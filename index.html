@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المجموعات الدوائية- Comic Book Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Cairo:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
+
+:root {
+    --primary-blue: #4682B4;
+    --secondary-blue: #5F9EA0;
+    --accent-green: #3CB371;
+    --bg-cream: #FFF8DC;
+    --border-blue: #4169E1;
+    --text-dark: #333333;
+    --text-light: #FFFFFF;
+    --student-color: #FF6B6B;
+    --workforce-color: #1E90FF;
+}
+
+body {
+    font-family: 'Cairo', sans-serif;
+    background-color: var(--bg-cream);
+    color: var(--text-dark);
+    transition: background-color 0.5s ease;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.03) 10%, transparent 10%),
+        radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.03) 10%, transparent 10%);
+    background-size: 20px 20px;
+}
+
+.comic-border {
+    border: 4px solid var(--border-black);
+    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--border-black), 8px 8px 16px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.comic-border::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border: 2px solid white;
+    z-index: -1;
+}
+
+.comic-header {
+    font-family: 'Luckiest Guy', cursive;
+    font-weight: 700;
+    font-size: 3.5rem;
+    color: #FFF;
+    background: linear-gradient(135deg, #D4145A, #FBB03B);
+    padding: 30px 40px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+    border: 4px solid #000;
+    transform: skew(-5deg); 
+}
+
+.comic-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+    transform: rotate(30deg);
+    animation: shine 3s infinite linear;
+    pointer-events: none;
+}
+
+.comic-header::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    background: #FFF;
+    border-radius: 50%;
+    box-shadow: -30px 0 0 5px rgba(255,255,255,0.4), -60px 0 0 2px rgba(255,255,255,0.2);
+}
+
+.comic-header .title-text {
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.comic-header:hover {
+    transform: skew(-5deg) scale(1.03);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2), 0 8px 8px rgba(0, 0, 0, 0.1);
+}
+
+.comic-header:hover .title-text {
+    animation: bouncy 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes shine {
+    from {
+        transform: rotate(30deg) translateY(-100%);
+    }
+    to {
+        transform: rotate(30deg) translateY(100%);
+    }
+}
+
+@keyframes bouncy {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-10px); }
+}
+
+.comic-header .title-text span {
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.comic-header:hover .title-text span:nth-child(even) {
+    transform: translateY(-5px) rotate(10deg);
+}
+
+.comic-header:hover .title-text span:nth-child(odd) {
+    transform: translateY(5px) rotate(-10deg);
+}
+
+.comic-header::before { left: 20px; animation: spin 10s linear infinite; }
+.comic-header::after { right: 20px; animation: spin 10s linear infinite reverse; }
+
+@keyframes spin {
+    100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+.comic-button {
+    font-family: 'Bangers', cursive;
+    font-size: 2rem;
+    padding: 18px 36px;
+    border: 3px solid black;
+    border-radius: 15px;
+    background-color: var(--text-light);
+    color: black;
+    text-shadow: 2px 2px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white;
+    box-shadow: 
+        5px 5px 0 black,
+        inset 3px 3px 0 rgba(255,255,255,0.5),
+        inset -3px -3px 0 rgba(0,0,0,0.1);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    outline: none;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.comic-button:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 
+        3px 3px 0 black,
+        inset 3px 3px 0 rgba(255,255,255,0.5),
+        inset -3px -3px 0 rgba(0,0,0,0.1);
+}
+
+.comic-button:active {
+    transform: translate(4px, 4px);
+    box-shadow: 
+        1px 1px 0 black,
+        inset 3px 3px 0 rgba(255,255,255,0.5),
+        inset -3px -3px 0 rgba(0,0,0,0.1);
+}
+
+.comic-button::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.comic-button:hover::before {
+    opacity: 1;
+}
+
+.comic-button.btn-inactive {
+    background-color: #d3d3d3;
+    color: #808080;
+    text-shadow: 1px 1px 0 #ffffff;
+    box-shadow: 
+        3px 3px 0 #a9a9a9,
+        inset 2px 2px 0 rgba(255,255,255,0.3),
+        inset -2px -2px 0 rgba(0,0,0,0.05);
+    border-color: #a9a9a9;
+    cursor: not-allowed;
+}
+
+.comic-button.btn-inactive:hover,
+.comic-button.btn-inactive:active {
+    transform: none;
+    box-shadow: 
+        3px 3px 0 #a9a9a9,
+        inset 2px 2px 0 rgba(255,255,255,0.3),
+        inset -2px -2px 0 rgba(0,0,0,0.05);
+}
+
+.card {
+    background-color: var(--text-light);
+    border: 3px solid black;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 
+        6px 6px 0 rgba(0,0,0,0.8), 
+        0 15px 25px rgba(0,0,0,0.15);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+    animation: cardFloat 4s ease-in-out infinite, cardPulse 4s ease-in-out infinite;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 3px solid white;
+    border-radius: 17px;
+    pointer-events: none;
+}
+
+.card:hover {
+    transform: translateY(-5px) rotate(1deg);
+    box-shadow: 
+        8px 8px 0 rgba(0,0,0,0.8), 
+        0 20px 30px rgba(0,0,0,0.2);
+    animation-play-state: paused;
+}
+
+.card h3 {
+    font-family: 'Bangers', cursive;
+    font-size: 2rem;
+    color: black;
+    text-shadow: 2px 2px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover h3 {
+    transform: scale(1.05);
+}
+
+.card-active {
+    opacity: 1;
+    background-color: #ffffff;
+    border-color: var(--primary-blue);
+    box-shadow: 
+        0 0 0 3px var(--primary-blue),
+        8px 8px 0 rgba(0,0,0,0.8), 
+        0 20px 30px rgba(0,0,0,0.2);
+    transform: translateY(-5px);
+    animation: cardFloat 3s ease-in-out infinite, cardPulse 3s ease-in-out infinite;
+}
+
+.card-active:hover {
+    animation-play-state: running;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card, .card-active {
+        animation: none;
+    }
+}
+
+@keyframes cardFloat {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    50% { transform: translateY(-5px) rotate(0.5deg); }
+}
+
+@keyframes cardPulse {
+    0%, 100% { box-shadow: 6px 6px 0 rgba(0,0,0,0.8), 0 15px 25px rgba(0,0,0,0.15); }
+    50% { box-shadow: 8px 8px 0 rgba(0,0,0,0.8), 0 20px 30px rgba(0,0,0,0.2); }
+}
+
+.card input[type="number"] {
+    font-size: 2rem;
+    padding: 15px;
+    border: 3px solid black;
+    border-radius: 15px;
+    width: 100%;
+    text-align: center;
+    color: var(--text-dark);
+    background-color: #FFFAF0;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 
+        inset 3px 3px 0 rgba(0,0,0,0.1),
+        inset -3px -3px 0 rgba(255,255,255,0.5);
+    -moz-appearance: textfield;
+    appearance: textfield;
+    position: relative;
+    z-index: 1;
+}
+
+.card input[type="number"]::-webkit-inner-spin-button,
+.card input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.card input[type="number"]:focus {
+    outline: none;
+    transform: scale(1.05);
+    box-shadow: 
+        0 0 20px rgba(70, 130, 180, 0.6), 
+        inset 3px 3px 0 rgba(0,0,0,0.1),
+        inset -3px -3px 0 rgba(255,255,255,0.5);
+    z-index: 2;
+}
+
+.theme-students {
+    background-color: #FFE4E1;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(255, 107, 107, 0.05) 0%, rgba(255, 107, 107, 0.05) 10%, transparent 10%),
+        radial-gradient(circle at 90% 80%, rgba(255, 107, 107, 0.05) 0%, rgba(255, 107, 107, 0.05) 10%, transparent 10%);
+}
+
+.theme-students .comic-header,
+.theme-students .comic-button:not(.btn-inactive) {
+    background: linear-gradient(135deg, var(--student-color), #FF9A8B);
+}
+
+.theme-students .comic-border {
+    border-color: var(--student-color);
+}
+
+.theme-workforce {
+    background-color: #E6F3FF;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(30, 144, 255, 0.05) 0%, rgba(30, 144, 255, 0.05) 10%, transparent 10%),
+        radial-gradient(circle at 90% 80%, rgba(30, 144, 255, 0.05) 0%, rgba(30, 144, 255, 0.05) 10%, transparent 10%);
+}
+
+.theme-workforce .comic-header,
+.theme-workforce .comic-button:not(.btn-inactive) {
+    background: linear-gradient(135deg, var(--workforce-color), #4169E1);
+}
+
+.theme-workforce .comic-border {
+    border-color: var(--workforce-color);
+}
+
+.theme-students .card-active {
+    border-color: var(--student-color);
+    box-shadow: 
+        0 0 0 3px var(--student-color),
+        8px 8px 0 rgba(0,0,0,0.8), 
+        0 20px 30px rgba(0,0,0,0.2);
+}
+
+.theme-students .card-active h3 {
+    color: var(--student-color);
+}
+
+.theme-students .card-active input[type="number"] {
+    border-color: var(--student-color);
+    background-color: #fff0f0;
+}
+
+.theme-workforce .card-active {
+    border-color: var(--workforce-color);
+    box-shadow: 
+        0 0 0 3px var(--workforce-color),
+        8px 8px 0 rgba(0,0,0,0.8), 
+        0 20px 30px rgba(0,0,0,0.2);
+}
+
+.theme-workforce .card-active h3 {
+    color: var(--workforce-color);
+}
+
+.theme-workforce .card-active input[type="number"] {
+    border-color: var(--workforce-color);
+    background-color: #f0f0ff;
+}
+
+select, input[type="number"] {
+    font-family: 'Cairo', sans-serif;
+    font-size: 1.1rem;
+    padding: 10px;
+    border: 3px solid black;
+    border-radius: 15px;
+    background-color: var(--text-light);
+    box-shadow: 
+        4px 4px 0 black,
+        inset 3px 3px 0 rgba(255,255,255,0.5),
+        inset -3px -3px 0 rgba(0,0,0,0.1);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    outline: none;
+}
+
+select:focus, input[type="number"]:focus {
+    box-shadow: 
+        2px 2px 0 black,
+        inset 3px 3px 0 rgba(255,255,255,0.5),
+        inset -3px -3px 0 rgba(0,0,0,0.1);
+    transform: translate(2px, 2px);
+}
+
+#total {
+    font-family: 'Bangers', cursive;
+    font-size: 5rem;
+    color: black;
+    text-shadow: 
+        3px 3px 0 white, 
+        -1px -1px 0 white, 
+        1px -1px 0 white, 
+        -1px 1px 0 white, 
+        1px 1px 0 white,
+        5px 5px 0 rgba(0,0,0,0.5);
+    letter-spacing: 2px;
+}
+
+#submitButton {
+    font-family: 'Bangers', cursive;
+    font-size: 2.5rem;
+    padding: 25px 50px;
+    background: linear-gradient(135deg, var(--accent-green), #2D9E5A);
+    color: white;
+    border: 3px solid black;
+    border-radius: 20px;
+    box-shadow: 
+        6px 6px 0 black,
+        inset 3px 3px 0 rgba(255,255,255,0.3),
+        inset -3px -3px 0 rgba(0,0,0,0.1);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 3px 3px 0 black;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    outline: none;
+}
+
+#submitButton:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 
+        4px 4px 0 black,
+        inset 3px 3px 0 rgba(255,255,255,0.3),
+        inset -3px -3px 0 rgba(0,0,0,0.1);
+}
+
+#submitButton:active {
+    transform: translate(4px, 4px);
+    box-shadow: 
+        2px 2px 0 black,
+        inset 3px 3px 0 rgba(255,255,255,0.3),
+        inset -3px -3px 0 rgba(0,0,0,0.1);
+}
+
+#submitButton::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease#submitButton:hover::before {
+    opacity: 1;
+}
+
+@media (max-width: 640px) {
+    .comic-header {
+        font-size: 2.5rem;
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .comic-button {
+        font-size: 1.6rem;
+        padding: 15px 30px;
+    }
+
+    .card h3 {
+        font-size: 1.8rem;
+    }
+
+    .card input[type="number"] {
+        font-size: 1.8rem;
+        padding: 12px;
+    }
+
+    #total {
+        font-size: 4rem;
+    }
+
+    #submitButton {
+        font-size: 2.2rem;
+        padding: 22px 44px;
+    }
+
+    .grid-cols-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.max-w-7xl {
+    position: relative;
+    z-index: 1;
+}
+
+.max-w-7xl::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
+    background-size: 100px 100px;
+    animation: moveStripes 30s linear infinite;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+@keyframes moveStripes {
+    0% { background-position: 0 0; }
+    100% { background-position: 100px 100px; }
+}
+
+.card-active {
+    transform: scale(1.02) rotate(-1deg);
+    box-shadow: 
+        8px 8px 0 rgba(0,0,0,0.8), 
+        0 20px 30px rgba(0,0,0,0.2);
+}
+
+.theme-students .card-active {
+    border-color: var(--student-color);
+}
+
+.theme-students .card-active::before {
+    border-color: var(--student-color);
+}
+
+.theme-workforce .card-active {
+    border-color: var(--workforce-color);
+}
+
+.theme-workforce .card-active::before {
+    border-color: var(--workforce-color);
+}
+
+.card-active h3 {
+    color: var(--text-dark);
+    text-shadow: 2px 2px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white;
+}
+
+.card-active input[type="number"] {
+    border-color: inherit;
+    box-shadow: 
+        0 0 15px rgba(0, 0, 0, 0.2), 
+        inset 3px 3px 0 rgba(0,0,0,0.1),
+        inset -3px -3px 0 rgba(255,255,255,0.5);
+}
+
+select {
+    font-family: 'Cuphead Felix', 'Courier New', monospace;
+    font-size: 1.4rem;
+    font-weight: bold;
+    padding: 15px 25px;
+    width: 250px;
+    border: 5px solid var(--cuphead-dark);
+    border-radius: 15px;
+    background-color: var(--cuphead-bg);
+    color: var(--cuphead-dark);
+    box-shadow: 
+        8px 8px 0 var(--cuphead-dark),
+        inset 3px 3px 0 rgba(255,255,255,0.5),
+        inset -3px -3px 0 rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    outline: none;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    transform: rotate(-2deg);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234A4A4A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 20px top 50%;
+    background-size: 24px;
+    padding-right: 60px;
+}
+
+select:hover {
+    transform: rotate(0deg) scale(1.05);
+    box-shadow: 
+        10px 10px 0 var(--cuphead-dark),
+        inset 3px 3px 0 rgba(255,255,255,0.5),
+        inset -3px -3px 0 rgba(0,0,0,0.2);
+    background-color: var(--cuphead-yellow);
+}
+
+select:focus {
+    transform: rotate(0deg) translate(5px, 5px);
+    box-shadow: 
+        3px 3px 0 var(--cuphead-dark),
+        inset 3px 3px 0 rgba(255,255,255,0.5),
+        inset -3px -3px 0 rgba(0,0,0,0.2);
+    background-color: var(--cuphead-red);
+    color: white;
+}
+
+/* Cuphead-style decorations */
+select {
+    position: relative;
+}
+
+select::before, select::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border: 5px solid var(--cuphead-dark);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+select::before {
+    top: -15px;
+    left: -15px;
+    background: var(--cuphead-yellow);
+}
+
+select::after {
+    bottom: -15px;
+    right: -15px;
+    background: var(--cuphead-red);
+}
+
+select option {
+    font-family: 'Cuphead Felix', 'Courier New', monospace;
+    font-size: 1.2rem;
+    background-color: var(--cuphead-bg);
+    color: var(--cuphead-dark);
+    padding: 10px;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+#submitButton {
+    animation: pulse 2s infinite;
+}
+
+#submitButton:hover {
+    animation: none;
+}
+
+[data-tippy-root] {
+    font-family: 'Bangers', cursive;
+    font-size: 1.2rem;
+    color: black;
+    background-color: white;
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.8);
+}
+
+.tippy-arrow {
+    color: black;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+    border: 2px solid black;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--primary-blue);
+    border: 2px solid black;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--secondary-blue);
+}
+
+@media print {
+    body {
+        background: none;
+        color: black;
+    }
+
+    .comic-border {
+        box-shadow: none;
+        border: 2px solid black;
+    }
+
+    .comic-header {
+        color: black;
+        text-shadow: none;
+        background: none;
+        border-bottom: 2px solid black;
+    }
+
+    .card, select, input[type="number"], #submitButton {
+        box-shadow: none;
+        border: 1px solid black;
+    }
+
+    #total {
+        color: black;
+        text-shadow: none;
+    }
+}
+
+body, .comic-header, .comic-button, .card, select, input[type="number"], #submitButton {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+::selection {
+    background-color: var(--accent-green);
+    color: white;
+}
+
+.card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.card:hover::after {
+    opacity: 0.5;
+}
+
+html {
+    font-size: 16px;
+}
+
+@media screen and (min-width: 640px) {
+    html {
+        font-size: 18px;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+    html {
+        font-size: 20px;
+    }
+}
+
+.comic-button, select, input[type="number"] {
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.02;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.max-w-7xl {
+    box-shadow: 
+        0 0 0 10px rgba(0,0,0,0.1),
+        0 0 20px rgba(0,0,0,0.2),
+        0 0 40px rgba(0,0,0,0.1);
+}
+
+.comic-header {
+    animation: headerPulse 5s infinite alternate;
+}
+
+@keyframes headerPulse {
+    0% { transform: rotate(-2deg) skew(-5deg) scale(1); }
+    100% { transform: rotate(-2deg) skew(-5deg) scale(1.03); }
+}
+
+.card-empty {
+    opacity: 0.7;
+}
+
+.card-active {
+    opacity: 1;
+}
+
+.comic-button, .card, select, input[type="number"], #submitButton {
+    will-change: transform, box-shadow;
+}
+
+.comic-header::before, .comic-header::after {
+    will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+.comic-button, #submitButton {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+.comic-button::after, #submitButton::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to bottom right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(45deg);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.comic-button:hover::after, #submitButton:hover::after {
+    top: -100%;
+    left: -100%;
+}
+
+.comic-button:focus, select:focus, input[type="number"]:focus, #submitButton:focus {
+    outline: none;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.card, .comic-button, #submitButton {
+    animation: fadeIn 0.3s ease-out;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        gap: 1rem;
+    }
+}
+
+@media (prefers-contrast: high) {
+    .comic-button, #submitButton {
+        border: 3px solid black;
+    }
+
+    .card {
+        border: 3px solid black;
+        box-shadow: none;
+    }
+}
+
+input[type="number"] {
+    direction: ltr;
+    text-align: right;
+}
+    </style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المجموعات الدوائية</title>
+</head>
+<body class="min-h-screen p-4">
+    <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-lg p-6 space-y-6 comic-border">
+        <h1 class="text-4xl sm:text-5xl font-bold text-center mb-8 comic-header" id="mainHeader">بيان المجموعات الدوائية</h1>
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <button id="studentsBtn" class="comic-button btn-inactive">الطلبة</button>
+            <button id="workforceBtn" class="comic-button btn-inactive">القوى العاملة</button>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="select-wrapper">
+                <select id="month" class="w-full">
+                    <option value="">الشهر</option>
+                    <option value="1">يناير</option>
+                    <option value="2">فبراير</option>
+                    <option value="3">مارس</option>
+                    <option value="4">أبريل</option>
+                    <option value="5">مايو</option>
+                    <option value="6">يونيو</option>
+                    <option value="7">يوليو</option>
+                    <option value="8">أغسطس</option>
+                    <option value="9">سبتمبر</option>
+                    <option value="10">أكتوبر</option>
+                    <option value="11">نوفمبر</option>
+                    <option value="12">ديسمبر</option>
+                </select>
+            </div>
+            <div class="select-wrapper">
+                <select id="region" class="w-full">
+                    <option value="">المنطقة</option>
+                    <option value="first">الاولي</option>
+                    <option value="second">الثانية</option>
+                    <option value="third">الثالثة</option>
+                </select>
+            </div>
+            <div class="select-wrapper">
+                <select id="pharmacy" class="w-full" disabled>
+                    <option value="">الصيدلية</option>
+                </select>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8" id="cards-container">
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <div class="card">
+                <h3>اجمالي التذاكر</h3>
+                <input type="number" id="totalTickets" value="0" min="0" step="1" dir="ltr">
+            </div>
+            <div class="card">
+                <h3>اجمالي الخارجي</h3>
+                <input type="number" id="totalExternal" value="0" min="0" step="1" dir="ltr">
+            </div>
+        </div>
+        <div class="card">
+            <h3 class="text-2xl sm:text-3xl font-bold mb-3 text-right">المجموع الكلي</h3>
+            <p id="total" class="text-right" dir="ltr">0</p>
+        </div>
+        <button id="submitButton" class="w-full mt-6">إرسال البيانات</button>
+    </div>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const cardsContainer = document.getElementById('cards-container');
+  const totalElement = document.getElementById('total');
+  const studentsBtn = document.getElementById('studentsBtn');
+  const workforceBtn = document.getElementById('workforceBtn');
+  const monthSelect = document.getElementById('month');
+  const regionSelect = document.getElementById('region');
+  const pharmacySelect = document.getElementById('pharmacy');
+  const submitButton = document.getElementById('submitButton');
+  const totalTicketsInput = document.getElementById('totalTickets');
+  const totalExternalInput = document.getElementById('totalExternal');
+  let cardValues = Array(18).fill(0);
+  let activeButton = null;
+
+  const cardNames = [
+    'المسكنات',
+    'مضادات حيوية',
+    'كلي',
+    'نفسية و عصبية',
+    'قلب',
+    'سكر حقن',
+    'سكر فم',
+    'نسا',
+    'كبد',
+    'جهاز هضمي',
+    'جهاز تنفسي',
+    'امراض جلدية',
+    'عيون و رمد',
+    'انف و اذن',
+    'مضادات تقلصات',
+    'اورام',
+    'فيتامينات',
+    'مختلفة'
+  ];
+
+  const pharmacyOptions = {
+    students: {
+      first: ["كفر الدوار طلاب", "البيضا طلاب", "ابو المطامير طلاب", "رشيد طلاب", "ادكو طلاب"],
+      second: ["دمنهور طلاب", "حوش عيسي طلاب", "المحمودية طلاب", "الرحمانية طلاب ", "ابو حمص طلاب","اورام طلاب"],
+      third: ["ايتاي طلاب", "كوم حمادة طلاب", "بدر طلاب", "شبراخيت طلاب", "الدلنجات طلاب"]
+    },
+    workforce: {
+      first: ["كفر الدوار سكر", "كفر الدوار الشاملة 1" , "كفر الدوار الشاملة 2", "كفر الدوار مسائي", "النوبارية", "البيضا", "ابو المطامير", "رشيد", "ادكو"],
+      second: ["دمنهور الشاملة 1", "دمنهور الشاملة 2", "دمنهور مسائي", "دمنهور سكر", "دمنهور اورام", "الشرطة", "حوش عيسي", "المحمودية", "الرحمانية", "ابو حمص"],
+      third: ["ايتاي الشاملة 1", "ايتاي الشاملة 2 ",   "ايتاي مسائي ","كوم حمادة", "كوم حمادة مسائي", "بدر", "شبراخيت", "الدلنجات", "وادي النطرون", "قليشان"]
+    }
+  };
+
+  for (let i = 0; i < 18; i++) {
+    const card = document.createElement('div');
+    card.className = 'bg-white p-4 rounded-lg shadow-lg card-container';
+    card.innerHTML = `
+      <div class="card p-4">
+        <h3 class="text-lg font-bold mb-2">${cardNames[i]}</h3>
+        <input type="number" class="w-full p-2 border-2 border-black rounded text-xl" data-index="${i}" value="0" min="0" max="1000000000" step="0.001" dir="ltr">
+      </div>
+    `;
+    cardsContainer.appendChild(card);
+  }
+
+  cardsContainer.addEventListener('input', (e) => {
+    if (e.target.type === 'number') {
+      const input = e.target;
+      const index = parseInt(input.dataset.index);
+      let value = input.value;
+      const cursorPosition = input.selectionStart;
+      
+      if (value === '') {
+        cardValues[index] = 0;
+      } else {
+        value = value.replace(/[^\d.]/g, '');
+        
+        const parts = value.split('.');
+        if (parts.length > 2) {
+          value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        
+        let numValue = parseFloat(value);
+        if (isNaN(numValue) || numValue < 0) {
+          numValue = 0;
+        } else if (numValue > 1000000000) {
+          numValue = 1000000000;
+        }
+        
+        cardValues[index] = Math.round(numValue * 1000) / 1000;
+      }
+      
+      updateTotal();
+      updateCardStyle(input);
+      saveToLocalStorage();
+      input.setSelectionRange(cursorPosition, cursorPosition);
+    }
+  });
+
+  cardsContainer.addEventListener('blur', (e) => {
+    if (e.target.type === 'number') {
+      const input = e.target;
+      const index = parseInt(input.dataset.index);
+      let value = input.value;
+      
+      if (value === '' || parseFloat(value) === 0) {
+        input.value = '';
+        cardValues[index] = 0;
+      } else {
+        const formattedValue = parseFloat(value).toFixed(3);
+        input.value = formattedValue;
+        cardValues[index] = parseFloat(formattedValue);
+      }
+      
+      updateTotal();
+      updateCardStyle(input);
+      saveToLocalStorage();
+    }
+  }, true);
+
+  function updateTotal() {
+    const total = cardValues.reduce((acc, val) => acc + val, 0);
+
+    const oldTotal = parseFloat(totalElement.textContent.replace(/,/g, ''));
+    if (total !== oldTotal) {
+      gsap.to(totalElement, {
+        textContent: total,
+        duration: 0.5,
+        ease: "power2.out",
+        snap: { textContent: 0.001 },
+        onUpdate: function() {
+          totalElement.textContent = parseFloat(totalElement.textContent).toLocaleString('en-US', {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
+          });
+        }
+      });
+    }
+
+    updateSubmitButtonVisibility();
+  }
+
+  function updateCardStyle(input) {
+    const card = input.closest('.card');
+    const value = parseFloat(input.value);
+    
+    if (value > 0) {
+      card.classList.add('card-active');
+      card.classList.remove('card-empty');
+    } else {
+      card.classList.remove('card-active');
+      card.classList.add('card-empty');
+    }
+  }
+
+  studentsBtn.addEventListener('click', () => toggleButton(studentsBtn));
+  workforceBtn.addEventListener('click', () => toggleButton(workforceBtn));
+
+  function toggleButton(clickedButton) {
+    const otherButton = clickedButton === studentsBtn ? workforceBtn : studentsBtn;
+    
+    if (activeButton !== clickedButton) {
+      if (activeButton) {
+        activeButton.classList.remove('btn-active');
+        activeButton.classList.add('btn-inactive');
+      }
+      clickedButton.classList.add('btn-active');
+      clickedButton.classList.remove('btn-inactive');
+      otherButton.classList.remove('btn-active');
+      otherButton.classList.add('btn-inactive');
+      activeButton = clickedButton;
+      
+      document.body.className = clickedButton === studentsBtn ? 'theme-students' : 'theme-workforce';
+    }
+    updatePharmacyDropdown();
+    saveToLocalStorage();
+    updateSubmitButtonVisibility();
+  }
+
+  function updatePharmacyDropdown() {
+    pharmacySelect.disabled = !(regionSelect.value && activeButton);
+    pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
+    
+    if (regionSelect.value && activeButton) {
+      const category = activeButton === studentsBtn ? 'students' : 'workforce';
+      const options = pharmacyOptions[category][regionSelect.value];
+      
+      if (options) {
+        options.forEach((option, index) => {
+          const optionElement = document.createElement('option');
+          optionElement.value = index + 1;
+          optionElement.textContent = option;
+          pharmacySelect.appendChild(optionElement);
+        });
+      } else {
+        console.error('No options found for the selected category and region');
+      }
+    }
+    updateSubmitButtonVisibility();
+  }
+
+  regionSelect.addEventListener('change', updatePharmacyDropdown);
+
+  function saveToLocalStorage() {
+    const dataToSave = {
+      cardValues,
+      activeButton: activeButton ? activeButton.id : null,
+      month: monthSelect.value,
+      region: regionSelect.value,
+      pharmacy: pharmacySelect.value,
+      totalTickets: totalTicketsInput.value,
+      totalExternal: totalExternalInput.value
+    };
+    localStorage.setItem('pharmacyAppData', JSON.stringify(dataToSave));
+  }
+
+  function loadFromLocalStorage() {
+    const savedData = localStorage.getItem('pharmacyAppData');
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      cardValues = parsedData.cardValues.map(value => {
+        const numValue = parseFloat(value);
+        return isNaN(numValue) || numValue < 0 ? 0 : Math.min(numValue, 1000000000);
+      });
+
+      if (parsedData.activeButton) {
+        document.getElementById(parsedData.activeButton).click();
+      }
+      monthSelect.value = parsedData.month;
+      regionSelect.value = parsedData.region;
+      updatePharmacyDropdown();
+      pharmacySelect.value = parsedData.pharmacy;
+      totalTicketsInput.value = parsedData.totalTickets || '';
+      totalExternalInput.value = parsedData.totalExternal || '';
+
+      cardValues.forEach((value, index) => {
+        const input = document.querySelector(`input[data-index="${index}"]`);
+        if (input) {
+          input.value = value || '';
+          updateCardStyle(input);
+        }
+      });
+
+      updateTotal();
+    }
+    updateSubmitButtonVisibility();
+  }
+
+  submitButton.addEventListener('click', sendDataToGoogleSheets);
+
+  async function sendDataToGoogleSheets() {
+    const pharmacologyData = cardNames.reduce((acc, name, index) => {
+      acc[name] = cardValues[index] || 0;  // Use 0 if the value is falsy
+      return acc;
+    }, {});
+
+    const data = {
+      date: new Date().toISOString(),
+      class: activeButton ? activeButton.textContent : 0,
+      month: monthSelect.options[monthSelect.selectedIndex].text || 0,
+      region: regionSelect.options[regionSelect.selectedIndex].text || 0,
+      pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex].text || 0,
+      totalPrescription: totalTicketsInput.value || 0,
+      insuranceCoveredPrescription: totalExternalInput.value || 0,
+      ...pharmacologyData
+    };
+
+    console.log('Preparing data:', data);
+    const jsonStr = JSON.stringify(data, null, 2);
+    
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prescription_data_${data.date.split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    try {
+      const response = await fetch('YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL', {
+        method: 'POST',
+        mode: 'no-cors',
+        cache: 'no-cache',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonStr,
+      });
+      console.log('Data sent to Google Sheets');
+      
+      alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
+      resetAllFields();
+    } catch (error) {
+      console.error('Error sending data to Google Sheets:', error);
+      alert('تم تنزيل الملف، ولكن حدث خطأ أثناء إرسال البيانات إلى Google Sheets.');
+    }
+  }
+
+  function resetAllFields() {
+    cardValues = Array(18).fill(0);
+    document.querySelectorAll('#cards-container input[type="number"]').forEach(input => {
+      input.value = '';
+      updateCardStyle(input);
+    });
+
+    monthSelect.selectedIndex = 0;
+    regionSelect.selectedIndex = 0;
+    pharmacySelect.selectedIndex = 0;
+    updatePharmacyDropdown();
+
+    totalTicketsInput.value = '';
+    totalExternalInput.value = '';
+
+    if (activeButton) {
+      activeButton.classList.remove('btn-active');
+      activeButton.classList.add('btn-inactive');
+      activeButton = null;
+    }
+    studentsBtn.classList.remove('btn-active');
+    studentsBtn.classList.add('btn-inactive');
+    workforceBtn.classList.remove('btn-active');
+    workforceBtn.classList.add('btn-inactive');
+
+    document.body.className = '';
+
+    updateTotal();
+
+    localStorage.removeItem('pharmacyAppData');
+
+    updateSubmitButtonVisibility();
+  }
+
+  function updateSubmitButtonVisibility() {
+    const total = cardValues.reduce((acc, val) => acc + val, 0);
+    const allDropdownsFilled = monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
+    const optionalInputsValid = validateOptionalInputs();
+    
+    if (total > 0 && allDropdownsFilled && optionalInputsValid) {
+      submitButton.style.display = 'block';
+    } else {
+      submitButton.style.display = 'none';
+    }
+  }
+
+  function validateOptionalInputs() {
+    const ticketValue = totalTicketsInput.value.trim();
+    const externalValue = totalExternalInput.value.trim();
+    
+    if (ticketValue !== '' && (!Number.isInteger(Number(ticketValue)) || Number(ticketValue) < 0 || Number(ticketValue) > 1000000)) {
+      return false;
+    }
+    
+    if (externalValue !== '' && (!Number.isInteger(Number(externalValue)) || Number(externalValue) < 0 || Number(externalValue) > 1000000)) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  loadFromLocalStorage();
+
+  [monthSelect, regionSelect, pharmacySelect].forEach(element => {
+    element.addEventListener('change', () => {
+      saveToLocalStorage();
+      updateSubmitButtonVisibility();
+    });
+  });
+
+  totalTicketsInput.addEventListener('input', () => {
+    let value = totalTicketsInput.value.trim();
+    if (value === '' || (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 1000000)) {
+    } else {
+      value = value.replace(/[^0-9]/g, '');
+      value = value === '' ? '' : Math.floor(Math.min(Math.max(0, parseInt(value)), 1000000)).toString();
+    }
+    totalTicketsInput.value = value;
+    updateCardStyle(totalTicketsInput);
+    saveToLocalStorage();
+    updateSubmitButtonVisibility();
+  });
+
+  totalExternalInput.addEventListener('input', () => {
+    let value = totalExternalInput.value.trim();
+    if (value === '' || (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 1000000)) {
+    } else {
+      value = value.replace(/[^0-9]/g, '');
+      value = value === '' ? '' : Math.floor(Math.min(Math.max(0, parseInt(value)), 1000000)).toString();
+    }
+    totalExternalInput.value = value;
+    updateCardStyle(totalExternalInput);
+    saveToLocalStorage();
+    updateSubmitButtonVisibility();
+  });
+
+  totalTicketsInput.addEventListener('blur', () => {
+    if (totalTicketsInput.value.trim() === '') {
+      totalTicketsInput.value = '';
+    }
+    updateCardStyle(totalTicketsInput);
+    saveToLocalStorage();
+    updateSubmitButtonVisibility();
+  });
+
+  totalExternalInput.addEventListener('blur', () => {
+    if (totalExternalInput.value.trim() === '') {
+      totalExternalInput.value = '';
+    }
+    updateCardStyle(totalExternalInput);
+    saveToLocalStorage();
+    updateSubmitButtonVisibility();
+  });
+
+  function updateCardStyle(input) {
+    const card = input.closest('.card') || input.parentElement;
+    const value = input.value.trim();
+    
+    if (value !== '' && Number(value) > 0) {
+      card.classList.add('card-active');
+      card.classList.remove('card-empty');
+    } else {
+      card.classList.remove('card-active');
+      card.classList.add('card-empty');
+    }
+  }
+
+  updateCardStyle(totalTicketsInput);
+  updateCardStyle(totalExternalInput);
+
+  updateSubmitButtonVisibility();
+});
+
+        </script>
+</body>
+</html>
