@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1216,55 +1217,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
   submitButton.addEventListener('click', sendDataToGoogleSheets);
 
-  async function sendDataToGoogleSheets() {
-    const pharmacologyData = cardNames.reduce((acc, name, index) => {
-      acc[name] = cardValues[index] || 0;  // Use 0 if the value is falsy
-      return acc;
-    }, {});
+async function sendDataToGoogleSheets() {
+  const pharmacologyData = cardNames.reduce((acc, name, index) => {
+    acc[name] = cardValues[index] || 0;
+    return acc;
+  }, {});
+  const data = {
+    date: new Date().toISOString(),
+    class: activeButton ? activeButton.textContent : '',
+    month: monthSelect.options[monthSelect.selectedIndex].text || '',
+    region: regionSelect.options[regionSelect.selectedIndex].text || '',
+    pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex].text || '',
+    totalPrescription: totalTicketsInput.value || 0,
+    insuranceCoveredPrescription: totalExternalInput.value || 0,
+    ...pharmacologyData
+  };
+  console.log('Preparing data:', data);
+  const jsonStr = JSON.stringify(data);
+  
+  // Download JSON file
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `prescription_data_${data.date.split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 
-    const data = {
-      date: new Date().toISOString(),
-      class: activeButton ? activeButton.textContent : 0,
-      month: monthSelect.options[monthSelect.selectedIndex].text || 0,
-      region: regionSelect.options[regionSelect.selectedIndex].text || 0,
-      pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex].text || 0,
-      totalPrescription: totalTicketsInput.value || 0,
-      insuranceCoveredPrescription: totalExternalInput.value || 0,
-      ...pharmacologyData
-    };
-
-    console.log('Preparing data:', data);
-    const jsonStr = JSON.stringify(data, null, 2);
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwwMaf7VglBxxOcmX8x1_vaSVyLXGIM1FoOyebXf78LlMPtD9ilcJIFqifkMYbqpdMp/exec';
+  
+  try {
+    const response = await fetch(SHEETS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+      body: jsonStr,
+    });
     
-    const blob = new Blob([jsonStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `prescription_data_${data.date.split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    try {
-      const response = await fetch('YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL', {
-        method: 'POST',
-        mode: 'no-cors',
-        cache: 'no-cache',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonStr,
-      });
-      console.log('Data sent to Google Sheets');
-      
-      alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
-      resetAllFields();
-    } catch (error) {
-      console.error('Error sending data to Google Sheets:', error);
-      alert('تم تنزيل الملف، ولكن حدث خطأ أثناء إرسال البيانات إلى Google Sheets.');
-    }
+    console.log('Data sent to Google Sheets');
+    alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
+    resetAllFields();
+  } catch (error) {
+    console.error('Error sending data to Google Sheets:', error);
+    alert('تم تنزيل الملف، ولكن حدث خطأ أثناء إرسال البيانات إلى Google Sheets.');
   }
+}
 
   function resetAllFields() {
     cardValues = Array(18).fill(0);
