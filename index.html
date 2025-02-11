@@ -1264,11 +1264,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Submit button event for sending data to Google Sheets.
   submitButton.addEventListener('click', sendDataToGoogleSheets);
 
-  async function sendDataToGoogleSheets() {
+async function sendDataToGoogleSheets() {
     const pharmacologyData = cardNames.reduce((acc, name, index) => {
       acc[name] = cardValues[index] || 0;
       return acc;
     }, {});
+    
     const data = {
       date: new Date().toISOString(),
       class: activeButton ? activeButton.textContent : '',
@@ -1279,10 +1280,10 @@ document.addEventListener('DOMContentLoaded', () => {
       insuranceCoveredPrescription: totalExternalInput.value || 0,
       ...pharmacologyData
     };
-    console.log('Preparing data:', data);
-    const jsonStr = JSON.stringify(data);
     
-    // Download JSON file locally
+    console.log('Preparing data:', data);
+    
+    // Save local copy
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1293,25 +1294,26 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    // Replace this URL with your new deployment URL
-    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwOvfZY2a2W4j7BtqS9WwYmFdgX1FAc91Xv4wZmzncV1Dl6WMVRaE7IPO168MDjJjQidQ/exec';
+    // Replace with your deployment URL
+    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwcgvhjUdnZctTi-1e3zjN4Zj-WwbN88LZArIT7GrVNzMpEnw9Stn-u6NjSyd9EEaip5A/exec';
     
     try {
-      const response = await fetch(SHEETS_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: jsonStr,
-      });
-      
-      console.log('Data sent to Google Sheets');
-      alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
-      resetAllFields();
+        // Using form data approach which works better with Google Apps Script
+        const formData = new FormData();
+        formData.append('data', JSON.stringify(data));
+
+        const response = await fetch(SHEETS_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: formData
+        });
+        
+        console.log('Request sent to Google Sheets');
+        alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
+        resetAllFields();
     } catch (error) {
-      console.error('Error sending data to Google Sheets:', error);
-      alert('تم تنزيل الملف، ولكن حدث خطأ أثناء إرسال البيانات إلى Google Sheets.');
+        console.error('Error sending data to Google Sheets:', error);
+        alert('تم تنزيل الملف، ولكن حدث خطأ أثناء إرسال البيانات إلى Google Sheets.');
     }
 }
 
