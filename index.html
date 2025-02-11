@@ -1282,7 +1282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Preparing data:', data);
     const jsonStr = JSON.stringify(data);
     
-    // Download JSON file locally.
+    // Download JSON file locally
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1293,22 +1293,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwK3Hu0APrllNRO7Zgtkf5vdDC4r0pYc5-BWgYoyrgB_I0qhPZlVFk8EcPFVMdIL3MUog/exec';
+    // Replace this URL with your new deployment URL
+    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbynYO0idTotFNHeNjNofAFkxqDNjn3B6j7HNrWYosaMQHkSjTmRrkmS2t7GnmSZuSKqOA/exec';
     
     try {
-      // Updated fetch with CORS mode and appropriate JSON header.
       const response = await fetch(SHEETS_URL, {
         method: 'POST',
-        mode: 'cors',
+        mode: 'no-cors',
         headers: {
           'Content-Type': 'application/json'
         },
         body: jsonStr,
       });
-      
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
       
       console.log('Data sent to Google Sheets');
       alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
@@ -1317,7 +1313,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Error sending data to Google Sheets:', error);
       alert('تم تنزيل الملف، ولكن حدث خطأ أثناء إرسال البيانات إلى Google Sheets.');
     }
-  }
+}
 
   // Reset form fields and stored values.
   function resetAllFields() {
