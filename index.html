@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -1009,17 +1010,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const pharmacyOptions = {
     students: {
-      first: ["كفر الدوار طلاب", "البيضا طلاب","النوبارية طلاب", "ابو المطامير طلاب", "رشيد طلاب", "ادكو طلاب"],
-      second: ["دمنهور طلاب", "حوش عيسي طلاب", "المحمودية طلاب", "الرحمانية طلاب ", "ابو حمص طلاب","اورام طلاب"],
-      third: ["ايتاي طلاب", "كوم حمادة طلاب", "بدر طلاب", "شبراخيت طلاب", "الدلنجات طلاب"]
+      first: [
+        "كفر الدوار طلاب", 
+        "البيضا طلاب",
+        "النوبارية طلاب", 
+        "ابو المطامير طلاب", 
+        "رشيد طلاب", 
+        "ادكو طلاب"
+      ],
+      second: [
+        "دمنهور طلاب", 
+        "حوش عيسي طلاب", 
+        "المحمودية طلاب", 
+        "الرحمانية طلاب", 
+        "ابو حمص طلاب",
+        "اورام طلاب"
+      ],
+      third: [
+        "ايتاي طلاب", 
+        "كوم حمادة طلاب", 
+        "بدر طلاب", 
+        "شبراخيت طلاب", 
+        "الدلنجات طلاب"
+      ]
     },
     workforce: {
-      first: ["كفر الدوار سكر", "كفر الدوار الشاملة 1" , "كفر الدوار الشاملة 2", "كفر الدوار مسائي", "النوبارية", "البيضا", "ابو المطامير", "رشيد", "ادكو"],
-      second: ["دمنهور الشاملة 1", "دمنهور الشاملة 2", "دمنهور مسائي", "دمنهور سكر", "دمنهور اورام", "الشرطة", "حوش عيسي", "المحمودية مسائي", "المحمودية", "الرحمانية", "ابو حمص"],
-      third: ["ايتاي الشاملة 1", "ايتاي الشاملة 2 ",   "ايتاي مسائي ","كوم حمادة", "كوم حمادة مسائي", "بدر", "شبراخيت", "الدلنجات", "وادي النطرون", "قليشان"]
+      first: [
+        "كفر الدوار سكر", 
+        "كفر الدوار الشاملة 1", 
+        "كفر الدوار الشاملة 2", 
+        "كفر الدوار مسائي", 
+        "النوبارية", 
+        "البيضا", 
+        "ابو المطامير", 
+        "رشيد", 
+        "ادكو"
+      ],
+      second: [
+        "دمنهور الشاملة 1", 
+        "دمنهور الشاملة 2", 
+        "دمنهور مسائي", 
+        "دمنهور سكر", 
+        "دمنهور اورام", 
+        "الشرطة", 
+        "حوش عيسي", 
+        "المحمودية مسائي", 
+        "المحمودية", 
+        "الرحمانية", 
+        "ابو حمص"
+      ],
+      third: [
+        "ايتاي الشاملة 1", 
+        "ايتاي الشاملة 2",  
+        "ايتاي مسائي", 
+        "كوم حمادة", 
+        "كوم حمادة مسائي", 
+        "بدر", 
+        "شبراخيت", 
+        "الدلنجات", 
+        "وادي النطرون", 
+        "قليشان"
+      ]
     }
   };
 
+  // Create card elements dynamically.
   for (let i = 0; i < 18; i++) {
     const card = document.createElement('div');
     card.className = 'bg-white p-4 rounded-lg shadow-lg card-container';
@@ -1032,6 +1087,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cardsContainer.appendChild(card);
   }
 
+  // Event listener for handling input events on cards.
   cardsContainer.addEventListener('input', (e) => {
     if (e.target.type === 'number') {
       const input = e.target;
@@ -1042,20 +1098,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (value === '') {
         cardValues[index] = 0;
       } else {
+        // Remove invalid characters.
         value = value.replace(/[^\d.]/g, '');
-        
         const parts = value.split('.');
         if (parts.length > 2) {
           value = parts[0] + '.' + parts.slice(1).join('');
         }
-        
         let numValue = parseFloat(value);
         if (isNaN(numValue) || numValue < 0) {
           numValue = 0;
         } else if (numValue > 1000000000) {
           numValue = 1000000000;
         }
-        
         cardValues[index] = Math.round(numValue * 1000) / 1000;
       }
       
@@ -1066,12 +1120,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Handle blur event for number inputs.
   cardsContainer.addEventListener('blur', (e) => {
     if (e.target.type === 'number') {
       const input = e.target;
       const index = parseInt(input.dataset.index);
       let value = input.value;
-      
       if (value === '' || parseFloat(value) === 0) {
         input.value = '';
         cardValues[index] = 0;
@@ -1080,7 +1134,6 @@ document.addEventListener('DOMContentLoaded', () => {
         input.value = formattedValue;
         cardValues[index] = parseFloat(formattedValue);
       }
-      
       updateTotal();
       updateCardStyle(input);
       saveToLocalStorage();
@@ -1089,7 +1142,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateTotal() {
     const total = cardValues.reduce((acc, val) => acc + val, 0);
-
     const oldTotal = parseFloat(totalElement.textContent.replace(/,/g, ''));
     if (total !== oldTotal) {
       gsap.to(totalElement, {
@@ -1105,14 +1157,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
-
     updateSubmitButtonVisibility();
   }
 
   function updateCardStyle(input) {
     const card = input.closest('.card');
     const value = parseFloat(input.value);
-    
     if (value > 0) {
       card.classList.add('card-active');
       card.classList.remove('card-empty');
@@ -1122,12 +1172,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Button click event handlers for toggling between students and workforce.
   studentsBtn.addEventListener('click', () => toggleButton(studentsBtn));
   workforceBtn.addEventListener('click', () => toggleButton(workforceBtn));
 
   function toggleButton(clickedButton) {
     const otherButton = clickedButton === studentsBtn ? workforceBtn : studentsBtn;
-    
     if (activeButton !== clickedButton) {
       if (activeButton) {
         activeButton.classList.remove('btn-active');
@@ -1138,7 +1188,6 @@ document.addEventListener('DOMContentLoaded', () => {
       otherButton.classList.remove('btn-active');
       otherButton.classList.add('btn-inactive');
       activeButton = clickedButton;
-      
       document.body.className = clickedButton === studentsBtn ? 'theme-students' : 'theme-workforce';
     }
     updatePharmacyDropdown();
@@ -1149,11 +1198,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function updatePharmacyDropdown() {
     pharmacySelect.disabled = !(regionSelect.value && activeButton);
     pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
-    
     if (regionSelect.value && activeButton) {
       const category = activeButton === studentsBtn ? 'students' : 'workforce';
       const options = pharmacyOptions[category][regionSelect.value];
-      
       if (options) {
         options.forEach((option, index) => {
           const optionElement = document.createElement('option');
@@ -1170,6 +1217,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   regionSelect.addEventListener('change', updatePharmacyDropdown);
 
+  // Save settings and state to local storage.
   function saveToLocalStorage() {
     const dataToSave = {
       cardValues,
@@ -1183,6 +1231,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('pharmacyAppData', JSON.stringify(dataToSave));
   }
 
+  // Load saved state from local storage.
   function loadFromLocalStorage() {
     const savedData = localStorage.getItem('pharmacyAppData');
     if (savedData) {
@@ -1191,7 +1240,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const numValue = parseFloat(value);
         return isNaN(numValue) || numValue < 0 ? 0 : Math.min(numValue, 1000000000);
       });
-
       if (parsedData.activeButton) {
         document.getElementById(parsedData.activeButton).click();
       }
@@ -1201,7 +1249,6 @@ document.addEventListener('DOMContentLoaded', () => {
       pharmacySelect.value = parsedData.pharmacy;
       totalTicketsInput.value = parsedData.totalTickets || '';
       totalExternalInput.value = parsedData.totalExternal || '';
-
       cardValues.forEach((value, index) => {
         const input = document.querySelector(`input[data-index="${index}"]`);
         if (input) {
@@ -1209,79 +1256,82 @@ document.addEventListener('DOMContentLoaded', () => {
           updateCardStyle(input);
         }
       });
-
       updateTotal();
     }
     updateSubmitButtonVisibility();
   }
 
+  // Submit button event for sending data to Google Sheets.
   submitButton.addEventListener('click', sendDataToGoogleSheets);
 
-async function sendDataToGoogleSheets() {
-  const pharmacologyData = cardNames.reduce((acc, name, index) => {
-    acc[name] = cardValues[index] || 0;
-    return acc;
-  }, {});
-  const data = {
-    date: new Date().toISOString(),
-    class: activeButton ? activeButton.textContent : '',
-    month: monthSelect.options[monthSelect.selectedIndex].text || '',
-    region: regionSelect.options[regionSelect.selectedIndex].text || '',
-    pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex].text || '',
-    totalPrescription: totalTicketsInput.value || 0,
-    insuranceCoveredPrescription: totalExternalInput.value || 0,
-    ...pharmacologyData
-  };
-  console.log('Preparing data:', data);
-  const jsonStr = JSON.stringify(data);
-  
-  // Download JSON file
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `prescription_data_${data.date.split('T')[0]}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwYkV9wDuvsziQtd6cObwojotXOgE4yTNriJL-HFLRsSF-Q9d4uPqyCaefaj2AzVsW5dw/exec';
-  
-  try {
-    const response = await fetch(SHEETS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-      body: jsonStr,
-    });
+  async function sendDataToGoogleSheets() {
+    const pharmacologyData = cardNames.reduce((acc, name, index) => {
+      acc[name] = cardValues[index] || 0;
+      return acc;
+    }, {});
+    const data = {
+      date: new Date().toISOString(),
+      class: activeButton ? activeButton.textContent : '',
+      month: monthSelect.options[monthSelect.selectedIndex].text || '',
+      region: regionSelect.options[regionSelect.selectedIndex].text || '',
+      pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex].text || '',
+      totalPrescription: totalTicketsInput.value || 0,
+      insuranceCoveredPrescription: totalExternalInput.value || 0,
+      ...pharmacologyData
+    };
+    console.log('Preparing data:', data);
+    const jsonStr = JSON.stringify(data);
     
-    console.log('Data sent to Google Sheets');
-    alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
-    resetAllFields();
-  } catch (error) {
-    console.error('Error sending data to Google Sheets:', error);
-    alert('تم تنزيل الملف، ولكن حدث خطأ أثناء إرسال البيانات إلى Google Sheets.');
-  }
-}
+    // Download JSON file locally.
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prescription_data_${data.date.split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 
+    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwYkV9wDuvsziQtd6cObwojotXOgE4yTNriJL-HFLRsSF-Q9d4uPqyCaefaj2AzVsW5dw/exec';
+    
+    try {
+      // Updated fetch with CORS mode and appropriate JSON header.
+      const response = await fetch(SHEETS_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: jsonStr,
+      });
+      
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      
+      console.log('Data sent to Google Sheets');
+      alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
+      resetAllFields();
+    } catch (error) {
+      console.error('Error sending data to Google Sheets:', error);
+      alert('تم تنزيل الملف، ولكن حدث خطأ أثناء إرسال البيانات إلى Google Sheets.');
+    }
+  }
+
+  // Reset form fields and stored values.
   function resetAllFields() {
     cardValues = Array(18).fill(0);
     document.querySelectorAll('#cards-container input[type="number"]').forEach(input => {
       input.value = '';
       updateCardStyle(input);
     });
-
     monthSelect.selectedIndex = 0;
     regionSelect.selectedIndex = 0;
     pharmacySelect.selectedIndex = 0;
     updatePharmacyDropdown();
-
     totalTicketsInput.value = '';
     totalExternalInput.value = '';
-
     if (activeButton) {
       activeButton.classList.remove('btn-active');
       activeButton.classList.add('btn-inactive');
@@ -1291,21 +1341,17 @@ async function sendDataToGoogleSheets() {
     studentsBtn.classList.add('btn-inactive');
     workforceBtn.classList.remove('btn-active');
     workforceBtn.classList.add('btn-inactive');
-
     document.body.className = '';
-
     updateTotal();
-
     localStorage.removeItem('pharmacyAppData');
-
     updateSubmitButtonVisibility();
   }
 
+  // Control the visibility on the submit button.
   function updateSubmitButtonVisibility() {
     const total = cardValues.reduce((acc, val) => acc + val, 0);
     const allDropdownsFilled = monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
     const optionalInputsValid = validateOptionalInputs();
-    
     if (total > 0 && allDropdownsFilled && optionalInputsValid) {
       submitButton.style.display = 'block';
     } else {
@@ -1313,34 +1359,22 @@ async function sendDataToGoogleSheets() {
     }
   }
 
+  // Validate optional inputs.
   function validateOptionalInputs() {
     const ticketValue = totalTicketsInput.value.trim();
     const externalValue = totalExternalInput.value.trim();
-    
     if (ticketValue !== '' && (!Number.isInteger(Number(ticketValue)) || Number(ticketValue) < 0 || Number(ticketValue) > 1000000)) {
       return false;
     }
-    
     if (externalValue !== '' && (!Number.isInteger(Number(externalValue)) || Number(externalValue) < 0 || Number(externalValue) > 1000000)) {
       return false;
     }
-    
     return true;
   }
 
-  loadFromLocalStorage();
-
-  [monthSelect, regionSelect, pharmacySelect].forEach(element => {
-    element.addEventListener('change', () => {
-      saveToLocalStorage();
-      updateSubmitButtonVisibility();
-    });
-  });
-
   totalTicketsInput.addEventListener('input', () => {
     let value = totalTicketsInput.value.trim();
-    if (value === '' || (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 1000000)) {
-    } else {
+    if (!(value === '' || (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 1000000))) {
       value = value.replace(/[^0-9]/g, '');
       value = value === '' ? '' : Math.floor(Math.min(Math.max(0, parseInt(value)), 1000000)).toString();
     }
@@ -1352,8 +1386,7 @@ async function sendDataToGoogleSheets() {
 
   totalExternalInput.addEventListener('input', () => {
     let value = totalExternalInput.value.trim();
-    if (value === '' || (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 1000000)) {
-    } else {
+    if (!(value === '' || (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 1000000))) {
       value = value.replace(/[^0-9]/g, '');
       value = value === '' ? '' : Math.floor(Math.min(Math.max(0, parseInt(value)), 1000000)).toString();
     }
@@ -1381,25 +1414,19 @@ async function sendDataToGoogleSheets() {
     updateSubmitButtonVisibility();
   });
 
-  function updateCardStyle(input) {
-    const card = input.closest('.card') || input.parentElement;
-    const value = input.value.trim();
-    
-    if (value !== '' && Number(value) > 0) {
-      card.classList.add('card-active');
-      card.classList.remove('card-empty');
-    } else {
-      card.classList.remove('card-active');
-      card.classList.add('card-empty');
-    }
-  }
-
+  // Initial setup.
   updateCardStyle(totalTicketsInput);
   updateCardStyle(totalExternalInput);
-
   updateSubmitButtonVisibility();
-});
+  loadFromLocalStorage();
 
+  [monthSelect, regionSelect, pharmacySelect].forEach(element => {
+    element.addEventListener('change', () => {
+      saveToLocalStorage();
+      updateSubmitButtonVisibility();
+    });
+  });
+});
         </script>
 </body>
 </html>
