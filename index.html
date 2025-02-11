@@ -1280,33 +1280,30 @@ async function sendDataToGoogleSheets() {
       insuranceCoveredPrescription: totalExternalInput.value || 0,
       ...pharmacologyData
     };
-    
-    console.log('Preparing data:', data);
-    
-    // Save local copy
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `prescription_data_${data.date.split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
 
-    // Replace with your deployment URL
-    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwcgvhjUdnZctTi-1e3zjN4Zj-WwbN88LZArIT7GrVNzMpEnw9Stn-u6NjSyd9EEaip5A/exec';
+    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzmzRe5sFZFyeiTYX6jqBGqYOoocktqPUBRd53dMkLB7mmZtvxWePojM4x5zXco3Llrxw/exec';
     
     try {
-        // Using form data approach which works better with Google Apps Script
-        const formData = new FormData();
+        // Create a URLSearchParams object
+        const formData = new URLSearchParams();
         formData.append('data', JSON.stringify(data));
 
-        const response = await fetch(SHEETS_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            body: formData
+        // Make the request
+        const response = await fetch(SHEETS_URL + '?' + formData.toString(), {
+            method: 'GET', // Changed to GET to avoid CORS
+            mode: 'no-cors'
         });
+
+        // Save local copy
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `prescription_data_${data.date.split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
         
         console.log('Request sent to Google Sheets');
         alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
