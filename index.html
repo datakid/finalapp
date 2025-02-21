@@ -969,8 +969,7 @@ input[type="number"] {
         </div>
         <button id="submitButton" class="w-full mt-6">إرسال البيانات</button>
     </div>
-
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
+   <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -986,6 +985,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalExternalInput = document.getElementById('totalExternal');
   let cardValues = Array(18).fill(0);
   let activeButton = null;
+  let isSubmitting = false; // New flag to track submission state
 
   const cardNames = [
     'المسكنات',
@@ -1262,9 +1262,32 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Submit button event for sending data to Google Sheets.
-  submitButton.addEventListener('click', sendDataToGoogleSheets);
+  submitButton.addEventListener('click', async () => {
+    if (isSubmitting) {
+      return; // Prevent multiple submissions
+    }
 
-async function sendDataToGoogleSheets() {
+    try {
+      isSubmitting = true;
+      submitButton.disabled = true;
+      submitButton.style.opacity = '0.7';
+      submitButton.style.cursor = 'not-allowed';
+      submitButton.textContent = 'جاري الإرسال...'; // Change button text to indicate processing
+
+      await sendDataToGoogleSheets();
+    } catch (error) {
+      console.error('Error in submission:', error);
+      alert('حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى.');
+    } finally {
+      isSubmitting = false;
+      submitButton.disabled = false;
+      submitButton.style.opacity = '1';
+      submitButton.style.cursor = 'pointer';
+      submitButton.textContent = 'إرسال البيانات'; // Reset button text
+    }
+  });
+
+  async function sendDataToGoogleSheets() {
     const pharmacologyData = cardNames.reduce((acc, name, index) => {
       acc[name] = cardValues[index] || 0;
       return acc;
@@ -1284,35 +1307,35 @@ async function sendDataToGoogleSheets() {
     const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbykxsi4bwZS9CumCNxtc_isN0u7mWC-Z97BqoXL7vHyGIwxZ48vk7_zkMkTMr-Derclhw/exec';
     
     try {
-        // Create a URLSearchParams object
-        const formData = new URLSearchParams();
-        formData.append('data', JSON.stringify(data));
+      // Create a URLSearchParams object
+      const formData = new URLSearchParams();
+      formData.append('data', JSON.stringify(data));
 
-        // Make the request
-        const response = await fetch(SHEETS_URL + '?' + formData.toString(), {
-            method: 'GET', // Changed to GET to avoid CORS
-            mode: 'no-cors'
-        });
+      // Make the request
+      const response = await fetch(SHEETS_URL + '?' + formData.toString(), {
+        method: 'GET',
+        mode: 'no-cors'
+      });
 
-        // Save local copy
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `prescription_data_${data.date.split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        console.log('Request sent to Google Sheets');
-        alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
-        resetAllFields();
+      // Save local copy
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `prescription_data_${data.date.split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      console.log('Request sent to Google Sheets');
+      alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
+      resetAllFields();
     } catch (error) {
-        console.error('Error sending data to Google Sheets:', error);
-        alert('تم تنزيل الملف، ولكن حدث خطأ أثناء إرسال البيانات إلى Google Sheets.');
+      console.error('Error sending data to Google Sheets:', error);
+      throw error; // Re-throw the error to be handled by the caller
     }
-}
+  }
 
   // Reset form fields and stored values.
   function resetAllFields() {
@@ -1329,7 +1352,7 @@ async function sendDataToGoogleSheets() {
     totalExternalInput.value = '';
     if (activeButton) {
       activeButton.classList.remove('btn-active');
-      activeButton.classList.add('btn-inactive');
+activeButton.classList.add('btn-inactive');
       activeButton = null;
     }
     studentsBtn.classList.remove('btn-active');
