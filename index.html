@@ -121,7 +121,7 @@
             font-family: 'Bangers', cursive;
             font-weight: 900;
             font-size: 1.2rem;
-            padding: 0.8rem 1.6rem;
+            padding: 1.1rem 1.6rem;
             border: var(--border-width) solid var(--border-dark);
             border-radius: var(--radius-md);
             background-color: var(--container-bg);
@@ -233,12 +233,12 @@
             will-change: transform, box-shadow, background-color;
             line-height: 1.4;
             min-height: calc(1.1rem * 1.4 + 2.2rem + 6px);
-            text-align: right;
+            text-align: left;
         }
 
         html[dir="rtl"] select {
-            padding: 1.1rem 3rem 1.1rem 1.8rem;
-            background-position: right 1rem center;
+            padding: 1.1rem 1.8rem 1.1rem 3rem;
+            background-position: left 1rem center;
             text-align: right;
         }
 
@@ -268,7 +268,8 @@
             opacity: 0.7;
         }
         html[dir="rtl"] select:disabled {
-            background-position: right 1rem center;
+            background-position: left 1rem center;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23BDBDBD' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E");
         }
 
 
@@ -328,7 +329,7 @@
         div.card h3 {
             font-family: 'Fredoka One', cursive;
             font-weight: 500;
-            font-size: 1.15rem;
+            font-size: 1.3rem;
             line-height: 1.4;
             color: var(--text-dark);
             margin-bottom: 1rem;
@@ -576,6 +577,10 @@
         .theme-workforce #total { color: var(--workforce-dark); text-shadow: 3px 3px 0 white, 5px 5px 0 var(--workforce-color); }
         .theme-workforce div.card:has(#total) { background-color: #e3f2fd; border-color: var(--workforce-dark); box-shadow: var(--shadow-offset) var(--workforce-dark); }
 
+        html[dir="rtl"] div.grid {
+            direction: rtl;
+        }
+
         @media (max-width: 768px) {
             html { font-size: 15px; }
             :root { --border-width: 2px; --shadow-offset: 3px 3px 0px; }
@@ -585,7 +590,11 @@
                 transform: rotate(-0.5deg);
                 margin: 0.5rem;
             }
-            button.comic-button { font-size: 1rem; padding: 0.6rem 1.2rem; letter-spacing: 0.5px;}
+            button.comic-button {
+                font-size: 1rem;
+                padding: 0.9rem 1.2rem;
+                letter-spacing: 0.5px;
+            }
             select {
                 font-size: 1rem;
                 padding: 0.9rem 1.5rem 0.9rem 2.5rem;
@@ -594,18 +603,18 @@
                 line-height: 1.3;
             }
             html[dir="rtl"] select {
-                padding: 0.9rem 2.5rem 0.9rem 1.5rem;
-                background-position: right 0.8rem center;
+                padding: 0.9rem 1.5rem 0.9rem 2.5rem;
+                background-position: left 0.8rem center;
             }
-            html[dir="rtl"] select:disabled {
-                 background-position: right 0.8rem center;
+             html[dir="rtl"] select:disabled {
+                 background-position: left 0.8rem center;
             }
 
             #cards-container.grid { gap: 1.5rem; }
             .grid.sm\:grid-cols-2.gap-4 { gap: 1rem; }
             div.card { padding: 1rem; transform: rotate(0.2deg); }
             div.card h3 {
-                font-size: 1.05rem;
+                font-size: 1.2rem;
                 min-height: 4em;
                 margin-bottom: 0.8rem;
                 line-height: 1.35;
@@ -632,7 +641,10 @@
         @media (max-width: 480px) {
             html { font-size: 14px; }
             h1.comic-header { font-size: 1.7rem; }
-            button.comic-button { font-size: 0.9rem; padding: 0.5rem 1rem;}
+            button.comic-button {
+                font-size: 0.9rem;
+                padding: 0.8rem 1rem;
+            }
             select {
                font-size: 0.95rem;
                padding: 0.8rem 1.2rem 0.8rem 2.2rem;
@@ -640,16 +652,16 @@
                background-size: 1.1em;
             }
             html[dir="rtl"] select {
-                padding: 0.8rem 2.2rem 0.8rem 1.2rem;
-                background-position: right 0.6rem center;
+                padding: 0.8rem 1.2rem 0.8rem 2.2rem;
+                background-position: left 0.6rem center;
             }
             html[dir="rtl"] select:disabled {
-                 background-position: right 0.6rem center;
+                 background-position: left 0.6rem center;
             }
 
             #cards-container.grid { gap: 1rem; }
             div.card h3 {
-               font-size: 0.95rem;
+               font-size: 1.1rem;
                min-height: 4em;
                margin-bottom: 0.6rem;
                line-height: 1.3;
@@ -737,10 +749,11 @@
         @media (min-width: 768px) {
             .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
-        
-html[dir="rtl"] div.grid {
-    direction: rtl;
-}
+
+        .card-invalid {
+             border-color: red !important;
+             box-shadow: var(--shadow-offset) red !important;
+         }
 
     </style>
 </head>
@@ -789,11 +802,11 @@ html[dir="rtl"] div.grid {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <div class="card">
                 <h3>اجمالي التذاكر</h3>
-                <input type="number" id="totalTickets" value="0" min="0" max="1000000" step="1" dir="ltr">
+                <input type="number" id="totalTickets" min="0" max="1000000" step="1" dir="ltr">
             </div>
             <div class="card">
                 <h3>اجمالي الخارجي</h3>
-                <input type="number" id="totalExternal" value="0" min="0" max="1000000" step="1" dir="ltr">
+                <input type="number" id="totalExternal" min="0" max="1000000" step="1" dir="ltr">
             </div>
         </div>
         <div class="card">
@@ -804,7 +817,7 @@ html[dir="rtl"] div.grid {
     </div>
 
    <script src="https://unpkg.com/@popperjs/core@2"></script>
-    <script src="https://unpkg.com/tippy.js@6"></script>
+   <script src="https://unpkg.com/tippy.js@6"></script>
     <script>
 document.addEventListener('DOMContentLoaded', () => {
   const cardsContainer = document.getElementById('cards-container');
@@ -822,106 +835,39 @@ document.addEventListener('DOMContentLoaded', () => {
   let isSubmitting = false;
 
   const cardNames = [
-    'المسكنات',
-    'مضادات حيوية',
-    'كلي',
-    'نفسية و عصبية',
-    'قلب',
-    'سكر حقن',
-    'سكر فم',
-    'نسا',
-    'كبد',
-    'جهاز هضمي',
-    'جهاز تنفسي',
-    'امراض جلدية',
-    'عيون و رمد',
-    'انف و اذن',
-    'مضادات تقلصات',
-    'اورام',
-    'فيتامينات',
-    'مختلفة'
+    'المسكنات', 'مضادات حيوية', 'كلي', 'نفسية و عصبية', 'قلب', 'سكر حقن',
+    'سكر فم', 'نسا', 'كبد', 'جهاز هضمي', 'جهاز تنفسي', 'امراض جلدية',
+    'عيون و رمد', 'انف و اذن', 'مضادات تقلصات', 'اورام', 'فيتامينات', 'مختلفة'
   ];
 
   const pharmacyOptions = {
     students: {
-      first: [
-        "كفر الدوار طلاب",
-        "البيضا طلاب",
-        "النوبارية طلاب",
-        "ابو المطامير طلاب",
-        "رشيد طلاب",
-        "ادكو طلاب"
-      ],
-      second: [
-        "دمنهور طلاب",
-        "حوش عيسي طلاب",
-        "المحمودية طلاب",
-        "الرحمانية طلاب",
-        "ابو حمص طلاب",
-        "اورام طلاب"
-      ],
-      third: [
-        "ايتاي طلاب",
-        "كوم حمادة طلاب",
-        "بدر طلاب",
-        "شبراخيت طلاب",
-        "الدلنجات طلاب"
-      ]
+      first: ["كفر الدوار طلاب", "البيضا طلاب", "النوبارية طلاب", "ابو المطامير طلاب", "رشيد طلاب", "ادكو طلاب"],
+      second: ["دمنهور طلاب", "حوش عيسي طلاب", "المحمودية طلاب", "الرحمانية طلاب", "ابو حمص طلاب", "اورام طلاب"],
+      third: ["ايتاي طلاب", "كوم حمادة طلاب", "بدر طلاب", "شبراخيت طلاب", "الدلنجات طلاب"]
     },
     workforce: {
-      first: [
-        "كفر الدوار سكر",
-        "كفر الدوار الشاملة 1",
-        "كفر الدوار الشاملة 2",
-        "كفر الدوار مسائي",
-        "النوبارية",
-        "البيضا",
-        "ابو المطامير",
-        "رشيد",
-        "ادكو"
-      ],
-      second: [
-        "دمنهور الشاملة 1",
-        "دمنهور الشاملة 2",
-        "دمنهور مسائي",
-        "دمنهور سكر",
-        "دمنهور اورام",
-        "الشرطة",
-        "حوش عيسي",
-        "المحمودية مسائي",
-        "المحمودية",
-        "الرحمانية",
-        "ابو حمص"
-      ],
-      third: [
-        "ايتاي الشاملة 1",
-        "ايتاي الشاملة 2",
-        "ايتاي مسائي",
-        "كوم حمادة",
-        "كوم حمادة مسائي",
-        "بدر",
-        "شبراخيت",
-        "الدلنجات",
-        "وادي النطرون",
-        "قليشان"
-      ]
+      first: ["كفر الدوار سكر", "كفر الدوار الشاملة 1", "كفر الدوار الشاملة 2", "كفر الدوار مسائي", "النوبارية", "البيضا", "ابو المطامير", "رشيد", "ادكو"],
+      second: ["دمنهور الشاملة 1", "دمنهور الشاملة 2", "دمنهور مسائي", "دمنهور سكر", "دمنهور اورام", "الشرطة", "حوش عيسي", "المحمودية مسائي", "المحمودية", "الرحمانية", "ابو حمص"],
+      third: ["ايتاي الشاملة 1", "ايتاي الشاملة 2", "ايتاي مسائي", "كوم حمادة", "كوم حمادة مسائي", "بدر", "شبراخيت", "الدلنجات", "وادي النطرون", "قليشان"]
     }
   };
 
   for (let i = 0; i < 18; i++) {
+    const cardWrapper = document.createElement('div');
+    cardWrapper.className = 'card-container';
     const card = document.createElement('div');
-    card.className = 'bg-white p-4 rounded-lg shadow-lg card-container';
+    card.className = 'card p-4';
     card.innerHTML = `
-      <div class="card p-4">
         <h3 class="text-lg font-bold mb-2">${cardNames[i]}</h3>
-        <input type="number" class="w-full p-2 border-2 border-black rounded text-xl" data-index="${i}" value="0" min="0" max="1000000000" step="0.001" dir="ltr">
-      </div>
-    `;
-    cardsContainer.appendChild(card);
+        <input type="number" class="w-full p-2 border-2 border-black rounded text-xl drug-input" data-index="${i}" min="0" max="1000000000" step="0.001" dir="ltr">
+      `;
+    cardWrapper.appendChild(card);
+    cardsContainer.appendChild(cardWrapper);
   }
 
   cardsContainer.addEventListener('input', (e) => {
-    if (e.target.type === 'number') {
+    if (e.target.classList.contains('drug-input') && e.target.type === 'number') {
       const input = e.target;
       const index = parseInt(input.dataset.index);
       let value = input.value;
@@ -938,29 +884,39 @@ document.addEventListener('DOMContentLoaded', () => {
         let numValue = parseFloat(value);
         if (isNaN(numValue) || numValue < 0) {
           numValue = 0;
+          value = '0';
         } else if (numValue > 1000000000) {
           numValue = 1000000000;
+          value = '1000000000';
+        } else {
+            numValue = Math.round(numValue * 1000) / 1000;
         }
-        cardValues[index] = Math.round(numValue * 1000) / 1000;
+        cardValues[index] = numValue;
       }
+      input.value = value;
 
       updateTotal();
       updateCardStyle(input);
       saveToLocalStorage();
-      input.setSelectionRange(cursorPosition, cursorPosition);
+      try {
+         input.setSelectionRange(cursorPosition, cursorPosition);
+      } catch(err) { console.warn("Couldn't set selection range", err); }
     }
   });
 
   cardsContainer.addEventListener('blur', (e) => {
-    if (e.target.type === 'number') {
+    if (e.target.classList.contains('drug-input') && e.target.type === 'number') {
       const input = e.target;
       const index = parseInt(input.dataset.index);
-      let value = input.value;
-      if (value === '' || parseFloat(value) === 0) {
+      let value = input.value.trim();
+      let numValue = parseFloat(value);
+
+      if (value === '' || isNaN(numValue) || numValue <= 0) {
         input.value = '';
         cardValues[index] = 0;
       } else {
-        const formattedValue = parseFloat(value).toFixed(3);
+        numValue = Math.min(numValue, 1000000000);
+        const formattedValue = numValue.toFixed(3);
         input.value = formattedValue;
         cardValues[index] = parseFloat(formattedValue);
       }
@@ -971,36 +927,71 @@ document.addEventListener('DOMContentLoaded', () => {
   }, true);
 
   function updateTotal() {
-    const total = cardValues.reduce((acc, val) => acc + val, 0);
-    const oldTotal = parseFloat(totalElement.textContent.replace(/,/g, ''));
-    if (total !== oldTotal) {
-      gsap.to(totalElement, {
-        textContent: total,
-        duration: 0.5,
-        ease: "power2.out",
-        snap: { textContent: 0.001 },
-        onUpdate: function() {
-          totalElement.textContent = parseFloat(totalElement.textContent).toLocaleString('en-US', {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
-          });
-        }
-      });
+    const total = cardValues.reduce((acc, val) => acc + (val || 0), 0);
+    const oldTotalText = totalElement.textContent.replace(/,/g, '');
+    const oldTotal = parseFloat(oldTotalText) || 0;
+
+    if (Math.abs(total - oldTotal) > 0.0001) {
+        gsap.to(totalElement, {
+            textContent: total,
+            duration: 0.5,
+            ease: "power2.out",
+            snap: { textContent: 0.001 },
+            onUpdate: function() {
+              const currentVal = parseFloat(this.targets()[0].textContent);
+              if (!isNaN(currentVal)) {
+                totalElement.textContent = currentVal.toLocaleString('en-US', {
+                  minimumFractionDigits: 3,
+                  maximumFractionDigits: 3
+                });
+              }
+            },
+            onComplete: function() {
+               totalElement.textContent = total.toLocaleString('en-US', {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+              });
+            }
+        });
+    } else if (oldTotal === 0 && total === 0 && oldTotalText !== "0.000") {
+         totalElement.textContent = "0.000"; // Ensure zero display is correct format
     }
-    updateSubmitButtonVisibility();
+     updateSubmitButtonVisibility();
   }
 
-  function updateCardStyle(input) {
-    const card = input.closest('.card');
-    const value = parseFloat(input.value);
-    if (value > 0) {
-      card.classList.add('card-active');
-      card.classList.remove('card-empty');
-    } else {
-      card.classList.remove('card-active');
-      card.classList.add('card-empty');
-    }
+
+  function updateCardStyle(inputElement) {
+      const card = inputElement.closest('.card');
+      if (!card) return;
+
+      const valueStr = inputElement.value.trim();
+      const valueNum = parseFloat(valueStr);
+
+      if (inputElement === totalTicketsInput || inputElement === totalExternalInput) {
+          if (valueStr !== '' && (!/^\d+$/.test(valueStr) || valueNum > 1000000)) {
+              card.classList.add('card-invalid');
+              card.classList.remove('card-active', 'card-empty');
+          } else {
+              card.classList.remove('card-invalid');
+              if (valueStr !== '' && valueNum >= 0) {
+                  card.classList.add('card-active');
+                  card.classList.remove('card-empty');
+              } else {
+                  card.classList.remove('card-active');
+                  card.classList.add('card-empty');
+              }
+          }
+      } else {
+          if (valueStr !== '' && valueNum > 0) {
+              card.classList.add('card-active');
+              card.classList.remove('card-empty');
+          } else {
+              card.classList.remove('card-active');
+              card.classList.add('card-empty');
+          }
+      }
   }
+
 
   studentsBtn.addEventListener('click', () => toggleButton(studentsBtn));
   workforceBtn.addEventListener('click', () => toggleButton(workforceBtn));
@@ -1008,43 +999,56 @@ document.addEventListener('DOMContentLoaded', () => {
   function toggleButton(clickedButton) {
     const otherButton = clickedButton === studentsBtn ? workforceBtn : studentsBtn;
     if (activeButton !== clickedButton) {
-      if (activeButton) {
-        activeButton.classList.remove('btn-active');
-        activeButton.classList.add('btn-inactive');
-      }
-      clickedButton.classList.add('btn-active');
-      clickedButton.classList.remove('btn-inactive');
-      otherButton.classList.remove('btn-active');
-      otherButton.classList.add('btn-inactive');
-      activeButton = clickedButton;
-      document.body.className = clickedButton === studentsBtn ? 'theme-students' : 'theme-workforce';
+        if (activeButton) {
+            activeButton.classList.remove('btn-active');
+            activeButton.classList.add('btn-inactive');
+            gsap.to(activeButton, { scale: 1, rotation: 0, duration: 0.2, ease: 'power1.out' });
+        }
+        clickedButton.classList.add('btn-active');
+        clickedButton.classList.remove('btn-inactive');
+        gsap.fromTo(clickedButton, { scale: 0.95, rotation: -2 }, { scale: 1, rotation: 0, duration: 0.3, ease: 'back.out(1.7)' });
+        otherButton.classList.remove('btn-active');
+        otherButton.classList.add('btn-inactive');
+        activeButton = clickedButton;
+        const themeClass = clickedButton === studentsBtn ? 'theme-students' : 'theme-workforce';
+        document.body.className = `min-h-screen p-4 ${themeClass}`;
+        updatePharmacyDropdown();
+        saveToLocalStorage();
+        updateSubmitButtonVisibility();
     }
-    updatePharmacyDropdown();
-    saveToLocalStorage();
-    updateSubmitButtonVisibility();
   }
 
-  function updatePharmacyDropdown() {
-    pharmacySelect.disabled = !(regionSelect.value && activeButton);
-    pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
-    if (regionSelect.value && activeButton) {
-      const category = activeButton === studentsBtn ? 'students' : 'workforce';
-      const options = pharmacyOptions[category][regionSelect.value];
-      if (options) {
-        options.forEach((option, index) => {
-          const optionElement = document.createElement('option');
-          optionElement.value = index + 1;
-          optionElement.textContent = option;
-          pharmacySelect.appendChild(optionElement);
-        });
-      } else {
-        console.error('No options found for the selected category and region');
-      }
-    }
-    updateSubmitButtonVisibility();
-  }
 
-  regionSelect.addEventListener('change', updatePharmacyDropdown);
+    function updatePharmacyDropdown() {
+        pharmacySelect.disabled = !(regionSelect.value && activeButton);
+        const currentPharmacyValue = pharmacySelect.value;
+        pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
+
+        if (regionSelect.value && activeButton) {
+            const category = activeButton === studentsBtn ? 'students' : 'workforce';
+            const options = pharmacyOptions[category]?.[regionSelect.value] || [];
+
+            if (options.length > 0) {
+                 options.forEach((option, index) => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = index + 1;
+                    optionElement.textContent = option;
+                    pharmacySelect.appendChild(optionElement);
+                });
+                 pharmacySelect.value = currentPharmacyValue;
+                 if (pharmacySelect.value !== currentPharmacyValue) {
+                     pharmacySelect.value = "";
+                 }
+            }
+        }
+         updateSubmitButtonVisibility();
+    }
+
+  regionSelect.addEventListener('change', () => {
+        updatePharmacyDropdown();
+        saveToLocalStorage();
+    });
+
 
   function saveToLocalStorage() {
     const dataToSave = {
@@ -1056,62 +1060,113 @@ document.addEventListener('DOMContentLoaded', () => {
       totalTickets: totalTicketsInput.value,
       totalExternal: totalExternalInput.value
     };
-    localStorage.setItem('pharmacyAppData', JSON.stringify(dataToSave));
+    try {
+        localStorage.setItem('pharmacyAppData', JSON.stringify(dataToSave));
+    } catch (error) {
+        console.error("Error saving to localStorage:", error);
+    }
   }
 
   function loadFromLocalStorage() {
-    const savedData = localStorage.getItem('pharmacyAppData');
-    if (savedData) {
-      const parsedData = JSON.parse(savedData);
-      cardValues = parsedData.cardValues.map(value => {
-        const numValue = parseFloat(value);
-        return isNaN(numValue) || numValue < 0 ? 0 : Math.min(numValue, 1000000000);
-      });
-      if (parsedData.activeButton) {
-        document.getElementById(parsedData.activeButton).click();
-      }
-      monthSelect.value = parsedData.month;
-      regionSelect.value = parsedData.region;
-      updatePharmacyDropdown();
-      pharmacySelect.value = parsedData.pharmacy;
-      totalTicketsInput.value = parsedData.totalTickets || '';
-      totalExternalInput.value = parsedData.totalExternal || '';
-      cardValues.forEach((value, index) => {
-        const input = document.querySelector(`input[data-index="${index}"]`);
-        if (input) {
-          input.value = value || '';
-          updateCardStyle(input);
+    try {
+        const savedData = localStorage.getItem('pharmacyAppData');
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          cardValues = (parsedData.cardValues || []).map(value => {
+            const numValue = parseFloat(value);
+            return isNaN(numValue) || numValue < 0 ? 0 : Math.min(numValue, 1000000000);
+          });
+          if (parsedData.activeButton) {
+              const btn = document.getElementById(parsedData.activeButton);
+              if (btn) {
+                   const otherBtn = btn === studentsBtn ? workforceBtn : studentsBtn;
+                   btn.classList.add('btn-active');
+                   btn.classList.remove('btn-inactive');
+                   otherBtn.classList.remove('btn-active');
+                   otherBtn.classList.add('btn-inactive');
+                   activeButton = btn;
+                   document.body.className = `min-h-screen p-4 ${btn === studentsBtn ? 'theme-students' : 'theme-workforce'}`;
+              }
+          } else {
+              [studentsBtn, workforceBtn].forEach(btn => {
+                   btn.classList.remove('btn-active');
+                   btn.classList.add('btn-inactive');
+              });
+              activeButton = null;
+              document.body.className = 'min-h-screen p-4';
+          }
+          monthSelect.value = parsedData.month || "";
+          regionSelect.value = parsedData.region || "";
+          updatePharmacyDropdown();
+          pharmacySelect.value = parsedData.pharmacy || "";
+          totalTicketsInput.value = parsedData.totalTickets || '';
+          totalExternalInput.value = parsedData.totalExternal || '';
+          updateCardStyle(totalTicketsInput);
+          updateCardStyle(totalExternalInput);
+          cardValues.forEach((value, index) => {
+            const input = document.querySelector(`input[data-index="${index}"]`);
+            if (input) {
+              input.value = (value > 0) ? value.toFixed(3) : '';
+              updateCardStyle(input);
+            }
+          });
+          updateTotal();
+        } else {
+             resetAllFields(false);
         }
-      });
-      updateTotal();
+    } catch (error) {
+         console.error("Error loading from localStorage:", error);
+         resetAllFields(true);
     }
     updateSubmitButtonVisibility();
   }
 
+
   submitButton.addEventListener('click', async () => {
-    if (isSubmitting) {
+    if (isSubmitting || !validateSubmission()) {
+      if (!validateSubmission()) {
+          alert("يرجى التأكد من ملء جميع الحقول المطلوبة (الشهر، المنطقة، الصيدلية، واختيار الفئة) وأن إجمالي القيم أكبر من صفر.");
+          gsap.fromTo(submitButton, { x: -5 }, { x: 5, duration: 0.05, repeat: 5, yoyo: true, clearProps: "x" });
+      }
       return;
     }
-
     try {
       isSubmitting = true;
       submitButton.disabled = true;
-      submitButton.style.opacity = '0.7';
-      submitButton.style.cursor = 'not-allowed';
       submitButton.textContent = 'جاري الإرسال...';
-
+      gsap.to(submitButton, { opacity: 0.7, duration: 0.2 });
       await sendDataToGoogleSheets();
+      gsap.to(submitButton, { backgroundColor: '#2E7D32', duration: 0.3 });
+      submitButton.textContent = 'تم الإرسال بنجاح!';
+      alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      resetAllFields(true);
     } catch (error) {
       console.error('Error in submission:', error);
+      submitButton.textContent = 'فشل الإرسال - حاول مرة أخرى';
+       gsap.to(submitButton, { backgroundColor: '#D32F2F', duration: 0.3 });
       alert('حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى.');
+       await new Promise(resolve => setTimeout(resolve, 2000));
     } finally {
       isSubmitting = false;
       submitButton.disabled = false;
-      submitButton.style.opacity = '1';
-      submitButton.style.cursor = 'pointer';
-      submitButton.textContent = 'إرسال البيانات';
+      gsap.to(submitButton, { opacity: 1, duration: 0.2 });
+      if (submitButton.textContent !== 'إرسال البيانات') {
+          submitButton.textContent = 'إرسال البيانات';
+           const defaultGradient = 'linear-gradient(135deg, var(--accent-green), var(--accent-green-dark))';
+           gsap.to(submitButton, { backgroundImage: defaultGradient, duration: 0.3 });
+      }
+       updateSubmitButtonVisibility();
     }
   });
+
+  function validateSubmission() {
+       const total = cardValues.reduce((acc, val) => acc + (val || 0), 0);
+       const allDropdownsFilled = monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
+       const optionalInputsValid = validateOptionalInputs();
+       return total > 0 && allDropdownsFilled && optionalInputsValid;
+   }
+
 
   async function sendDataToGoogleSheets() {
     const pharmacologyData = cardNames.reduce((acc, name, index) => {
@@ -1121,141 +1176,157 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const data = {
       date: new Date().toISOString(),
-      class: activeButton ? activeButton.textContent : '',
-      month: monthSelect.options[monthSelect.selectedIndex].text || '',
-      region: regionSelect.options[regionSelect.selectedIndex].text || '',
-      pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex].text || '',
-      totalPrescription: totalTicketsInput.value || 0,
-      insuranceCoveredPrescription: totalExternalInput.value || 0,
+      class: activeButton ? activeButton.textContent.trim() : '',
+      month: monthSelect.options[monthSelect.selectedIndex]?.text || '',
+      region: regionSelect.options[regionSelect.selectedIndex]?.text || '',
+      pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex]?.text || '',
+      totalPrescription: totalTicketsInput.value.trim() === '' ? 0 : parseInt(totalTicketsInput.value, 10),
+      insuranceCoveredPrescription: totalExternalInput.value.trim() === '' ? 0 : parseInt(totalExternalInput.value, 10),
       ...pharmacologyData
     };
 
     const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbykxsi4bwZS9CumCNxtc_isN0u7mWC-Z97BqoXL7vHyGIwxZ48vk7_zkMkTMr-Derclhw/exec';
 
     try {
-      const formData = new URLSearchParams();
-      formData.append('data', JSON.stringify(data));
-
-      const response = await fetch(SHEETS_URL + '?' + formData.toString(), {
-        method: 'GET',
-        mode: 'no-cors'
-      });
-
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `prescription_data_${data.date.split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      console.log('Request sent to Google Sheets');
-      alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
-      resetAllFields();
+        const params = new URLSearchParams({ data: JSON.stringify(data) });
+        const fullUrl = `${SHEETS_URL}?${params.toString()}`;
+        await fetch(fullUrl, {
+            method: 'GET',
+            mode: 'no-cors',
+        });
+        console.log('Request likely sent to Google Sheets (no-cors mode hides response).');
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `prescription_data_${data.pharmacy || 'unknown'}_${timestamp}.json`;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error sending data to Google Sheets:', error);
-      throw error;
+      console.error('Error during fetch or file download:', error);
+      throw new Error('Failed to send data or create backup file.');
     }
   }
 
-  function resetAllFields() {
-    cardValues = Array(18).fill(0);
-    document.querySelectorAll('#cards-container input[type="number"]').forEach(input => {
-      input.value = '';
-      updateCardStyle(input);
-    });
-    monthSelect.selectedIndex = 0;
-    regionSelect.selectedIndex = 0;
-    pharmacySelect.selectedIndex = 0;
-    updatePharmacyDropdown();
-    totalTicketsInput.value = '';
-    totalExternalInput.value = '';
-    if (activeButton) {
-      activeButton.classList.remove('btn-active');
-      activeButton.classList.add('btn-inactive');
-      activeButton = null;
+
+    function resetAllFields(clearStorage = true) {
+        cardValues = Array(18).fill(0);
+        document.querySelectorAll('#cards-container input.drug-input').forEach(input => {
+            input.value = '';
+            updateCardStyle(input);
+        });
+        monthSelect.selectedIndex = 0;
+        regionSelect.selectedIndex = 0;
+        pharmacySelect.selectedIndex = 0;
+        pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
+        pharmacySelect.disabled = true;
+        totalTicketsInput.value = '';
+        totalExternalInput.value = '';
+        updateCardStyle(totalTicketsInput);
+        updateCardStyle(totalExternalInput);
+        if (activeButton) {
+            activeButton.classList.remove('btn-active');
+            activeButton.classList.add('btn-inactive');
+            gsap.to(activeButton, { scale: 1, rotation: 0, duration: 0.2, ease: 'power1.out' });
+            activeButton = null;
+        }
+         studentsBtn.classList.remove('btn-active');
+         studentsBtn.classList.add('btn-inactive');
+         workforceBtn.classList.remove('btn-active');
+         workforceBtn.classList.add('btn-inactive');
+        document.body.className = 'min-h-screen p-4';
+        updateTotal();
+        if (clearStorage) {
+            try {
+                localStorage.removeItem('pharmacyAppData');
+            } catch (error) {
+                 console.error("Error clearing localStorage:", error);
+            }
+        }
+        updateSubmitButtonVisibility();
     }
-    studentsBtn.classList.remove('btn-active');
-    studentsBtn.classList.add('btn-inactive');
-    workforceBtn.classList.remove('btn-active');
-    workforceBtn.classList.add('btn-inactive');
-    document.body.className = '';
-    updateTotal();
-    localStorage.removeItem('pharmacyAppData');
-    updateSubmitButtonVisibility();
-  }
+
 
   function updateSubmitButtonVisibility() {
-    const total = cardValues.reduce((acc, val) => acc + val, 0);
-    const allDropdownsFilled = monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
-    const optionalInputsValid = validateOptionalInputs();
-    if (total > 0 && allDropdownsFilled && optionalInputsValid) {
-      submitButton.style.display = 'block';
+    const isValid = validateSubmission();
+    const isDisplayed = submitButton.style.display === 'block';
+
+    if (isValid) {
+        if (!isDisplayed) {
+             submitButton.style.display = 'block';
+             gsap.fromTo(submitButton, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power1.out' });
+        }
+         submitButton.disabled = isSubmitting;
     } else {
-      submitButton.style.display = 'none';
+         if (isDisplayed) {
+             gsap.to(submitButton, { opacity: 0, y: 10, duration: 0.2, ease: 'power1.in', onComplete: () => {
+                 submitButton.style.display = 'none';
+             }});
+         } else {
+             submitButton.style.display = 'none';
+         }
+         submitButton.disabled = true;
     }
   }
 
   function validateOptionalInputs() {
     const ticketValue = totalTicketsInput.value.trim();
     const externalValue = totalExternalInput.value.trim();
-    if (ticketValue !== '' && (!Number.isInteger(Number(ticketValue)) || Number(ticketValue) < 0 || Number(ticketValue) > 1000000)) {
-      return false;
+    let ticketsValid = true;
+    let externalValid = true;
+
+    if (ticketValue !== '' && (!/^\d+$/.test(ticketValue) || parseInt(ticketValue, 10) > 1000000)) {
+        ticketsValid = false;
     }
-    if (externalValue !== '' && (!Number.isInteger(Number(externalValue)) || Number(externalValue) < 0 || Number(externalValue) > 1000000)) {
-      return false;
+    updateCardStyle(totalTicketsInput);
+
+    if (externalValue !== '' && (!/^\d+$/.test(externalValue) || parseInt(externalValue, 10) > 1000000)) {
+        externalValid = false;
     }
-    return true;
+    updateCardStyle(totalExternalInput);
+
+    return ticketsValid && externalValid;
   }
 
-  totalTicketsInput.addEventListener('input', () => {
-    let value = totalTicketsInput.value.trim();
-    if (!(value === '' || (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 1000000))) {
-      value = value.replace(/[^0-9]/g, '');
-      value = value === '' ? '' : Math.floor(Math.min(Math.max(0, parseInt(value)), 1000000)).toString();
-    }
-    totalTicketsInput.value = value;
-    updateCardStyle(totalTicketsInput);
-    saveToLocalStorage();
-    updateSubmitButtonVisibility();
+
+  [totalTicketsInput, totalExternalInput].forEach(input => {
+      input.addEventListener('input', () => {
+          let value = input.value.trim().replace(/[^0-9]/g, '');
+          if (value !== '') {
+              let num = parseInt(value, 10);
+              if (isNaN(num)) {
+                  value = '';
+              } else if (num > 1000000) {
+                  value = '1000000';
+              } else if (num < 0) {
+                  value = '0';
+              }
+          }
+          input.value = value;
+           validateOptionalInputs();
+           saveToLocalStorage();
+           updateSubmitButtonVisibility();
+      });
+
+      input.addEventListener('blur', () => {
+          validateOptionalInputs();
+          saveToLocalStorage();
+           updateSubmitButtonVisibility();
+      });
   });
 
-  totalExternalInput.addEventListener('input', () => {
-    let value = totalExternalInput.value.trim();
-    if (!(value === '' || (Number.isInteger(Number(value)) && Number(value) >= 0 && Number(value) <= 1000000))) {
-      value = value.replace(/[^0-9]/g, '');
-      value = value === '' ? '' : Math.floor(Math.min(Math.max(0, parseInt(value)), 1000000)).toString();
-    }
-    totalExternalInput.value = value;
-    updateCardStyle(totalExternalInput);
-    saveToLocalStorage();
-    updateSubmitButtonVisibility();
-  });
-
-  totalTicketsInput.addEventListener('blur', () => {
-    if (totalTicketsInput.value.trim() === '') {
-      totalTicketsInput.value = '';
-    }
-    updateCardStyle(totalTicketsInput);
-    saveToLocalStorage();
-    updateSubmitButtonVisibility();
-  });
-
-  totalExternalInput.addEventListener('blur', () => {
-    if (totalExternalInput.value.trim() === '') {
-      totalExternalInput.value = '';
-    }
-    updateCardStyle(totalExternalInput);
-    saveToLocalStorage();
-    updateSubmitButtonVisibility();
-  });
 
   updateCardStyle(totalTicketsInput);
   updateCardStyle(totalExternalInput);
-  updateSubmitButtonVisibility();
   loadFromLocalStorage();
+   if (!localStorage.getItem('pharmacyAppData')) {
+        updateSubmitButtonVisibility();
+   }
+
 
   [monthSelect, regionSelect, pharmacySelect].forEach(element => {
     element.addEventListener('change', () => {
