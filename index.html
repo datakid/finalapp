@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -9,908 +7,703 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
     <style>
-@import url('https://fonts.googleapis.com/css2?family=Bangers&family=Cairo:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap');
-
-:root {
-    --primary-blue: #4682B4;
-    --secondary-blue: #5F9EA0;
-    --accent-green: #3CB371;
-    --bg-cream: #FFF8DC;
-    --border-blue: #4169E1;
-    --text-dark: #333333;
-    --text-light: #FFFFFF;
-    --student-color: #FF6B6B;
-    --workforce-color: #1E90FF;
-}
-
-body {
-    font-family: 'Cairo', sans-serif;
-    background-color: var(--bg-cream);
-    color: var(--text-dark);
-    transition: background-color 0.5s ease;
-    background-image: 
-        radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.03) 10%, transparent 10%),
-        radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.03) 10%, transparent 10%);
-    background-size: 20px 20px;
-}
-
-.comic-border {
-    border: 4px solid var(--border-black);
-    box-shadow: 0 0 0 2px white, 0 0 0 4px var(--border-black), 8px 8px 16px rgba(0,0,0,0.2);
-    position: relative;
-    overflow: hidden;
-}
-
-.comic-border::before {
-    content: "";
-    position: absolute;
-    top: -6px;
-    left: -6px;
-    right: -6px;
-    bottom: -6px;
-    border: 2px solid white;
-    z-index: -1;
-}
-
-.comic-header {
-    font-family: 'Luckiest Guy', cursive;
-    font-weight: 700;
-    font-size: 3.5rem;
-    color: #FFF;
-    background: linear-gradient(135deg, #D4145A, #FBB03B);
-    padding: 30px 40px;
-    margin-bottom: 40px;
-    position: relative;
-    overflow: hidden;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-    border: 4px solid #000;
-    transform: skew(-5deg); 
-}
-
-.comic-header::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
-    transform: rotate(30deg);
-    animation: shine 3s infinite linear;
-    pointer-events: none;
-}
-
-.comic-header::after {
-    content: '';
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 20px;
-    height: 20px;
-    background: #FFF;
-    border-radius: 50%;
-    box-shadow: -30px 0 0 5px rgba(255,255,255,0.4), -60px 0 0 2px rgba(255,255,255,0.2);
-}
-
-.comic-header .title-text {
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-
-.comic-header:hover {
-    transform: skew(-5deg) scale(1.03);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2), 0 8px 8px rgba(0, 0, 0, 0.1);
-}
-
-.comic-header:hover .title-text {
-    animation: bouncy 0.5s ease-in-out infinite alternate;
-}
-
-@keyframes shine {
-    from {
-        transform: rotate(30deg) translateY(-100%);
-    }
-    to {
-        transform: rotate(30deg) translateY(100%);
-    }
-}
-
-@keyframes bouncy {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-10px); }
-}
-
-.comic-header .title-text span {
-    display: inline-block;
-    transition: all 0.3s ease;
-}
-
-.comic-header:hover .title-text span:nth-child(even) {
-    transform: translateY(-5px) rotate(10deg);
-}
-
-.comic-header:hover .title-text span:nth-child(odd) {
-    transform: translateY(5px) rotate(-10deg);
-}
-
-.comic-header::before { left: 20px; animation: spin 10s linear infinite; }
-.comic-header::after { right: 20px; animation: spin 10s linear infinite reverse; }
-
-@keyframes spin {
-    100% { transform: translateY(-50%) rotate(360deg); }
-}
-
-.comic-button {
-    font-family: 'Bangers', cursive;
-    font-size: 2rem;
-    padding: 18px 36px;
-    border: 3px solid black;
-    border-radius: 15px;
-    background-color: var(--text-light);
-    color: black;
-    text-shadow: 2px 2px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white;
-    box-shadow: 
-        5px 5px 0 black,
-        inset 3px 3px 0 rgba(255,255,255,0.5),
-        inset -3px -3px 0 rgba(0,0,0,0.1);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    outline: none;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.comic-button:hover {
-    transform: translate(2px, 2px);
-    box-shadow: 
-        3px 3px 0 black,
-        inset 3px 3px 0 rgba(255,255,255,0.5),
-        inset -3px -3px 0 rgba(0,0,0,0.1);
-}
-
-.comic-button:active {
-    transform: translate(4px, 4px);
-    box-shadow: 
-        1px 1px 0 black,
-        inset 3px 3px 0 rgba(255,255,255,0.5),
-        inset -3px -3px 0 rgba(0,0,0,0.1);
-}
-
-.comic-button::before {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.comic-button:hover::before {
-    opacity: 1;
-}
-
-.comic-button.btn-inactive {
-    background-color: #d3d3d3;
-    color: #808080;
-    text-shadow: 1px 1px 0 #ffffff;
-    box-shadow: 
-        3px 3px 0 #a9a9a9,
-        inset 2px 2px 0 rgba(255,255,255,0.3),
-        inset -2px -2px 0 rgba(0,0,0,0.05);
-    border-color: #a9a9a9;
-    cursor: not-allowed;
-}
-
-.comic-button.btn-inactive:hover,
-.comic-button.btn-inactive:active {
-    transform: none;
-    box-shadow: 
-        3px 3px 0 #a9a9a9,
-        inset 2px 2px 0 rgba(255,255,255,0.3),
-        inset -2px -2px 0 rgba(0,0,0,0.05);
-}
-
-.card {
-    background-color: var(--text-light);
-    border: 3px solid black;
-    border-radius: 20px;
-    padding: 25px;
-    box-shadow: 
-        6px 6px 0 rgba(0,0,0,0.8), 
-        0 15px 25px rgba(0,0,0,0.15);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    position: relative;
-    overflow: hidden;
-    animation: cardFloat 4s ease-in-out infinite, cardPulse 4s ease-in-out infinite;
-}
-
-.card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border: 3px solid white;
-    border-radius: 17px;
-    pointer-events: none;
-}
-
-.card:hover {
-    transform: translateY(-5px) rotate(1deg);
-    box-shadow: 
-        8px 8px 0 rgba(0,0,0,0.8), 
-        0 20px 30px rgba(0,0,0,0.2);
-    animation-play-state: paused;
-}
-
-.card h3 {
-    font-family: 'Bangers', cursive;
-    font-size: 2rem;
-    color: black;
-    text-shadow: 2px 2px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white;
-    margin-bottom: 20px;
-    letter-spacing: 1px;
-    transition: transform 0.3s ease;
-}
-
-.card:hover h3 {
-    transform: scale(1.05);
-}
-
-.card-active {
-    opacity: 1;
-    background-color: #ffffff;
-    border-color: var(--primary-blue);
-    box-shadow: 
-        0 0 0 3px var(--primary-blue),
-        8px 8px 0 rgba(0,0,0,0.8), 
-        0 20px 30px rgba(0,0,0,0.2);
-    transform: translateY(-5px);
-    animation: cardFloat 3s ease-in-out infinite, cardPulse 3s ease-in-out infinite;
-}
-
-.card-active:hover {
-    animation-play-state: running;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .card, .card-active {
-        animation: none;
-    }
-}
-
-@keyframes cardFloat {
-    0%, 100% { transform: translateY(0) rotate(0); }
-    50% { transform: translateY(-5px) rotate(0.5deg); }
-}
-
-@keyframes cardPulse {
-    0%, 100% { box-shadow: 6px 6px 0 rgba(0,0,0,0.8), 0 15px 25px rgba(0,0,0,0.15); }
-    50% { box-shadow: 8px 8px 0 rgba(0,0,0,0.8), 0 20px 30px rgba(0,0,0,0.2); }
-}
-
-.card input[type="number"] {
-    font-size: 2rem;
-    padding: 15px;
-    border: 3px solid black;
-    border-radius: 15px;
-    width: 100%;
-    text-align: center;
-    color: var(--text-dark);
-    background-color: #FFFAF0;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 
-        inset 3px 3px 0 rgba(0,0,0,0.1),
-        inset -3px -3px 0 rgba(255,255,255,0.5);
-    -moz-appearance: textfield;
-    appearance: textfield;
-    position: relative;
-    z-index: 1;
-}
-
-.card input[type="number"]::-webkit-inner-spin-button,
-.card input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.card input[type="number"]:focus {
-    outline: none;
-    transform: scale(1.05);
-    box-shadow: 
-        0 0 20px rgba(70, 130, 180, 0.6), 
-        inset 3px 3px 0 rgba(0,0,0,0.1),
-        inset -3px -3px 0 rgba(255,255,255,0.5);
-    z-index: 2;
-}
-
-.theme-students {
-    background-color: #FFE4E1;
-    background-image: 
-        radial-gradient(circle at 10% 20%, rgba(255, 107, 107, 0.05) 0%, rgba(255, 107, 107, 0.05) 10%, transparent 10%),
-        radial-gradient(circle at 90% 80%, rgba(255, 107, 107, 0.05) 0%, rgba(255, 107, 107, 0.05) 10%, transparent 10%);
-}
-
-.theme-students .comic-header,
-.theme-students .comic-button:not(.btn-inactive) {
-    background: linear-gradient(135deg, var(--student-color), #FF9A8B);
-}
-
-.theme-students .comic-border {
-    border-color: var(--student-color);
-}
-
-.theme-workforce {
-    background-color: #E6F3FF;
-    background-image: 
-        radial-gradient(circle at 10% 20%, rgba(30, 144, 255, 0.05) 0%, rgba(30, 144, 255, 0.05) 10%, transparent 10%),
-        radial-gradient(circle at 90% 80%, rgba(30, 144, 255, 0.05) 0%, rgba(30, 144, 255, 0.05) 10%, transparent 10%);
-}
-
-.theme-workforce .comic-header,
-.theme-workforce .comic-button:not(.btn-inactive) {
-    background: linear-gradient(135deg, var(--workforce-color), #4169E1);
-}
-
-.theme-workforce .comic-border {
-    border-color: var(--workforce-color);
-}
-
-.theme-students .card-active {
-    border-color: var(--student-color);
-    box-shadow: 
-        0 0 0 3px var(--student-color),
-        8px 8px 0 rgba(0,0,0,0.8), 
-        0 20px 30px rgba(0,0,0,0.2);
-}
-
-.theme-students .card-active h3 {
-    color: var(--student-color);
-}
-
-.theme-students .card-active input[type="number"] {
-    border-color: var(--student-color);
-    background-color: #fff0f0;
-}
-
-.theme-workforce .card-active {
-    border-color: var(--workforce-color);
-    box-shadow: 
-        0 0 0 3px var(--workforce-color),
-        8px 8px 0 rgba(0,0,0,0.8), 
-        0 20px 30px rgba(0,0,0,0.2);
-}
-
-.theme-workforce .card-active h3 {
-    color: var(--workforce-color);
-}
-
-.theme-workforce .card-active input[type="number"] {
-    border-color: var(--workforce-color);
-    background-color: #f0f0ff;
-}
-
-select, input[type="number"] {
-    font-family: 'Cairo', sans-serif;
-    font-size: 1.1rem;
-    padding: 10px;
-    border: 3px solid black;
-    border-radius: 15px;
-    background-color: var(--text-light);
-    box-shadow: 
-        4px 4px 0 black,
-        inset 3px 3px 0 rgba(255,255,255,0.5),
-        inset -3px -3px 0 rgba(0,0,0,0.1);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    cursor: pointer;
-    outline: none;
-}
-
-select:focus, input[type="number"]:focus {
-    box-shadow: 
-        2px 2px 0 black,
-        inset 3px 3px 0 rgba(255,255,255,0.5),
-        inset -3px -3px 0 rgba(0,0,0,0.1);
-    transform: translate(2px, 2px);
-}
-
-#total {
-    font-family: 'Bangers', cursive;
-    font-size: 5rem;
-    color: black;
-    text-shadow: 
-        3px 3px 0 white, 
-        -1px -1px 0 white, 
-        1px -1px 0 white, 
-        -1px 1px 0 white, 
-        1px 1px 0 white,
-        5px 5px 0 rgba(0,0,0,0.5);
-    letter-spacing: 2px;
-}
-
-#submitButton {
-    font-family: 'Bangers', cursive;
-    font-size: 2.5rem;
-    padding: 25px 50px;
-    background: linear-gradient(135deg, var(--accent-green), #2D9E5A);
-    color: white;
-    border: 3px solid black;
-    border-radius: 20px;
-    box-shadow: 
-        6px 6px 0 black,
-        inset 3px 3px 0 rgba(255,255,255,0.3),
-        inset -3px -3px 0 rgba(0,0,0,0.1);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    text-transform: uppercase;
-    letter-spacing: 3px;
-    text-shadow: 3px 3px 0 black;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    outline: none;
-}
-
-#submitButton:hover {
-    transform: translate(2px, 2px);
-    box-shadow: 
-        4px 4px 0 black,
-        inset 3px 3px 0 rgba(255,255,255,0.3),
-        inset -3px -3px 0 rgba(0,0,0,0.1);
-}
-
-#submitButton:active {
-    transform: translate(4px, 4px);
-    box-shadow: 
-        2px 2px 0 black,
-        inset 3px 3px 0 rgba(255,255,255,0.3),
-        inset -3px -3px 0 rgba(0,0,0,0.1);
-}
-
-#submitButton::before {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease#submitButton:hover::before {
-    opacity: 1;
-}
-
-@media (max-width: 640px) {
-    .comic-header {
-        font-size: 2.5rem;
-        padding: 25px;
-        margin-bottom: 25px;
-    }
-
-    .comic-button {
-        font-size: 1.6rem;
-        padding: 15px 30px;
-    }
-
-    .card h3 {
-        font-size: 1.8rem;
-    }
-
-    .card input[type="number"] {
-        font-size: 1.8rem;
-        padding: 12px;
-    }
-
-    #total {
-        font-size: 4rem;
-    }
-
-    #submitButton {
-        font-size: 2.2rem;
-        padding: 22px 44px;
-    }
-
-    .grid-cols-2 {
-        grid-template-columns: 1fr;
-    }
-}
-
-.max-w-7xl {
-    position: relative;
-    z-index: 1;
-}
-
-.max-w-7xl::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: 
-        linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
-    background-size: 100px 100px;
-    animation: moveStripes 30s linear infinite;
-    z-index: -1;
-    opacity: 0.5;
-}
-
-@keyframes moveStripes {
-    0% { background-position: 0 0; }
-    100% { background-position: 100px 100px; }
-}
-
-.card-active {
-    transform: scale(1.02) rotate(-1deg);
-    box-shadow: 
-        8px 8px 0 rgba(0,0,0,0.8), 
-        0 20px 30px rgba(0,0,0,0.2);
-}
-
-.theme-students .card-active {
-    border-color: var(--student-color);
-}
-
-.theme-students .card-active::before {
-    border-color: var(--student-color);
-}
-
-.theme-workforce .card-active {
-    border-color: var(--workforce-color);
-}
-
-.theme-workforce .card-active::before {
-    border-color: var(--workforce-color);
-}
-
-.card-active h3 {
-    color: var(--text-dark);
-    text-shadow: 2px 2px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white;
-}
-
-.card-active input[type="number"] {
-    border-color: inherit;
-    box-shadow: 
-        0 0 15px rgba(0, 0, 0, 0.2), 
-        inset 3px 3px 0 rgba(0,0,0,0.1),
-        inset -3px -3px 0 rgba(255,255,255,0.5);
-}
-
-select {
-    font-family: 'Cuphead Felix', 'Courier New', monospace;
-    font-size: 1.4rem;
-    font-weight: bold;
-    padding: 15px 25px;
-    width: 250px;
-    border: 5px solid var(--cuphead-dark);
-    border-radius: 15px;
-    background-color: var(--cuphead-bg);
-    color: var(--cuphead-dark);
-    box-shadow: 
-        8px 8px 0 var(--cuphead-dark),
-        inset 3px 3px 0 rgba(255,255,255,0.5),
-        inset -3px -3px 0 rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
-    cursor: pointer;
-    outline: none;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
-    transform: rotate(-2deg);
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234A4A4A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 20px top 50%;
-    background-size: 24px;
-    padding-right: 60px;
-}
-
-select:hover {
-    transform: rotate(0deg) scale(1.05);
-    box-shadow: 
-        10px 10px 0 var(--cuphead-dark),
-        inset 3px 3px 0 rgba(255,255,255,0.5),
-        inset -3px -3px 0 rgba(0,0,0,0.2);
-    background-color: var(--cuphead-yellow);
-}
-
-select:focus {
-    transform: rotate(0deg) translate(5px, 5px);
-    box-shadow: 
-        3px 3px 0 var(--cuphead-dark),
-        inset 3px 3px 0 rgba(255,255,255,0.5),
-        inset -3px -3px 0 rgba(0,0,0,0.2);
-    background-color: var(--cuphead-red);
-    color: white;
-}
-
-/* Cuphead-style decorations */
-select {
-    position: relative;
-}
-
-select::before, select::after {
-    content: '';
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    border: 5px solid var(--cuphead-dark);
-    border-radius: 50%;
-    z-index: 1;
-}
-
-select::before {
-    top: -15px;
-    left: -15px;
-    background: var(--cuphead-yellow);
-}
-
-select::after {
-    bottom: -15px;
-    right: -15px;
-    background: var(--cuphead-red);
-}
-
-select option {
-    font-family: 'Cuphead Felix', 'Courier New', monospace;
-    font-size: 1.2rem;
-    background-color: var(--cuphead-bg);
-    color: var(--cuphead-dark);
-    padding: 10px;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-#submitButton {
-    animation: pulse 2s infinite;
-}
-
-#submitButton:hover {
-    animation: none;
-}
-
-[data-tippy-root] {
-    font-family: 'Bangers', cursive;
-    font-size: 1.2rem;
-    color: black;
-    background-color: white;
-    border: 2px solid black;
-    border-radius: 10px;
-    padding: 10px;
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.8);
-}
-
-.tippy-arrow {
-    color: black;
-}
-
-::-webkit-scrollbar {
-    width: 12px;
-}
-
-::-webkit-scrollbar-track {
-    background-color: #f1f1f1;
-    border: 2px solid black;
-}
-
-::-webkit-scrollbar-thumb {
-    background-color: var(--primary-blue);
-    border: 2px solid black;
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background-color: var(--secondary-blue);
-}
-
-@media print {
-    body {
-        background: none;
-        color: black;
-    }
-
-    .comic-border {
-        box-shadow: none;
-        border: 2px solid black;
-    }
-
-    .comic-header {
-        color: black;
-        text-shadow: none;
-        background: none;
-        border-bottom: 2px solid black;
-    }
-
-    .card, select, input[type="number"], #submitButton {
-        box-shadow: none;
-        border: 1px solid black;
-    }
-
-    #total {
-        color: black;
-        text-shadow: none;
-    }
-}
-
-body, .comic-header, .comic-button, .card, select, input[type="number"], #submitButton {
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-::selection {
-    background-color: var(--accent-green);
-    color: white;
-}
-
-.card::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.card:hover::after {
-    opacity: 0.5;
-}
-
-html {
-    font-size: 16px;
-}
-
-@media screen and (min-width: 640px) {
-    html {
-        font-size: 18px;
-    }
-}
-
-@media screen and (min-width: 1024px) {
-    html {
-        font-size: 20px;
-    }
-}
-
-.comic-button, select, input[type="number"] {
-    text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
-}
-
-body::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.02;
-    z-index: -1;
-    pointer-events: none;
-}
-
-.max-w-7xl {
-    box-shadow: 
-        0 0 0 10px rgba(0,0,0,0.1),
-        0 0 20px rgba(0,0,0,0.2),
-        0 0 40px rgba(0,0,0,0.1);
-}
-
-.comic-header {
-    animation: headerPulse 5s infinite alternate;
-}
-
-@keyframes headerPulse {
-    0% { transform: rotate(-2deg) skew(-5deg) scale(1); }
-    100% { transform: rotate(-2deg) skew(-5deg) scale(1.03); }
-}
-
-.card-empty {
-    opacity: 0.7;
-}
-
-.card-active {
-    opacity: 1;
-}
-
-.comic-button, .card, select, input[type="number"], #submitButton {
-    will-change: transform, box-shadow;
-}
-
-.comic-header::before, .comic-header::after {
-    will-change: transform;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    *, ::before, ::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-}
-
-.comic-button, #submitButton {
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    position: relative;
-    overflow: hidden;
-}
-
-.comic-button::after, #submitButton::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-        to bottom right,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.1) 50%,
-        rgba(255, 255, 255, 0) 100%
-    );
-    transform: rotate(45deg);
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-.comic-button:hover::after, #submitButton:hover::after {
-    top: -100%;
-    left: -100%;
-}
-
-.comic-button:focus, select:focus, input[type="number"]:focus, #submitButton:focus {
-    outline: none;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.card, .comic-button, #submitButton {
-    animation: fadeIn 0.3s ease-out;
-}
-
-@media (max-width: 768px) {
-    .grid {
-        gap: 1rem;
-    }
-}
-
-@media (prefers-contrast: high) {
-    .comic-button, #submitButton {
-        border: 3px solid black;
-    }
-
-    .card {
-        border: 3px solid black;
-        box-shadow: none;
-    }
-}
-
-input[type="number"] {
-    direction: ltr;
-    text-align: right;
-}
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bangers&display=swap');
+
+        :root {
+            --primary-blue: #4682B4;
+            --secondary-blue: #5F9EA0;
+            --accent-green: #3CB371;
+            --bg-cream: #FFF8DC;
+            --container-bg: #FFFFFF;
+            --border-light: #E0E0E0;
+            --border-medium: #BDBDBD;
+            --border-dark: #333;
+            --text-dark: #212121;
+            --text-light: #FFFFFF;
+            --text-secondary: #757575;
+            --student-color: #FF6B6B;
+            --student-dark: #D32F2F;
+            --workforce-color: #1E90FF;
+            --workforce-dark: #1976D2;
+            --accent-green-dark: #2E7D32;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-offset: 4px 4px 0px;
+            --shadow-color-dark: rgba(0, 0, 0, 0.6);
+            --shadow-color-medium: rgba(0, 0, 0, 0.35);
+            --shadow-color-light: rgba(0, 0, 0, 0.15);
+            --radius-sm: 0.375rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --transition-speed: 0.22s;
+            --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --border-width: 3px;
+        }
+
+        html {
+            font-size: 15.5px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
+            transition: background-color 0.3s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.03) 10%, transparent 10%),
+                radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.03) 10%, transparent 10%);
+            background-size: 20px 20px;
+            overflow-x: hidden;
+        }
+
+        .max-w-7xl.comic-border {
+            background-color: var(--container-bg);
+            border-radius: var(--radius-lg);
+            border: 4px solid var(--border-dark);
+            box-shadow: var(--shadow-offset) var(--shadow-color-medium), var(--shadow-lg);
+            overflow: hidden;
+            position: relative;
+            will-change: box-shadow;
+        }
+
+        .comic-border {
+            border: 4px solid var(--border-dark);
+            box-shadow: var(--shadow-offset) var(--shadow-color-medium), var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        .comic-border::before {
+            content: "";
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            right: 4px;
+            bottom: 4px;
+            border: 2px solid white;
+            border-radius: calc(var(--radius-lg) - 4px);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        h1.comic-header {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.6rem;
+            color: var(--text-light);
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border-dark);
+            text-align: center;
+            text-shadow: 2px 2px 0 var(--border-dark), -1px -1px 0 var(--border-dark), 1px -1px 0 var(--border-dark), -1px 1px 0 var(--border-dark), 1px 1px 0 var(--border-dark);
+            transition: all var(--transition-speed) var(--transition-ease);
+            position: relative;
+            transform: rotate(-1deg);
+            margin: 1rem;
+            z-index: 2;
+            will-change: transform;
+            overflow: visible;
+            line-height: 1.2;
+        }
+        h1.comic-header:hover {
+            transform: rotate(0.5deg) scale(1.02);
+            filter: brightness(1.05);
+        }
+
+        button.comic-button {
+            font-family: 'Bangers', cursive;
+            font-weight: 900;
+            font-size: 1.2rem;
+            padding: 0.8rem 1.6rem;
+            border: var(--border-width) solid var(--border-dark);
+            border-radius: var(--radius-md);
+            background-color: var(--container-bg);
+            color: var(--text-dark);
+            box-shadow: var(--shadow-offset) var(--shadow-color-dark);
+            transition: all var(--transition-speed) var(--transition-ease);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.6);
+            will-change: transform, box-shadow;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+        button.comic-button::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 60%);
+            transform: scale(0);
+            transition: transform 0.5s ease;
+            pointer-events: none;
+            opacity: 0;
+        }
+        button.comic-button:hover::after {
+            transform: scale(1.5);
+            opacity: 1;
+            transition: transform 0.5s ease, opacity 0.3s ease;
+        }
+
+        button.comic-button:hover {
+            transform: translate(2px, 2px) rotate(-1deg);
+            box-shadow: calc(var(--shadow-offset)/2) var(--shadow-color-dark);
+            background-color: #f8f8f8;
+        }
+
+        button.comic-button:active {
+            transform: translate(var(--shadow-offset));
+            box-shadow: none;
+            filter: brightness(95%);
+        }
+
+        button.comic-button.btn-active {
+            color: var(--text-light);
+            box-shadow: var(--shadow-offset) var(--border-dark);
+            animation: pulse-active-button 1.5s var(--transition-ease) infinite;
+        }
+        @keyframes pulse-active-button {
+            0%, 100% { transform: scale(1) translate(0,0) rotate(0); }
+            50% { transform: scale(1.03) translate(0,0) rotate(0); }
+        }
+        button.comic-button.btn-active:hover {
+            transform: scale(1.03);
+        }
+        button.comic-button.btn-active:active {
+            transform: scale(1.03) translate(2px, 2px);
+            box-shadow: calc(var(--shadow-offset)/2) var(--border-dark);
+            filter: brightness(95%);
+        }
+
+        button.comic-button.btn-inactive {
+            background-color: #E0E0E0;
+            color: var(--text-secondary);
+            cursor: default;
+            box-shadow: var(--shadow-offset) #BDBDBD;
+            border-color: #BDBDBD;
+            transform: none;
+            animation: none;
+            opacity: 0.7;
+        }
+        button.comic-button.btn-inactive:hover,
+        button.comic-button.btn-inactive:active {
+            transform: none;
+            box-shadow: var(--shadow-offset) #BDBDBD;
+            background-color: #E0E0E0;
+            filter: none;
+        }
+        button.comic-button.btn-inactive::after {
+           display: none;
+        }
+
+        select {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 1.1rem 1.8rem 1.1rem 3rem;
+            border: var(--border-width) solid var(--border-dark);
+            border-radius: var(--radius-md);
+            background-color: var(--container-bg);
+            color: var(--text-dark);
+            box-shadow: var(--shadow-offset) var(--shadow-color-dark);
+            transition: all var(--transition-speed) var(--transition-ease);
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 1rem center;
+            background-size: 1.2em;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+            transform: rotate(-0.5deg);
+            will-change: transform, box-shadow, background-color;
+            line-height: 1.4;
+            min-height: calc(1.1rem * 1.4 + 2.2rem + 6px);
+        }
+
+        select:hover {
+            transform: rotate(0deg) scale(1.02) translate(1px, 1px);
+            box-shadow: calc(var(--shadow-offset)/1.5) var(--shadow-color-dark);
+            background-color: #fdfdfd;
+        }
+
+        select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.3),
+                        calc(var(--shadow-offset)/2) var(--shadow-color-dark);
+            transform: rotate(0deg) translate(1px, 1px);
+            background-color: #f0f8ff;
+        }
+
+        select:disabled {
+            background-color: #E0E0E0;
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            border-color: var(--border-medium);
+            box-shadow: var(--shadow-offset) #BDBDBD;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23BDBDBD' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-position: left 1rem center;
+            transform: rotate(0deg);
+            opacity: 0.7;
+        }
+
+        select option {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            font-weight: 400;
+            background-color: var(--container-bg);
+            color: var(--text-dark);
+            padding: 10px 15px;
+        }
+
+
+        #cards-container.grid {
+            gap: 2rem;
+        }
+        .grid.sm\:grid-cols-2.gap-4 {
+            gap: 1.5rem;
+        }
+
+        div.card {
+            background-color: var(--container-bg);
+            border: var(--border-width) solid var(--border-dark);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-offset) rgba(0, 0, 0, 0.3);
+            transition: all var(--transition-speed) var(--transition-ease);
+            position: relative;
+            overflow: visible;
+            z-index: 2;
+            transform: rotate(0.3deg) scale(1);
+            will-change: transform, box-shadow, border-color;
+            display: flex;
+            flex-direction: column;
+        }
+        div.card::before {
+            content: '';
+            position: absolute;
+            top: 3px; left: 3px; right: 3px; bottom: 3px;
+            border: 2px solid white;
+            border-radius: calc(var(--radius-lg) - 4px);
+            pointer-events: none;
+            z-index: -1;
+        }
+        div.card:hover {
+            transform: rotate(-0.4deg) scale(1.02) translate(1px, 1px);
+            box-shadow: calc(var(--shadow-offset)/1.2) rgba(0, 0, 0, 0.3);
+            z-index: 3;
+        }
+
+        div.card h3 {
+            font-family: 'Fredoka One', cursive;
+            font-weight: 500;
+            font-size: 1.15rem;
+            line-height: 1.4;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            transition: color var(--transition-speed) ease;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.7);
+            display: flex;
+            flex-grow: 1;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 4.5em;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
+            hyphens: auto;
+        }
+
+        div.card input[type="number"] {
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+            padding: 0.75rem;
+            border: var(--border-width) solid var(--border-dark);
+            border-radius: var(--radius-md);
+            width: 100%;
+            text-align: right;
+            direction: ltr;
+            color: var(--text-dark);
+            background-color: #FAFAFA;
+            transition: all var(--transition-speed) ease;
+            box-shadow: inset 2px 2px 3px rgba(0,0,0,0.1);
+            -moz-appearance: textfield;
+            appearance: textfield;
+            will-change: background-color, border-color, box-shadow;
+            flex-shrink: 0;
+            line-height: 1.3;
+        }
+        div.card input[type="number"]::-webkit-inner-spin-button,
+        div.card input[type="number"]::-webkit-outer-spin-button {
+           -webkit-appearance: none; margin: 0;
+        }
+
+        div.card input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background-color: var(--container-bg);
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05),
+                        0 0 0 3px rgba(70, 130, 180, 0.4),
+                        0 0 10px rgba(70, 130, 180, 0.2);
+        }
+
+        div.card.card-active {
+            border-color: var(--primary-blue);
+            box-shadow: var(--shadow-offset) var(--primary-blue);
+            transform: rotate(-1deg) scale(1.02);
+        }
+        .theme-students div.card.card-active {
+            border-color: var(--student-color);
+            box-shadow: var(--shadow-offset) var(--student-color);
+        }
+        .theme-workforce div.card.card-active {
+            border-color: var(--workforce-color);
+            box-shadow: var(--shadow-offset) var(--workforce-color);
+        }
+
+        div.card.card-active:hover {
+            transform: rotate(-0.8deg) scale(1.03);
+            z-index: 4;
+        }
+
+        div.card.card-active h3 {
+            color: var(--primary-blue);
+        }
+        .theme-students div.card.card-active h3 { color: var(--student-dark); }
+        .theme-workforce div.card.card-active h3 { color: var(--workforce-dark); }
+
+        div.card.card-active input[type="number"] {
+            border-color: var(--primary-blue);
+            background-color: #EAF5FF;
+        }
+        .theme-students div.card.card-active input[type="number"] {
+            border-color: var(--student-color);
+            background-color: #FFF0F0;
+        }
+        .theme-workforce div.card.card-active input[type="number"] {
+            border-color: var(--workforce-color);
+            background-color: #E6F3FF;
+        }
+
+        div.card.card-empty {
+            opacity: 0.9;
+            transform: rotate(0.2deg);
+        }
+        div.card.card-empty:hover {
+            transform: rotate(-0.4deg) scale(1.02) translate(1px, 1px);
+        }
+
+        #total {
+            font-family: 'Bangers', 'Fredoka One', cursive;
+            font-size: 3.5rem;
+            color: var(--text-dark);
+            text-shadow: 3px 3px 0 white, 5px 5px 0 var(--shadow-color-medium);
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            transition: color var(--transition-speed) ease, text-shadow var(--transition-speed) ease;
+            line-height: 1.1;
+            will-change: text-shadow, color;
+            text-align: center;
+        }
+        div.card:has(#total) {
+            text-align: center;
+            overflow: visible;
+            background-color: #fffacd;
+            border-color: var(--border-dark);
+            box-shadow: var(--shadow-offset) var(--shadow-color-dark);
+        }
+        div.card:has(#total)::before {
+            border-radius: calc(var(--radius-lg) - 4px);
+        }
+        div.card:has(#total) h3 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.6rem;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.7);
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; width: 100%; max-width: 100%;
+            overflow-wrap: break-word; word-wrap: break-word;
+            word-break: break-word; white-space: normal;
+            min-height: 1.5em; flex-grow: 0;
+        }
+
+        button#submitButton {
+            font-family: 'Fredoka One', cursive;
+            font-weight: 500;
+            font-size: 1.6rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark));
+            color: white;
+            border: var(--border-width) solid var(--border-dark);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-offset) var(--shadow-color-dark);
+            transition: all var(--transition-speed) var(--transition-ease);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            outline: none;
+            width: 100%;
+            margin-top: 1.5rem;
+            text-shadow: 2px 2px 0 var(--accent-green-dark);
+            z-index: 2;
+            will-change: transform, box-shadow;
+            position: relative;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+        button#submitButton::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -150%;
+            width: 100%; height: 200%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            transition: left 0.6s ease;
+            pointer-events: none;
+        }
+        button#submitButton:hover::after {
+            left: 150%;
+        }
+
+        button#submitButton:hover {
+            transform: translate(2px, 2px) rotate(1deg);
+            box-shadow: calc(var(--shadow-offset)/2) var(--shadow-color-dark);
+            background: linear-gradient(135deg, #45c47d, #36a860);
+        }
+
+        button#submitButton:active {
+            transform: translate(var(--shadow-offset));
+            box-shadow: none;
+            filter: brightness(95%);
+        }
+
+        button#submitButton:disabled,
+        button#submitButton[disabled] {
+            background: linear-gradient(135deg, #b8e0c8, #a9d4ba);
+            color: #707070;
+            cursor: not-allowed;
+            box-shadow: var(--shadow-offset) #ababab;
+            border-color: #ababab;
+            transform: none;
+            text-shadow: 1px 1px 0px #d3d3d3;
+            opacity: 0.7;
+        }
+        button#submitButton:disabled::after { display: none; }
+
+        .theme-students body { background-color: #FFE4E1; }
+        .theme-students h1.comic-header {
+            background: linear-gradient(135deg, var(--student-color), #FF8C8C);
+            text-shadow: 2px 2px 0 var(--student-dark), -1px -1px 0 var(--student-dark), 1px -1px 0 var(--student-dark), -1px 1px 0 var(--student-dark), 1px 1px 0 var(--student-dark);
+        }
+        .theme-students button.comic-button.btn-active {
+            background-color: var(--student-color);
+            border-color: var(--student-dark);
+            box-shadow: var(--shadow-offset) var(--student-dark);
+        }
+        .theme-students select:focus,
+        .theme-students div.card input[type="number"]:focus {
+            border-color: var(--student-color);
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05),
+                        0 0 0 3px rgba(255, 107, 107, 0.4),
+                        0 0 10px rgba(255, 107, 107, 0.2);
+            background-color: #fff0f0;
+        }
+        .theme-students select:hover {
+            background-color: #fff5f5;
+        }
+        .theme-students #total { color: var(--student-dark); text-shadow: 3px 3px 0 white, 5px 5px 0 var(--student-color); }
+        .theme-students div.card:has(#total) { background-color: #ffebee; border-color: var(--student-dark); box-shadow: var(--shadow-offset) var(--student-dark); }
+
+        .theme-workforce body { background-color: #E6F3FF; }
+        .theme-workforce h1.comic-header {
+            background: linear-gradient(135deg, var(--workforce-color), #4682B4);
+            text-shadow: 2px 2px 0 var(--workforce-dark), -1px -1px 0 var(--workforce-dark), 1px -1px 0 var(--workforce-dark), -1px 1px 0 var(--workforce-dark), 1px 1px 0 var(--workforce-dark);
+        }
+        .theme-workforce button.comic-button.btn-active {
+            background-color: var(--workforce-color);
+            border-color: var(--workforce-dark);
+            box-shadow: var(--shadow-offset) var(--workforce-dark);
+        }
+        .theme-workforce select:focus,
+        .theme-workforce div.card input[type="number"]:focus {
+            border-color: var(--workforce-color);
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05),
+                        0 0 0 3px rgba(30, 144, 255, 0.4),
+                        0 0 10px rgba(30, 144, 255, 0.2);
+            background-color: #e3f2fd;
+        }
+        .theme-workforce select:hover {
+            background-color: #f0f8ff;
+        }
+        .theme-workforce #total { color: var(--workforce-dark); text-shadow: 3px 3px 0 white, 5px 5px 0 var(--workforce-color); }
+        .theme-workforce div.card:has(#total) { background-color: #e3f2fd; border-color: var(--workforce-dark); box-shadow: var(--shadow-offset) var(--workforce-dark); }
+
+        @media (max-width: 768px) {
+            html { font-size: 15px; }
+            :root { --border-width: 2px; --shadow-offset: 3px 3px 0px; }
+            h1.comic-header {
+                font-size: 2rem;
+                padding: 1rem 1.5rem;
+                transform: rotate(-0.5deg);
+                margin: 0.5rem;
+            }
+            button.comic-button { font-size: 1rem; padding: 0.6rem 1.2rem; letter-spacing: 0.5px;}
+            select {
+                font-size: 1rem;
+                padding: 0.9rem 1.5rem 0.9rem 2.5rem;
+                background-position: left 0.8rem center;
+                min-height: auto;
+                line-height: 1.3;
+            }
+            #cards-container.grid { gap: 1.5rem; }
+            .grid.sm\:grid-cols-2.gap-4 { gap: 1rem; }
+            div.card { padding: 1rem; transform: rotate(0.2deg); }
+            div.card h3 {
+                font-size: 1.05rem;
+                min-height: 4em;
+                margin-bottom: 0.8rem;
+                line-height: 1.35;
+            }
+            div.card input[type="number"] {
+                font-size: 1.15rem;
+                padding: 0.6rem;
+            }
+            #total {
+                font-size: 2.8rem;
+                letter-spacing: 1px;
+                text-shadow: 2px 2px 0 white, 4px 4px 0 var(--shadow-color-medium);
+            }
+            div.card:has(#total) h3 {
+               font-size: 1.4rem;
+               min-height: 1.5em;
+           }
+            button#submitButton {
+                font-size: 1.4rem;
+                padding: 0.8rem 1.5rem;
+                letter-spacing: 1px;
+            }
+        }
+        @media (max-width: 480px) {
+            html { font-size: 14px; }
+            h1.comic-header { font-size: 1.7rem; }
+            button.comic-button { font-size: 0.9rem; padding: 0.5rem 1rem;}
+            select {
+               font-size: 0.95rem;
+               padding: 0.8rem 1.2rem 0.8rem 2.2rem;
+               background-position: left 0.6rem center;
+               background-size: 1.1em;
+            }
+            #cards-container.grid { gap: 1rem; }
+            div.card h3 {
+               font-size: 0.95rem;
+               min-height: 4em;
+               margin-bottom: 0.6rem;
+               line-height: 1.3;
+            }
+            div.card input[type="number"] {
+               font-size: 1.05rem;
+               padding: 0.5rem;
+            }
+            #total {
+               font-size: 2.2rem;
+               text-shadow: 2px 2px 0 white, 3px 3px 0 var(--shadow-color-medium);
+            }
+            div.card:has(#total) h3 {
+                font-size: 1.2rem;
+            }
+            button#submitButton { font-size: 1.2rem; }
+        }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background-color: #ebdcb2; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background-color: var(--border-medium); border-radius: 10px; border: 2px solid #ebdcb2; }
+        ::-webkit-scrollbar-thumb:hover { background-color: var(--text-secondary); }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, ::before, ::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+                transform: none !important;
+            }
+            body { background-image: none; }
+            h1.comic-header, button.comic-button, select, div.card, button#submitButton { transform: none !important; }
+            button.comic-button.btn-active { animation: none !important; }
+        }
+        @media print {
+            :root { --border-width: 1px; --shadow-offset: 0px 0px 0px; }
+            body { background: none !important; color: black; font-size: 10pt; }
+            .max-w-7xl.comic-border, .card, select, input[type="number"], button.comic-button, button#submitButton {
+                box-shadow: none !important;
+                border: 1px solid #333 !important;
+                border-radius: 0 !important;
+                background: white !important;
+                color: black !important;
+                transform: none !important;
+                animation: none !important;
+                padding: 0.5em;
+            }
+            .comic-border::before, .card::before { display: none; }
+            h1.comic-header {
+                background: none !important;
+                color: black !important;
+                text-shadow: none !important;
+                border: none !important;
+                border-bottom: 2px solid black !important;
+                border-radius: 0;
+                box-shadow: none !important;
+                margin: 0 0 1rem 0 !important;
+                padding: 0.5rem 0 !important;
+                transform: none !important;
+                text-align: center;
+            }
+            #total { color: black !important; text-shadow: none !important; font-size: 14pt;}
+            button#submitButton, button.comic-button, select { display: none !important; }
+            .grid > * { page-break-inside: avoid !important; }
+            input[type="number"] { background-color: #eee !important; font-size: 10pt !important; }
+            h3 { font-size: 11pt !important; }
+        }
+
+        .p-4 { padding: 1rem; }
+        .p-6 { padding: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .space-y-6 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(1.5rem * var(--tw-space-y-reverse)); }
+        .text-center { text-align: center; }
+        .w-full { width: 100%; }
+        .grid { display: grid; }
+        .gap-4 { gap: 1rem; }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        @media (min-width: 640px) {
+            .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        @media (min-width: 768px) {
+            .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+
     </style>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المجموعات الدوائية</title>
 </head>
 <body class="min-h-screen p-4">
     <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-lg p-6 space-y-6 comic-border">
@@ -952,15 +745,16 @@ input[type="number"] {
             </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8" id="cards-container">
+
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <div class="card">
                 <h3>اجمالي التذاكر</h3>
-                <input type="number" id="totalTickets" value="0" min="0" step="1" dir="ltr">
+                <input type="number" id="totalTickets" value="0" min="0" max="1000000" step="1" dir="ltr">
             </div>
             <div class="card">
                 <h3>اجمالي الخارجي</h3>
-                <input type="number" id="totalExternal" value="0" min="0" step="1" dir="ltr">
+                <input type="number" id="totalExternal" value="0" min="0" max="1000000" step="1" dir="ltr">
             </div>
         </div>
         <div class="card">
@@ -969,6 +763,7 @@ input[type="number"] {
         </div>
         <button id="submitButton" class="w-full mt-6">إرسال البيانات</button>
     </div>
+
    <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
     <script>
@@ -985,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalExternalInput = document.getElementById('totalExternal');
   let cardValues = Array(18).fill(0);
   let activeButton = null;
-  let isSubmitting = false; // New flag to track submission state
+  let isSubmitting = false;
 
   const cardNames = [
     'المسكنات',
@@ -1011,70 +806,69 @@ document.addEventListener('DOMContentLoaded', () => {
   const pharmacyOptions = {
     students: {
       first: [
-        "كفر الدوار طلاب", 
+        "كفر الدوار طلاب",
         "البيضا طلاب",
-        "النوبارية طلاب", 
-        "ابو المطامير طلاب", 
-        "رشيد طلاب", 
+        "النوبارية طلاب",
+        "ابو المطامير طلاب",
+        "رشيد طلاب",
         "ادكو طلاب"
       ],
       second: [
-        "دمنهور طلاب", 
-        "حوش عيسي طلاب", 
-        "المحمودية طلاب", 
-        "الرحمانية طلاب", 
+        "دمنهور طلاب",
+        "حوش عيسي طلاب",
+        "المحمودية طلاب",
+        "الرحمانية طلاب",
         "ابو حمص طلاب",
         "اورام طلاب"
       ],
       third: [
-        "ايتاي طلاب", 
-        "كوم حمادة طلاب", 
-        "بدر طلاب", 
-        "شبراخيت طلاب", 
+        "ايتاي طلاب",
+        "كوم حمادة طلاب",
+        "بدر طلاب",
+        "شبراخيت طلاب",
         "الدلنجات طلاب"
       ]
     },
     workforce: {
       first: [
-        "كفر الدوار سكر", 
-        "كفر الدوار الشاملة 1", 
-        "كفر الدوار الشاملة 2", 
-        "كفر الدوار مسائي", 
-        "النوبارية", 
-        "البيضا", 
-        "ابو المطامير", 
-        "رشيد", 
+        "كفر الدوار سكر",
+        "كفر الدوار الشاملة 1",
+        "كفر الدوار الشاملة 2",
+        "كفر الدوار مسائي",
+        "النوبارية",
+        "البيضا",
+        "ابو المطامير",
+        "رشيد",
         "ادكو"
       ],
       second: [
-        "دمنهور الشاملة 1", 
-        "دمنهور الشاملة 2", 
-        "دمنهور مسائي", 
-        "دمنهور سكر", 
-        "دمنهور اورام", 
-        "الشرطة", 
-        "حوش عيسي", 
-        "المحمودية مسائي", 
-        "المحمودية", 
-        "الرحمانية", 
+        "دمنهور الشاملة 1",
+        "دمنهور الشاملة 2",
+        "دمنهور مسائي",
+        "دمنهور سكر",
+        "دمنهور اورام",
+        "الشرطة",
+        "حوش عيسي",
+        "المحمودية مسائي",
+        "المحمودية",
+        "الرحمانية",
         "ابو حمص"
       ],
       third: [
-        "ايتاي الشاملة 1", 
-        "ايتاي الشاملة 2",  
-        "ايتاي مسائي", 
-        "كوم حمادة", 
-        "كوم حمادة مسائي", 
-        "بدر", 
-        "شبراخيت", 
-        "الدلنجات", 
-        "وادي النطرون", 
+        "ايتاي الشاملة 1",
+        "ايتاي الشاملة 2",
+        "ايتاي مسائي",
+        "كوم حمادة",
+        "كوم حمادة مسائي",
+        "بدر",
+        "شبراخيت",
+        "الدلنجات",
+        "وادي النطرون",
         "قليشان"
       ]
     }
   };
 
-  // Create card elements dynamically.
   for (let i = 0; i < 18; i++) {
     const card = document.createElement('div');
     card.className = 'bg-white p-4 rounded-lg shadow-lg card-container';
@@ -1087,18 +881,16 @@ document.addEventListener('DOMContentLoaded', () => {
     cardsContainer.appendChild(card);
   }
 
-  // Event listener for handling input events on cards.
   cardsContainer.addEventListener('input', (e) => {
     if (e.target.type === 'number') {
       const input = e.target;
       const index = parseInt(input.dataset.index);
       let value = input.value;
       const cursorPosition = input.selectionStart;
-      
+
       if (value === '') {
         cardValues[index] = 0;
       } else {
-        // Remove invalid characters.
         value = value.replace(/[^\d.]/g, '');
         const parts = value.split('.');
         if (parts.length > 2) {
@@ -1112,7 +904,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         cardValues[index] = Math.round(numValue * 1000) / 1000;
       }
-      
+
       updateTotal();
       updateCardStyle(input);
       saveToLocalStorage();
@@ -1120,7 +912,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Handle blur event for number inputs.
   cardsContainer.addEventListener('blur', (e) => {
     if (e.target.type === 'number') {
       const input = e.target;
@@ -1172,7 +963,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Button click event handlers for toggling between students and workforce.
   studentsBtn.addEventListener('click', () => toggleButton(studentsBtn));
   workforceBtn.addEventListener('click', () => toggleButton(workforceBtn));
 
@@ -1217,7 +1007,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   regionSelect.addEventListener('change', updatePharmacyDropdown);
 
-  // Save settings and state to local storage.
   function saveToLocalStorage() {
     const dataToSave = {
       cardValues,
@@ -1231,7 +1020,6 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('pharmacyAppData', JSON.stringify(dataToSave));
   }
 
-  // Load saved state from local storage.
   function loadFromLocalStorage() {
     const savedData = localStorage.getItem('pharmacyAppData');
     if (savedData) {
@@ -1261,10 +1049,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSubmitButtonVisibility();
   }
 
-  // Submit button event for sending data to Google Sheets.
   submitButton.addEventListener('click', async () => {
     if (isSubmitting) {
-      return; // Prevent multiple submissions
+      return;
     }
 
     try {
@@ -1272,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', () => {
       submitButton.disabled = true;
       submitButton.style.opacity = '0.7';
       submitButton.style.cursor = 'not-allowed';
-      submitButton.textContent = 'جاري الإرسال...'; // Change button text to indicate processing
+      submitButton.textContent = 'جاري الإرسال...';
 
       await sendDataToGoogleSheets();
     } catch (error) {
@@ -1283,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', () => {
       submitButton.disabled = false;
       submitButton.style.opacity = '1';
       submitButton.style.cursor = 'pointer';
-      submitButton.textContent = 'إرسال البيانات'; // Reset button text
+      submitButton.textContent = 'إرسال البيانات';
     }
   });
 
@@ -1292,7 +1079,7 @@ document.addEventListener('DOMContentLoaded', () => {
       acc[name] = cardValues[index] || 0;
       return acc;
     }, {});
-    
+
     const data = {
       date: new Date().toISOString(),
       class: activeButton ? activeButton.textContent : '',
@@ -1305,19 +1092,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbykxsi4bwZS9CumCNxtc_isN0u7mWC-Z97BqoXL7vHyGIwxZ48vk7_zkMkTMr-Derclhw/exec';
-    
+
     try {
-      // Create a URLSearchParams object
       const formData = new URLSearchParams();
       formData.append('data', JSON.stringify(data));
 
-      // Make the request
       const response = await fetch(SHEETS_URL + '?' + formData.toString(), {
         method: 'GET',
         mode: 'no-cors'
       });
 
-      // Save local copy
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1327,17 +1111,16 @@ document.addEventListener('DOMContentLoaded', () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       console.log('Request sent to Google Sheets');
       alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
       resetAllFields();
     } catch (error) {
       console.error('Error sending data to Google Sheets:', error);
-      throw error; // Re-throw the error to be handled by the caller
+      throw error;
     }
   }
 
-  // Reset form fields and stored values.
   function resetAllFields() {
     cardValues = Array(18).fill(0);
     document.querySelectorAll('#cards-container input[type="number"]').forEach(input => {
@@ -1352,7 +1135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     totalExternalInput.value = '';
     if (activeButton) {
       activeButton.classList.remove('btn-active');
-activeButton.classList.add('btn-inactive');
+      activeButton.classList.add('btn-inactive');
       activeButton = null;
     }
     studentsBtn.classList.remove('btn-active');
@@ -1365,7 +1148,6 @@ activeButton.classList.add('btn-inactive');
     updateSubmitButtonVisibility();
   }
 
-  // Control the visibility on the submit button.
   function updateSubmitButtonVisibility() {
     const total = cardValues.reduce((acc, val) => acc + val, 0);
     const allDropdownsFilled = monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
@@ -1377,7 +1159,6 @@ activeButton.classList.add('btn-inactive');
     }
   }
 
-  // Validate optional inputs.
   function validateOptionalInputs() {
     const ticketValue = totalTicketsInput.value.trim();
     const externalValue = totalExternalInput.value.trim();
@@ -1432,7 +1213,6 @@ activeButton.classList.add('btn-inactive');
     updateSubmitButtonVisibility();
   });
 
-  // Initial setup.
   updateCardStyle(totalTicketsInput);
   updateCardStyle(totalExternalInput);
   updateSubmitButtonVisibility();
@@ -1445,6 +1225,6 @@ activeButton.classList.add('btn-inactive');
     });
   });
 });
-        </script>
+    </script>
 </body>
 </html>
