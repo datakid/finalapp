@@ -954,7 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } else if (oldTotal === 0 && total === 0 && oldTotalText !== "0.000") {
-         totalElement.textContent = "0.000"; // Ensure zero display is correct format
+         totalElement.textContent = "0.000"; 
     }
      updateSubmitButtonVisibility();
   }
@@ -1019,35 +1019,47 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-    function updatePharmacyDropdown() {
-        pharmacySelect.disabled = !(regionSelect.value && activeButton);
-        const currentPharmacyValue = pharmacySelect.value;
-        pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
-
-        if (regionSelect.value && activeButton) {
-            const category = activeButton === studentsBtn ? 'students' : 'workforce';
-            const options = pharmacyOptions[category]?.[regionSelect.value] || [];
-
-            if (options.length > 0) {
-                 options.forEach((option, index) => {
-                    const optionElement = document.createElement('option');
-                    optionElement.value = index + 1;
-                    optionElement.textContent = option;
-                    pharmacySelect.appendChild(optionElement);
-                });
-                 pharmacySelect.value = currentPharmacyValue;
-                 if (pharmacySelect.value !== currentPharmacyValue) {
-                     pharmacySelect.value = "";
-                 }
+  function updatePharmacyDropdown() {
+    pharmacySelect.disabled = !(regionSelect.value && activeButton);
+    const currentPharmacyValue = pharmacySelect.value;
+    pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
+    if (regionSelect.value && activeButton) {
+        const category = activeButton === studentsBtn ? 'students' : 'workforce';
+        const options = pharmacyOptions[category]?.[regionSelect.value] || [];
+        if (options.length > 0) {
+            options.forEach((option, index) => {
+                const optionElement = document.createElement('option');
+                optionElement.value = index + 1;
+                optionElement.textContent = option;
+                pharmacySelect.appendChild(optionElement);
+            });
+            pharmacySelect.value = currentPharmacyValue;
+            if (pharmacySelect.value !== currentPharmacyValue) {
+                pharmacySelect.value = "";
             }
         }
-         updateSubmitButtonVisibility();
     }
+    updateSubmitButtonVisibility();
+}
 
-  regionSelect.addEventListener('change', () => {
-        updatePharmacyDropdown();
-        saveToLocalStorage();
-    });
+regionSelect.addEventListener('change', () => {
+    updatePharmacyDropdown();
+    saveToLocalStorage();
+});
+
+studentsBtn.addEventListener('click', () => {
+    activeButton = studentsBtn;
+    pharmacySelect.value = "";
+    updatePharmacyDropdown();
+    saveToLocalStorage();
+});
+
+workforceBtn.addEventListener('click', () => {
+    activeButton = workforceBtn;
+    pharmacySelect.value = "";
+    updatePharmacyDropdown();
+    saveToLocalStorage();
+});
 
 
   function saveToLocalStorage() {
@@ -1125,7 +1137,7 @@ document.addEventListener('DOMContentLoaded', () => {
   submitButton.addEventListener('click', async () => {
     if (isSubmitting || !validateSubmission()) {
       if (!validateSubmission()) {
-          alert("يرجى التأكد من ملء جميع الحقول المطلوبة (الشهر، المنطقة، الصيدلية، واختيار الفئة) وأن إجمالي القيم أكبر من صفر.");
+          alert("برجاء اكمال البيانات المطلوبة");
           gsap.fromTo(submitButton, { x: -5 }, { x: 5, duration: 0.05, repeat: 5, yoyo: true, clearProps: "x" });
       }
       return;
