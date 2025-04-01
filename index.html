@@ -4,9 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>المجموعات الدوائية</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
     <style>
+        *, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: #e5e7eb; }
+        html { line-height: 1.5; -webkit-text-size-adjust: 100%; -moz-tab-size: 4; tab-size: 4; font-family: 'Cairo', sans-serif; }
+        body { margin: 0; line-height: inherit; }
+        hr { height: 0; color: inherit; border-top-width: 1px; }
+        h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+        a { color: inherit; text-decoration: inherit; }
+        b, strong { font-weight: bolder; }
+        code, kbd, samp, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 1em; }
+        small { font-size: 80%; }
+        sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+        sub { bottom: -0.25em; }
+        sup { top: -0.5em; }
+        table { text-indent: 0; border-color: inherit; border-collapse: collapse; }
+        button, input, optgroup, select, textarea { font-family: inherit; font-size: 100%; font-weight: inherit; line-height: inherit; color: inherit; margin: 0; padding: 0; }
+        button, select { text-transform: none; }
+        button, [type='button'], [type='reset'], [type='submit'] { -webkit-appearance: button; background-color: transparent; background-image: none; }
+        :-moz-focusring { outline: auto; }
+        :-moz-ui-invalid { box-shadow: none; }
+        progress { vertical-align: baseline; }
+        ::-webkit-inner-spin-button, ::-webkit-outer-spin-button { height: auto; }
+        [type='search'] { -webkit-appearance: textfield; outline-offset: -2px; }
+        ::-webkit-search-decoration { -webkit-appearance: none; }
+        ::-webkit-file-upload-button { -webkit-appearance: button; font: inherit; }
+        summary { display: list-item; }
+        blockquote, dl, dd, h1, h2, h3, h4, h5, h6, hr, figure, p, pre { margin: 0; }
+        fieldset { margin: 0; padding: 0; }
+        legend { padding: 0; }
+        ol, ul, menu { list-style: none; margin: 0; padding: 0; }
+        textarea { resize: vertical; }
+        input::placeholder, textarea::placeholder { opacity: 1; color: #9ca3af; }
+        button, [role="button"] { cursor: pointer; }
+        :disabled { cursor: default; }
+        img, svg, video, canvas, audio, iframe, embed, object { display: block; vertical-align: middle; }
+        img, video { max-width: 100%; height: auto; }
+        [hidden] { display: none; }
+
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
@@ -61,16 +96,25 @@
                 radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.03) 10%, transparent 10%);
             background-size: 20px 20px;
             overflow-x: hidden;
+            min-height: 100vh;
+            padding: 1rem;
         }
 
-        .max-w-7xl.comic-border {
+        .main-container {
+            max-width: 80rem;
+            margin-left: auto;
+            margin-right: auto;
             background-color: var(--container-bg);
             border-radius: var(--radius-lg);
+            padding: 1.5rem;
             border: 4px solid var(--border-dark);
             box-shadow: var(--shadow-offset) var(--shadow-color-medium), var(--shadow-lg);
             overflow: hidden;
             position: relative;
             will-change: box-shadow;
+        }
+        .main-container > :not([hidden]) ~ :not([hidden]) {
+            margin-top: 1.5rem;
         }
 
         .comic-border {
@@ -95,10 +139,10 @@
         h1.comic-header {
             font-family: 'Fredoka One', cursive;
             font-size: 2.6rem;
+            font-weight: 700;
             color: var(--text-light);
             background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
             padding: 1.5rem 2rem;
-            margin-bottom: 2rem;
             border-radius: var(--radius-md);
             border: 2px solid var(--border-dark);
             text-align: center;
@@ -138,73 +182,17 @@
             overflow: hidden;
             line-height: 1.3;
         }
-        button.comic-button::after {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 60%);
-            transform: scale(0);
-            transition: transform 0.5s ease;
-            pointer-events: none;
-            opacity: 0;
-        }
-        button.comic-button:hover::after {
-            transform: scale(1.5);
-            opacity: 1;
-            transition: transform 0.5s ease, opacity 0.3s ease;
-        }
-
-        button.comic-button:hover {
-            transform: translate(2px, 2px) rotate(-1deg);
-            box-shadow: calc(var(--shadow-offset)/2) var(--shadow-color-dark);
-            background-color: #f8f8f8;
-        }
-
-        button.comic-button:active {
-            transform: translate(var(--shadow-offset));
-            box-shadow: none;
-            filter: brightness(95%);
-        }
-
-        button.comic-button.btn-active {
-            color: var(--text-light);
-            box-shadow: var(--shadow-offset) var(--border-dark);
-            animation: pulse-active-button 1.5s var(--transition-ease) infinite;
-        }
-        @keyframes pulse-active-button {
-            0%, 100% { transform: scale(1) translate(0,0) rotate(0); }
-            50% { transform: scale(1.03) translate(0,0) rotate(0); }
-        }
-        button.comic-button.btn-active:hover {
-            transform: scale(1.03);
-        }
-        button.comic-button.btn-active:active {
-            transform: scale(1.03) translate(2px, 2px);
-            box-shadow: calc(var(--shadow-offset)/2) var(--border-dark);
-            filter: brightness(95%);
-        }
-
-        button.comic-button.btn-inactive {
-            background-color: #E0E0E0;
-            color: var(--text-secondary);
-            cursor: default;
-            box-shadow: var(--shadow-offset) #BDBDBD;
-            border-color: #BDBDBD;
-            transform: none;
-            animation: none;
-            opacity: 0.7;
-        }
-        button.comic-button.btn-inactive:hover,
-        button.comic-button.btn-inactive:active {
-            transform: none;
-            box-shadow: var(--shadow-offset) #BDBDBD;
-            background-color: #E0E0E0;
-            filter: none;
-        }
-        button.comic-button.btn-inactive::after {
-           display: none;
-        }
+        button.comic-button::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 60%); transform: scale(0); transition: transform 0.5s ease; pointer-events: none; opacity: 0; }
+        button.comic-button:hover::after { transform: scale(1.5); opacity: 1; transition: transform 0.5s ease, opacity 0.3s ease; }
+        button.comic-button:hover { transform: translate(2px, 2px) rotate(-1deg); box-shadow: calc(var(--shadow-offset)/2) var(--shadow-color-dark); background-color: #f8f8f8; }
+        button.comic-button:active { transform: translate(var(--shadow-offset)); box-shadow: none; filter: brightness(95%); }
+        button.comic-button.btn-active { color: var(--text-light); box-shadow: var(--shadow-offset) var(--border-dark); animation: pulse-active-button 1.5s var(--transition-ease) infinite; }
+        @keyframes pulse-active-button { 0%, 100% { transform: scale(1) translate(0,0) rotate(0); } 50% { transform: scale(1.03) translate(0,0) rotate(0); } }
+        button.comic-button.btn-active:hover { transform: scale(1.03); }
+        button.comic-button.btn-active:active { transform: scale(1.03) translate(2px, 2px); box-shadow: calc(var(--shadow-offset)/2) var(--border-dark); filter: brightness(95%); }
+        button.comic-button.btn-inactive { background-color: #E0E0E0; color: var(--text-secondary); cursor: default; box-shadow: var(--shadow-offset) #BDBDBD; border-color: #BDBDBD; transform: none; animation: none; opacity: 0.7; }
+        button.comic-button.btn-inactive:hover, button.comic-button.btn-inactive:active { transform: none; box-shadow: var(--shadow-offset) #BDBDBD; background-color: #E0E0E0; filter: none; }
+        button.comic-button.btn-inactive::after { display: none; }
 
         select {
             font-family: 'Nunito', sans-serif;
@@ -223,78 +211,39 @@
             transition: all var(--transition-speed) var(--transition-ease);
             cursor: pointer;
             outline: none;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
             width: 100%;
-            position: relative;
-            z-index: 2;
-            transform: rotate(-0.5deg);
+            position: relative; z-index: 2; transform: rotate(-0.5deg);
             will-change: transform, box-shadow, background-color;
-            line-height: 1.4;
-            min-height: calc(1.1rem * 1.4 + 2.2rem + 6px);
+            line-height: 1.4; min-height: calc(1.1rem * 1.4 + 2.2rem + 6px);
             text-align: left;
         }
+        html[dir="rtl"] select { padding: 1.1rem 1.8rem 1.1rem 3rem; background-position: left 1rem center; text-align: right; }
+        select:hover { transform: rotate(0deg) scale(1.02) translate(1px, 1px); box-shadow: calc(var(--shadow-offset)/1.5) var(--shadow-color-dark); background-color: #fdfdfd; }
+        select:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.3), calc(var(--shadow-offset)/2) var(--shadow-color-dark); transform: rotate(0deg) translate(1px, 1px); background-color: #f0f8ff; }
+        select:disabled { background-color: #E0E0E0; color: var(--text-secondary); cursor: not-allowed; border-color: var(--border-medium); box-shadow: var(--shadow-offset) #BDBDBD; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23BDBDBD' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E"); background-position: left 1rem center; transform: rotate(0deg); opacity: 0.7; }
+        html[dir="rtl"] select:disabled { background-position: left 1rem center; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23BDBDBD' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+        select option { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 400; background-color: var(--container-bg); color: var(--text-dark); padding: 10px 15px; text-align: right; direction: rtl; }
+        html[dir="ltr"] select option { text-align: left; direction: ltr; }
 
-        html[dir="rtl"] select {
-            padding: 1.1rem 1.8rem 1.1rem 3rem;
-            background-position: left 1rem center;
-            text-align: right;
+        .grid-container {
+            display: grid;
+            margin-bottom: 2rem;
         }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .gap-4 { gap: 1rem; }
+        .gap-6 { gap: 1.5rem; }
 
-        select:hover {
-            transform: rotate(0deg) scale(1.02) translate(1px, 1px);
-            box-shadow: calc(var(--shadow-offset)/1.5) var(--shadow-color-dark);
-            background-color: #fdfdfd;
+        @media (min-width: 640px) {
+            .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
-
-        select:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.3),
-                        calc(var(--shadow-offset)/2) var(--shadow-color-dark);
-            transform: rotate(0deg) translate(1px, 1px);
-            background-color: #f0f8ff;
-        }
-
-        select:disabled {
-            background-color: #E0E0E0;
-            color: var(--text-secondary);
-            cursor: not-allowed;
-            border-color: var(--border-medium);
-            box-shadow: var(--shadow-offset) #BDBDBD;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23BDBDBD' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-position: left 1rem center;
-            transform: rotate(0deg);
-            opacity: 0.7;
-        }
-        html[dir="rtl"] select:disabled {
-            background-position: left 1rem center;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23BDBDBD' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E");
+        @media (min-width: 768px) {
+             .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
 
-
-        select option {
-            font-family: 'Nunito', sans-serif;
-            font-size: 1rem;
-            font-weight: 400;
-            background-color: var(--container-bg);
-            color: var(--text-dark);
-            padding: 10px 15px;
-            text-align: right;
-            direction: rtl;
-        }
-        html[dir="ltr"] select option {
-            text-align: left;
-            direction: ltr;
-        }
-
-
-        #cards-container.grid {
-            gap: 2rem;
-        }
-        .grid.sm\:grid-cols-2.gap-4 {
-            gap: 1.5rem;
-        }
+        #cards-container.grid-container { gap: 2rem; }
 
         div.card {
             background-color: var(--container-bg);
@@ -303,399 +252,140 @@
             padding: 1.5rem;
             box-shadow: var(--shadow-offset) rgba(0, 0, 0, 0.3);
             transition: all var(--transition-speed) var(--transition-ease);
-            position: relative;
-            overflow: visible;
-            z-index: 2;
+            position: relative; overflow: visible; z-index: 2;
             transform: rotate(0.3deg) scale(1);
             will-change: transform, box-shadow, border-color;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
-        div.card::before {
-            content: '';
-            position: absolute;
-            top: 3px; left: 3px; right: 3px; bottom: 3px;
-            border: 2px solid white;
-            border-radius: calc(var(--radius-lg) - 4px);
-            pointer-events: none;
-            z-index: -1;
-        }
-        div.card:hover {
-            transform: rotate(-0.4deg) scale(1.02) translate(1px, 1px);
-            box-shadow: calc(var(--shadow-offset)/1.2) rgba(0, 0, 0, 0.3);
-            z-index: 3;
-        }
-
+        div.card::before { content: ''; position: absolute; top: 3px; left: 3px; right: 3px; bottom: 3px; border: 2px solid white; border-radius: calc(var(--radius-lg) - 4px); pointer-events: none; z-index: -1; }
+        div.card:hover { transform: rotate(-0.4deg) scale(1.02) translate(1px, 1px); box-shadow: calc(var(--shadow-offset)/1.2) rgba(0, 0, 0, 0.3); z-index: 3; }
         div.card h3 {
-            font-family: 'Fredoka One', cursive;
-            font-weight: 500;
-            font-size: 1.3rem;
-            line-height: 1.4;
-            color: var(--text-dark);
-            margin-bottom: 1rem;
-            transition: color var(--transition-speed) ease;
-            text-shadow: 1px 1px 0px rgba(255,255,255,0.7);
-            display: flex;
-            flex-grow: 1;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            min-height: 4.5em;
-            width: 100%;
-            max-width: 100%;
-            overflow: hidden;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            word-break: break-word;
-            white-space: normal;
-            hyphens: auto;
+            font-family: 'Fredoka One', cursive; font-weight: 500; font-size: 1.3rem; line-height: 1.4;
+            color: var(--text-dark); margin-bottom: 1rem;
+            transition: color var(--transition-speed) ease; text-shadow: 1px 1px 0px rgba(255,255,255,0.7);
+            display: flex; flex-grow: 1; align-items: center; justify-content: center; text-align: center; min-height: 4.5em;
+            width: 100%; max-width: 100%; overflow: hidden; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; white-space: normal; hyphens: auto;
         }
-
         div.card input[type="number"],
         div.card input[type="text"].drug-input {
-            font-family: 'Cairo', sans-serif;
-            font-weight: 700;
-            font-size: 1.4rem;
-            padding: 0.75rem;
-            border: var(--border-width) solid var(--border-dark);
-            border-radius: var(--radius-md);
+            font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 1.4rem; padding: 0.75rem;
+            border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md);
             width: 100%;
-            text-align: right;
-            direction: ltr;
-            color: var(--text-dark);
-            background-color: #FAFAFA;
-            transition: all var(--transition-speed) ease;
+            text-align: right; direction: ltr; color: var(--text-dark);
+            background-color: #FAFAFA; transition: all var(--transition-speed) ease;
             box-shadow: inset 2px 2px 3px rgba(0,0,0,0.1);
             will-change: background-color, border-color, box-shadow;
-            flex-shrink: 0;
-            line-height: 1.3;
+            flex-shrink: 0; line-height: 1.3;
         }
-        div.card input[type="number"]::-webkit-inner-spin-button,
-        div.card input[type="number"]::-webkit-outer-spin-button {
-           -webkit-appearance: none; margin: 0;
-        }
-        div.card input[type="number"] {
-            -moz-appearance: textfield;
-            appearance: textfield;
-        }
-        div.card input[type="text"].drug-input {
-            appearance: none;
-            -moz-appearance: textfield;
-        }
+        div.card input[type="number"]::-webkit-inner-spin-button, div.card input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        div.card input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+        div.card input[type="text"].drug-input { appearance: none; -moz-appearance: textfield; }
+        div.card input[type="number"]:focus, div.card input[type="text"].drug-input:focus { outline: none; border-color: var(--primary-blue); background-color: var(--container-bg); box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05), 0 0 0 3px rgba(70, 130, 180, 0.4), 0 0 10px rgba(70, 130, 180, 0.2); }
 
-
-        div.card input[type="number"]:focus,
-        div.card input[type="text"].drug-input:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-            background-color: var(--container-bg);
-            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05),
-                        0 0 0 3px rgba(70, 130, 180, 0.4),
-                        0 0 10px rgba(70, 130, 180, 0.2);
-        }
-
-        div.card.card-active {
-            border-color: var(--primary-blue);
-            box-shadow: var(--shadow-offset) var(--primary-blue);
-            transform: rotate(-1deg) scale(1.02);
-        }
-        .theme-students div.card.card-active {
-            border-color: var(--student-color);
-            box-shadow: var(--shadow-offset) var(--student-color);
-        }
-        .theme-workforce div.card.card-active {
-            border-color: var(--workforce-color);
-            box-shadow: var(--shadow-offset) var(--workforce-color);
-        }
-
-        div.card.card-active:hover {
-            transform: rotate(-0.8deg) scale(1.03);
-            z-index: 4;
-        }
-
-        div.card.card-active h3 {
-            color: var(--primary-blue);
-        }
+        div.card.card-active { border-color: var(--primary-blue); box-shadow: var(--shadow-offset) var(--primary-blue); transform: rotate(-1deg) scale(1.02); }
+        .theme-students div.card.card-active { border-color: var(--student-color); box-shadow: var(--shadow-offset) var(--student-color); }
+        .theme-workforce div.card.card-active { border-color: var(--workforce-color); box-shadow: var(--shadow-offset) var(--workforce-color); }
+        div.card.card-active:hover { transform: rotate(-0.8deg) scale(1.03); z-index: 4; }
+        div.card.card-active h3 { color: var(--primary-blue); }
         .theme-students div.card.card-active h3 { color: var(--student-dark); }
         .theme-workforce div.card.card-active h3 { color: var(--workforce-dark); }
-
-        div.card.card-active input[type="number"],
-        div.card.card-active input[type="text"].drug-input {
-            border-color: var(--primary-blue);
-            background-color: #EAF5FF;
-        }
-        .theme-students div.card.card-active input[type="number"],
-        .theme-students div.card.card-active input[type="text"].drug-input {
-            border-color: var(--student-color);
-            background-color: #FFF0F0;
-        }
-        .theme-workforce div.card.card-active input[type="number"],
-        .theme-workforce div.card.card-active input[type="text"].drug-input {
-            border-color: var(--workforce-color);
-            background-color: #E6F3FF;
-        }
-
-        div.card.card-empty {
-            opacity: 0.9;
-            transform: rotate(0.2deg);
-        }
-        div.card.card-empty:hover {
-            transform: rotate(-0.4deg) scale(1.02) translate(1px, 1px);
-        }
+        div.card.card-active input[type="number"], div.card.card-active input[type="text"].drug-input { border-color: var(--primary-blue); background-color: #EAF5FF; }
+        .theme-students div.card.card-active input[type="number"], .theme-students div.card.card-active input[type="text"].drug-input { border-color: var(--student-color); background-color: #FFF0F0; }
+        .theme-workforce div.card.card-active input[type="number"], .theme-workforce div.card.card-active input[type="text"].drug-input { border-color: var(--workforce-color); background-color: #E6F3FF; }
+        div.card.card-empty { opacity: 0.9; transform: rotate(0.2deg); }
+        div.card.card-empty:hover { transform: rotate(-0.4deg) scale(1.02) translate(1px, 1px); }
 
         #total {
-            font-family: 'Bangers', 'Fredoka One', cursive;
-            font-size: 3.5rem;
-            color: var(--text-dark);
-            text-shadow: 3px 3px 0 white, 5px 5px 0 var(--shadow-color-medium);
-            font-weight: 400;
-            letter-spacing: 1.5px;
+            font-family: 'Bangers', 'Fredoka One', cursive; font-size: 3.5rem; color: var(--text-dark);
+            text-shadow: 3px 3px 0 white, 5px 5px 0 var(--shadow-color-medium); font-weight: 400; letter-spacing: 1.5px;
             transition: color var(--transition-speed) ease, text-shadow var(--transition-speed) ease;
-            line-height: 1.1;
-            will-change: text-shadow, color;
-            text-align: center;
+            line-height: 1.1; will-change: text-shadow, color; text-align: center;
+            text-align: right;
+            direction: ltr;
         }
         div.card:has(#total) {
-            text-align: center;
-            overflow: visible;
-            background-color: #fffacd;
-            border-color: var(--border-dark);
+            text-align: center; overflow: visible; background-color: #fffacd; border-color: var(--border-dark);
             box-shadow: var(--shadow-offset) var(--shadow-color-dark);
         }
-        div.card:has(#total)::before {
-            border-radius: calc(var(--radius-lg) - 4px);
-        }
+        div.card:has(#total)::before { border-radius: calc(var(--radius-lg) - 4px); }
         div.card:has(#total) h3 {
-            font-family: 'Fredoka One', cursive;
-            font-size: 1.6rem;
-            text-shadow: 1px 1px 0px rgba(255,255,255,0.7);
-            margin-bottom: 0.5rem;
-            color: var(--text-dark);
-            display: flex; align-items: center; justify-content: center;
-            text-align: center; width: 100%; max-width: 100%;
-            overflow-wrap: break-word; word-wrap: break-word;
-            word-break: break-word; white-space: normal;
+            font-family: 'Fredoka One', cursive; font-size: 1.6rem;
+            font-weight: 700; margin-bottom: 0.5rem; text-align: right;
+            text-shadow: 1px 1px 0px rgba(255,255,255,0.7); color: var(--text-dark);
+            display: flex; align-items: center; justify-content: center; width: 100%; max-width: 100%;
+            overflow-wrap: break-word; word-wrap: break-word; word-break: break-word; white-space: normal;
             min-height: 1.5em; flex-grow: 0;
         }
 
         button#submitButton {
-            font-family: 'Fredoka One', cursive;
-            font-weight: 500;
-            font-size: 1.6rem;
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark));
-            color: white;
-            border: var(--border-width) solid var(--border-dark);
-            border-radius: var(--radius-md);
+            font-family: 'Fredoka One', cursive; font-weight: 500; font-size: 1.6rem; padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark)); color: white;
+            border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md);
             box-shadow: var(--shadow-offset) var(--shadow-color-dark);
             transition: all var(--transition-speed) var(--transition-ease);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            cursor: pointer;
-            outline: none;
-            width: 100%;
-            margin-top: 1.5rem;
-            text-shadow: 2px 2px 0 var(--accent-green-dark);
-            z-index: 2;
-            will-change: transform, box-shadow;
-            position: relative;
-            overflow: hidden;
-            line-height: 1.3;
-             display: block;
-             opacity: 1;
+            text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; outline: none;
+            width: 100%; margin-top: 1.5rem;
+            text-shadow: 2px 2px 0 var(--accent-green-dark); z-index: 2; will-change: transform, box-shadow;
+            position: relative; overflow: hidden; line-height: 1.3; display: block; opacity: 1;
         }
-        button#submitButton::after {
-            content: '';
-            position: absolute;
-            top: -50%; left: -150%;
-            width: 100%; height: 200%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg);
-            transition: left 0.6s ease;
-            pointer-events: none;
-        }
-        button#submitButton:hover::after {
-            left: 150%;
-        }
-
-        button#submitButton:hover {
-            transform: translate(2px, 2px) rotate(1deg);
-            box-shadow: calc(var(--shadow-offset)/2) var(--shadow-color-dark);
-            background: linear-gradient(135deg, #45c47d, #36a860);
-        }
-
-        button#submitButton:active {
-            transform: translate(var(--shadow-offset));
-            box-shadow: none;
-            filter: brightness(95%);
-        }
-
-        button#submitButton:disabled,
-        button#submitButton[disabled] {
-            background: linear-gradient(135deg, #b8e0c8, #a9d4ba);
-            color: #707070;
-            cursor: not-allowed;
-            box-shadow: var(--shadow-offset) #ababab;
-            border-color: #ababab;
-            transform: none;
-            text-shadow: 1px 1px 0px #d3d3d3;
-            opacity: 0.7;
-        }
+        button#submitButton::after { content: ''; position: absolute; top: -50%; left: -150%; width: 100%; height: 200%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%); transform: skewX(-25deg); transition: left 0.6s ease; pointer-events: none; }
+        button#submitButton:hover::after { left: 150%; }
+        button#submitButton:hover { transform: translate(2px, 2px) rotate(1deg); box-shadow: calc(var(--shadow-offset)/2) var(--shadow-color-dark); background: linear-gradient(135deg, #45c47d, #36a860); }
+        button#submitButton:active { transform: translate(var(--shadow-offset)); box-shadow: none; filter: brightness(95%); }
+        button#submitButton:disabled, button#submitButton[disabled] { background: linear-gradient(135deg, #b8e0c8, #a9d4ba); color: #707070; cursor: not-allowed; box-shadow: var(--shadow-offset) #ababab; border-color: #ababab; transform: none; text-shadow: 1px 1px 0px #d3d3d3; opacity: 0.7; }
         button#submitButton:disabled::after { display: none; }
 
         .theme-students body { background-color: #FFE4E1; }
-        .theme-students h1.comic-header {
-            background: linear-gradient(135deg, var(--student-color), #FF8C8C);
-            text-shadow: 2px 2px 0 var(--student-dark), -1px -1px 0 var(--student-dark), 1px -1px 0 var(--student-dark), -1px 1px 0 var(--student-dark), 1px 1px 0 var(--student-dark);
-        }
-        .theme-students button.comic-button.btn-active {
-            background-color: var(--student-color);
-            border-color: var(--student-dark);
-            box-shadow: var(--shadow-offset) var(--student-dark);
-        }
-        .theme-students select:focus,
-        .theme-students div.card input[type="number"]:focus,
-        .theme-students div.card input[type="text"].drug-input:focus {
-            border-color: var(--student-color);
-            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05),
-                        0 0 0 3px rgba(255, 107, 107, 0.4),
-                        0 0 10px rgba(255, 107, 107, 0.2);
-            background-color: #fff0f0;
-        }
-        .theme-students select:hover {
-            background-color: #fff5f5;
-        }
+        .theme-students h1.comic-header { background: linear-gradient(135deg, var(--student-color), #FF8C8C); text-shadow: 2px 2px 0 var(--student-dark), -1px -1px 0 var(--student-dark), 1px -1px 0 var(--student-dark), -1px 1px 0 var(--student-dark), 1px 1px 0 var(--student-dark); }
+        .theme-students button.comic-button.btn-active { background-color: var(--student-color); border-color: var(--student-dark); box-shadow: var(--shadow-offset) var(--student-dark); }
+        .theme-students select:focus, .theme-students div.card input[type="number"]:focus, .theme-students div.card input[type="text"].drug-input:focus { border-color: var(--student-color); box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05), 0 0 0 3px rgba(255, 107, 107, 0.4), 0 0 10px rgba(255, 107, 107, 0.2); background-color: #fff0f0; }
+        .theme-students select:hover { background-color: #fff5f5; }
         .theme-students #total { color: var(--student-dark); text-shadow: 3px 3px 0 white, 5px 5px 0 var(--student-color); }
         .theme-students div.card:has(#total) { background-color: #ffebee; border-color: var(--student-dark); box-shadow: var(--shadow-offset) var(--student-dark); }
-
         .theme-workforce body { background-color: #E6F3FF; }
-        .theme-workforce h1.comic-header {
-            background: linear-gradient(135deg, var(--workforce-color), #4682B4);
-            text-shadow: 2px 2px 0 var(--workforce-dark), -1px -1px 0 var(--workforce-dark), 1px -1px 0 var(--workforce-dark), -1px 1px 0 var(--workforce-dark), 1px 1px 0 var(--workforce-dark);
-        }
-        .theme-workforce button.comic-button.btn-active {
-            background-color: var(--workforce-color);
-            border-color: var(--workforce-dark);
-            box-shadow: var(--shadow-offset) var(--workforce-dark);
-        }
-        .theme-workforce select:focus,
-        .theme-workforce div.card input[type="number"]:focus,
-        .theme-workforce div.card input[type="text"].drug-input:focus {
-            border-color: var(--workforce-color);
-            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05),
-                        0 0 0 3px rgba(30, 144, 255, 0.4),
-                        0 0 10px rgba(30, 144, 255, 0.2);
-            background-color: #e3f2fd;
-        }
-        .theme-workforce select:hover {
-            background-color: #f0f8ff;
-        }
+        .theme-workforce h1.comic-header { background: linear-gradient(135deg, var(--workforce-color), #4682B4); text-shadow: 2px 2px 0 var(--workforce-dark), -1px -1px 0 var(--workforce-dark), 1px -1px 0 var(--workforce-dark), -1px 1px 0 var(--workforce-dark), 1px 1px 0 var(--workforce-dark); }
+        .theme-workforce button.comic-button.btn-active { background-color: var(--workforce-color); border-color: var(--workforce-dark); box-shadow: var(--shadow-offset) var(--workforce-dark); }
+        .theme-workforce select:focus, .theme-workforce div.card input[type="number"]:focus, .theme-workforce div.card input[type="text"].drug-input:focus { border-color: var(--workforce-color); box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05), 0 0 0 3px rgba(30, 144, 255, 0.4), 0 0 10px rgba(30, 144, 255, 0.2); background-color: #e3f2fd; }
+        .theme-workforce select:hover { background-color: #f0f8ff; }
         .theme-workforce #total { color: var(--workforce-dark); text-shadow: 3px 3px 0 white, 5px 5px 0 var(--workforce-color); }
         .theme-workforce div.card:has(#total) { background-color: #e3f2fd; border-color: var(--workforce-dark); box-shadow: var(--shadow-offset) var(--workforce-dark); }
 
-        html[dir="rtl"] div.grid {
-            direction: rtl;
-        }
+        html[dir="rtl"] div.grid-container { direction: rtl; }
 
         @media (max-width: 768px) {
             html { font-size: 15px; }
             :root { --border-width: 2px; --shadow-offset: 3px 3px 0px; }
-            h1.comic-header {
-                font-size: 2rem;
-                padding: 1rem 1.5rem;
-                transform: rotate(-0.5deg);
-                margin: 0.5rem;
-            }
-            button.comic-button {
-                font-size: 1rem;
-                padding: 0.9rem 1.2rem;
-                letter-spacing: 0.5px;
-            }
-            select {
-                font-size: 1rem;
-                padding: 0.9rem 1.5rem 0.9rem 2.5rem;
-                background-position: left 0.8rem center;
-                min-height: auto;
-                line-height: 1.3;
-            }
-            html[dir="rtl"] select {
-                padding: 0.9rem 1.5rem 0.9rem 2.5rem;
-                background-position: left 0.8rem center;
-            }
-             html[dir="rtl"] select:disabled {
-                 background-position: left 0.8rem center;
-            }
-
-            #cards-container.grid { gap: 1.5rem; }
-            .grid.sm\:grid-cols-2.gap-4 { gap: 1rem; }
+            h1.comic-header { font-size: 2rem; padding: 1rem 1.5rem; transform: rotate(-0.5deg); margin: 0.5rem; }
+            button.comic-button { font-size: 1rem; padding: 0.9rem 1.2rem; letter-spacing: 0.5px; }
+            select { font-size: 1rem; padding: 0.9rem 1.5rem 0.9rem 2.5rem; background-position: left 0.8rem center; min-height: auto; line-height: 1.3; }
+            html[dir="rtl"] select { padding: 0.9rem 1.5rem 0.9rem 2.5rem; background-position: left 0.8rem center; }
+            html[dir="rtl"] select:disabled { background-position: left 0.8rem center; }
+            #cards-container.grid-container { gap: 1.5rem; }
+            .gap-4 { gap: 1rem; }
             div.card { padding: 1rem; transform: rotate(0.2deg); }
-            div.card h3 {
-                font-size: 1.2rem;
-                min-height: 4em;
-                margin-bottom: 0.8rem;
-                line-height: 1.35;
-            }
-            div.card input[type="number"],
-            div.card input[type="text"].drug-input {
-                font-size: 1.15rem;
-                padding: 0.6rem;
-            }
-            #total {
-                font-size: 2.8rem;
-                letter-spacing: 1px;
-                text-shadow: 2px 2px 0 white, 4px 4px 0 var(--shadow-color-medium);
-            }
-            div.card:has(#total) h3 {
-               font-size: 1.4rem;
-               min-height: 1.5em;
-           }
-            button#submitButton {
-                font-size: 1.4rem;
-                padding: 0.8rem 1.5rem;
-                letter-spacing: 1px;
-            }
+            div.card h3 { font-size: 1.2rem; min-height: 4em; margin-bottom: 0.8rem; line-height: 1.35; }
+            div.card input[type="number"], div.card input[type="text"].drug-input { font-size: 1.15rem; padding: 0.6rem; }
+            #total { font-size: 2.8rem; letter-spacing: 1px; text-shadow: 2px 2px 0 white, 4px 4px 0 var(--shadow-color-medium); }
+            div.card:has(#total) h3 { font-size: 1.4rem; min-height: 1.5em; }
+            button#submitButton { font-size: 1.4rem; padding: 0.8rem 1.5rem; letter-spacing: 1px; }
         }
         @media (max-width: 480px) {
             html { font-size: 14px; }
             h1.comic-header { font-size: 1.7rem; }
-            button.comic-button {
-                font-size: 0.9rem;
-                padding: 0.8rem 1rem;
-            }
-            select {
-               font-size: 0.95rem;
-               padding: 0.8rem 1.2rem 0.8rem 2.2rem;
-               background-position: left 0.6rem center;
-               background-size: 1.1em;
-            }
-            html[dir="rtl"] select {
-                padding: 0.8rem 1.2rem 0.8rem 2.2rem;
-                background-position: left 0.6rem center;
-            }
-            html[dir="rtl"] select:disabled {
-                 background-position: left 0.6rem center;
-            }
-
-            #cards-container.grid { gap: 1rem; }
-            div.card h3 {
-               font-size: 1.1rem;
-               min-height: 4em;
-               margin-bottom: 0.6rem;
-               line-height: 1.3;
-            }
-            div.card input[type="number"],
-            div.card input[type="text"].drug-input {
-               font-size: 1.05rem;
-               padding: 0.5rem;
-            }
-            #total {
-               font-size: 2.2rem;
-               text-shadow: 2px 2px 0 white, 3px 3px 0 var(--shadow-color-medium);
-            }
-            div.card:has(#total) h3 {
-                font-size: 1.2rem;
-            }
+            button.comic-button { font-size: 0.9rem; padding: 0.8rem 1rem; }
+            select { font-size: 0.95rem; padding: 0.8rem 1.2rem 0.8rem 2.2rem; background-position: left 0.6rem center; background-size: 1.1em; }
+            html[dir="rtl"] select { padding: 0.8rem 1.2rem 0.8rem 2.2rem; background-position: left 0.6rem center; }
+            html[dir="rtl"] select:disabled { background-position: left 0.6rem center; }
+            #cards-container.grid-container { gap: 1rem; }
+            div.card h3 { font-size: 1.1rem; min-height: 4em; margin-bottom: 0.6rem; line-height: 1.3; }
+            div.card input[type="number"], div.card input[type="text"].drug-input { font-size: 1.05rem; padding: 0.5rem; }
+            #total { font-size: 2.2rem; text-shadow: 2px 2px 0 white, 3px 3px 0 var(--shadow-color-medium); }
+            div.card:has(#total) h3 { font-size: 1.2rem; }
             button#submitButton { font-size: 1.2rem; }
+
+             .grid-cols-2, .sm\:grid-cols-2, .sm\:grid-cols-3, .md\:grid-cols-3 {
+                grid-template-columns: repeat(1, minmax(0, 1fr));
+             }
         }
 
         ::-webkit-scrollbar { width: 10px; height: 10px; }
@@ -703,88 +393,31 @@
         ::-webkit-scrollbar-thumb { background-color: var(--border-medium); border-radius: 10px; border: 2px solid #ebdcb2; }
         ::-webkit-scrollbar-thumb:hover { background-color: var(--text-secondary); }
 
-        @media (prefers-reduced-motion: reduce) {
-            *, ::before, ::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-                transform: none !important;
-            }
-            body { background-image: none; }
-            h1.comic-header, button.comic-button, select, div.card, button#submitButton { transform: none !important; }
-            button.comic-button.btn-active { animation: none !important; }
-        }
-        @media print {
-            :root { --border-width: 1px; --shadow-offset: 0px 0px 0px; }
-            body { background: none !important; color: black; font-size: 10pt; }
-            .max-w-7xl.comic-border, .card, select, input[type="number"], input[type="text"], button.comic-button, button#submitButton {
-                box-shadow: none !important;
-                border: 1px solid #333 !important;
-                border-radius: 0 !important;
-                background: white !important;
-                color: black !important;
-                transform: none !important;
-                animation: none !important;
-                padding: 0.5em;
-            }
-            .comic-border::before, .card::before { display: none; }
-            h1.comic-header {
-                background: none !important;
-                color: black !important;
-                text-shadow: none !important;
-                border: none !important;
-                border-bottom: 2px solid black !important;
-                border-radius: 0;
-                box-shadow: none !important;
-                margin: 0 0 1rem 0 !important;
-                padding: 0.5rem 0 !important;
-                transform: none !important;
-                text-align: center;
-            }
-            #total { color: black !important; text-shadow: none !important; font-size: 14pt;}
-            button#submitButton, button.comic-button, select { display: none !important; }
-            .grid > * { page-break-inside: avoid !important; }
-            input[type="number"], input[type="text"] { background-color: #eee !important; font-size: 10pt !important; }
-            h3 { font-size: 11pt !important; }
-        }
+        @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; transform: none !important; } body { background-image: none; } h1.comic-header, button.comic-button, select, div.card, button#submitButton { transform: none !important; } button.comic-button.btn-active { animation: none !important; } }
+        @media print { :root { --border-width: 1px; --shadow-offset: 0px 0px 0px; } body { background: none !important; color: black; font-size: 10pt; padding: 0; } .main-container, .card, select, input[type="number"], input[type="text"], button.comic-button, button#submitButton { box-shadow: none !important; border: 1px solid #333 !important; border-radius: 0 !important; background: white !important; color: black !important; transform: none !important; animation: none !important; padding: 0.5em; margin: 0.5em 0 !important; max-width: 100%; } .comic-border::before, .card::before { display: none; } h1.comic-header { background: none !important; color: black !important; text-shadow: none !important; border: none !important; border-bottom: 2px solid black !important; border-radius: 0; box-shadow: none !important; margin: 0 0 1rem 0 !important; padding: 0.5rem 0 !important; transform: none !important; text-align: center; font-size: 14pt; } #total { color: black !important; text-shadow: none !important; font-size: 14pt;} button#submitButton, button.comic-button, select { display: none !important; } .grid-container > * { page-break-inside: avoid !important; } .grid-container { display: block; } input[type="number"], input[type="text"] { background-color: #eee !important; font-size: 10pt !important; } h3 { font-size: 11pt !important; } .main-container > :not([hidden]) ~ :not([hidden]) { margin-top: 0.5rem;} }
 
-        .p-4 { padding: 1rem; }
-        .p-6 { padding: 1.5rem; }
-        .mb-8 { margin-bottom: 2rem; }
-        .mt-6 { margin-top: 1.5rem; }
-        .space-y-6 > :not([hidden]) ~ :not([hidden]) { --tw-space-y-reverse: 0; margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse))); margin-bottom: calc(1.5rem * var(--tw-space-y-reverse)); }
         .text-center { text-align: center; }
         .w-full { width: 100%; }
-        .grid { display: grid; }
-        .gap-4 { gap: 1rem; }
-        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        @media (min-width: 640px) {
-            .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        }
-        @media (min-width: 768px) {
-            .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        }
 
-        .card-invalid {
+         .card-invalid {
              border-color: red !important;
              box-shadow: var(--shadow-offset) red !important;
          }
 
     </style>
 </head>
-<body class="min-h-screen p-4">
-    <div class="max-w-7xl mx-auto bg-white rounded-lg shadow-lg p-6 space-y-6 comic-border">
-        <h1 class="text-4xl sm:text-5xl font-bold text-center mb-8 comic-header" id="mainHeader">بيان المجموعات الدوائية</h1>
-        <div class="grid grid-cols-2 gap-4 mb-8">
+<body>
+    <div class="main-container">
+        <h1 id="mainHeader" class="comic-header">بيان المجموعات الدوائية</h1>
+
+        <div class="grid-container grid-cols-2 gap-4">
             <button id="studentsBtn" class="comic-button btn-inactive">الطلبة</button>
             <button id="workforceBtn" class="comic-button btn-inactive">القوى العاملة</button>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+
+        <div class="grid-container grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="select-wrapper">
-                <select id="month" class="w-full">
+                <select id="month">
                     <option value="">الشهر</option>
                     <option value="1">يناير</option>
                     <option value="2">فبراير</option>
@@ -801,7 +434,7 @@
                 </select>
             </div>
             <div class="select-wrapper">
-                <select id="region" class="w-full">
+                <select id="region">
                     <option value="">المنطقة</option>
                     <option value="first">الاولي</option>
                     <option value="second">الثانية</option>
@@ -809,15 +442,17 @@
                 </select>
             </div>
             <div class="select-wrapper">
-                <select id="pharmacy" class="w-full" disabled>
+                <select id="pharmacy" disabled>
                     <option value="">الصيدلية</option>
                 </select>
             </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8" id="cards-container">
+
+        <div id="cards-container" class="grid-container grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             <!-- Cards Generated by JS -->
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+
+        <div class="grid-container grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="card">
                 <h3>اجمالي التذاكر</h3>
                 <input type="number" id="totalTickets" min="0" max="1000000" step="1" dir="ltr">
@@ -827,591 +462,660 @@
                 <input type="number" id="totalExternal" min="0" max="1000000" step="1" dir="ltr">
             </div>
         </div>
+
         <div class="card">
-            <h3 class="text-2xl sm:text-3xl font-bold mb-3 text-right">المجموع الكلي</h3>
-            <p id="total" class="text-right" dir="ltr">0</p>
+            <h3 class="text-right">المجموع الكلي</h3>
+            <p id="total" dir="ltr">0</p>
         </div>
-        <button id="submitButton" class="w-full mt-6">إرسال البيانات</button>
+
+        <button id="submitButton">إرسال البيانات</button>
     </div>
 
    <script src="https://unpkg.com/@popperjs/core@2"></script>
    <script src="https://unpkg.com/tippy.js@6"></script>
     <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const cardsContainer = document.getElementById('cards-container');
-  const totalElement = document.getElementById('total');
-  const studentsBtn = document.getElementById('studentsBtn');
-  const workforceBtn = document.getElementById('workforceBtn');
-  const monthSelect = document.getElementById('month');
-  const regionSelect = document.getElementById('region');
-  const pharmacySelect = document.getElementById('pharmacy');
-  const submitButton = document.getElementById('submitButton');
-  const totalTicketsInput = document.getElementById('totalTickets');
-  const totalExternalInput = document.getElementById('totalExternal');
-  let cardValues = Array(18).fill(0);
-  let activeButton = null;
-  let isSubmitting = false;
+    document.addEventListener('DOMContentLoaded', () => {
+      const cardsContainer = document.getElementById('cards-container');
+      const totalElement = document.getElementById('total');
+      const studentsBtn = document.getElementById('studentsBtn');
+      const workforceBtn = document.getElementById('workforceBtn');
+      const monthSelect = document.getElementById('month');
+      const regionSelect = document.getElementById('region');
+      const pharmacySelect = document.getElementById('pharmacy');
+      const submitButton = document.getElementById('submitButton');
+      const totalTicketsInput = document.getElementById('totalTickets');
+      const totalExternalInput = document.getElementById('totalExternal');
+      let cardValues = Array(18).fill(0);
+      let activeButton = null;
+      let isSubmitting = false;
 
-  const cardNames = [
-    'المسكنات', 'مضادات حيوية', 'كلي', 'نفسية و عصبية', 'قلب', 'سكر حقن',
-    'سكر فم', 'نسا', 'كبد', 'جهاز هضمي', 'جهاز تنفسي', 'امراض جلدية',
-    'عيون و رمد', 'انف و اذن', 'مضادات تقلصات', 'اورام', 'فيتامينات', 'مختلفة'
-  ];
+      const cardNames = [
+        'المسكنات', 'مضادات حيوية', 'كلي', 'نفسية و عصبية', 'قلب', 'سكر حقن',
+        'سكر فم', 'نسا', 'كبد', 'جهاز هضمي', 'جهاز تنفسي', 'امراض جلدية',
+        'عيون و رمد', 'انف و اذن', 'مضادات تقلصات', 'اورام', 'فيتامينات', 'مختلفة'
+      ];
 
-  const pharmacyOptions = {
-    students: {
-      first: ["كفر الدوار طلاب", "البيضا طلاب", "النوبارية طلاب", "ابو المطامير طلاب", "رشيد طلاب", "ادكو طلاب"],
-      second: ["دمنهور طلاب", "حوش عيسي طلاب", "المحمودية طلاب", "الرحمانية طلاب", "ابو حمص طلاب", "اورام طلاب"],
-      third: ["ايتاي طلاب", "كوم حمادة طلاب", "بدر طلاب", "شبراخيت طلاب", "الدلنجات طلاب"]
-    },
-    workforce: {
-      first: ["كفر الدوار سكر", "كفر الدوار الشاملة 1", "كفر الدوار الشاملة 2", "كفر الدوار مسائي", "النوبارية", "البيضا", "ابو المطامير", "رشيد", "ادكو"],
-      second: ["دمنهور الشاملة 1", "دمنهور الشاملة 2", "دمنهور مسائي", "دمنهور سكر", "دمنهور اورام", "الشرطة", "حوش عيسي", "المحمودية مسائي", "المحمودية", "الرحمانية", "ابو حمص"],
-      third: ["ايتاي الشاملة 1", "ايتاي الشاملة 2", "ايتاي مسائي", "كوم حمادة", "كوم حمادة مسائي", "بدر", "شبراخيت", "الدلنجات", "وادي النطرون", "قليشان"]
-    }
-  };
-
-  for (let i = 0; i < 18; i++) {
-    const cardWrapper = document.createElement('div');
-    cardWrapper.className = 'card-container';
-    const card = document.createElement('div');
-    card.className = 'card p-4';
-    card.innerHTML = `
-        <h3 class="text-lg font-bold mb-2">${cardNames[i]}</h3>
-        <input type="text" class="w-full p-2 border-2 border-black rounded text-xl drug-input" data-index="${i}" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]+" dir="ltr">
-      `;
-    cardWrapper.appendChild(card);
-    cardsContainer.appendChild(cardWrapper);
-  }
-
-  cardsContainer.addEventListener('input', (e) => {
-    if (e.target.classList.contains('drug-input')) {
-      const input = e.target;
-      const index = parseInt(input.dataset.index);
-      let value = input.value;
-      const cursorPosition = input.selectionStart;
-
-      if (value === '') {
-        cardValues[index] = 0;
-      } else {
-        value = value.replace(/,/g, '.');
-        value = value.replace(/[^\d.]/g, '');
-        const parts = value.split('.');
-        if (parts.length > 2) {
-            value = parts[0] + '.' + parts.slice(1).join('');
+      const pharmacyOptions = {
+        students: {
+          first: ["كفر الدوار طلاب", "البيضا طلاب", "النوبارية طلاب", "ابو المطامير طلاب", "رشيد طلاب", "ادكو طلاب"],
+          second: ["دمنهور طلاب", "حوش عيسي طلاب", "المحمودية طلاب", "الرحمانية طلاب", "ابو حمص طلاب", "اورام طلاب"],
+          third: ["ايتاي طلاب", "كوم حمادة طلاب", "بدر طلاب", "شبراخيت طلاب", "الدلنجات طلاب"]
+        },
+        workforce: {
+          first: ["كفر الدوار سكر", "كفر الدوار الشاملة 1", "كفر الدوار الشاملة 2", "كفر الدوار مسائي", "النوبارية", "البيضا", "ابو المطامير", "رشيد", "ادكو"],
+          second: ["دمنهور الشاملة 1", "دمنهور الشاملة 2", "دمنهور مسائي", "دمنهور سكر", "دمنهور اورام", "الشرطة", "حوش عيسي", "المحمودية مسائي", "المحمودية", "الرحمانية", "ابو حمص"],
+          third: ["ايتاي الشاملة 1", "ايتاي الشاملة 2", "ايتاي مسائي", "كوم حمادة", "كوم حمادة مسائي", "بدر", "شبراخيت", "الدلنجات", "وادي النطرون", "قليشان"]
         }
+      };
 
-        let numValue = parseFloat(value);
+      for (let i = 0; i < 18; i++) {
+        const cardWrapper = document.createElement('div');
+        cardWrapper.className = 'card-container';
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <h3>${cardNames[i]}</h3>
+            <input type="text" class="drug-input" data-index="${i}" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]+" dir="ltr">
+          `;
+        cardWrapper.appendChild(card);
+        cardsContainer.appendChild(cardWrapper);
+      }
 
-        if (isNaN(numValue) || numValue < 0) {
+      cardsContainer.addEventListener('input', (e) => {
+        if (e.target.classList.contains('drug-input')) {
+          const input = e.target;
+          const index = parseInt(input.dataset.index);
+          let value = input.value;
+          const cursorPosition = input.selectionStart;
+
+          if (value === '') {
             cardValues[index] = 0;
-        } else if (numValue > 1000000000) {
-            numValue = 1000000000;
-            value = '1000000000';
-            cardValues[index] = numValue;
-        } else {
-            cardValues[index] = numValue;
-        }
-      }
-
-      input.value = value;
-
-      updateTotal();
-      updateCardStyle(input);
-      saveToLocalStorage();
-      try {
-         input.setSelectionRange(cursorPosition, cursorPosition);
-      } catch(err) { console.warn("Couldn't set selection range", err); }
-    }
-  });
-
-  cardsContainer.addEventListener('blur', (e) => {
-    if (e.target.classList.contains('drug-input')) {
-      const input = e.target;
-      const index = parseInt(input.dataset.index);
-      let value = input.value.trim();
-
-      value = value.replace(/,/g, '.');
-      value = value.replace(/[^\d.]/g, '');
-      const parts = value.split('.');
-      if (parts.length > 2) {
-          value = parts[0] + '.' + parts.slice(1).join('');
-      }
-
-      let numValue = parseFloat(value);
-
-      if (value === '' || isNaN(numValue) || numValue <= 0) {
-        input.value = '';
-        cardValues[index] = 0;
-      } else {
-        numValue = Math.min(numValue, 1000000000);
-        numValue = Math.round(numValue * 1000) / 1000;
-        cardValues[index] = numValue;
-
-        if (numValue % 1 === 0) {
-            input.value = numValue.toString();
-        } else {
-            input.value = numValue.toFixed(3).replace(/\.?0+$/, "");
-        }
-      }
-      updateTotal();
-      updateCardStyle(input);
-      saveToLocalStorage();
-    }
-  }, true);
-
-  function updateTotal() {
-    const total = cardValues.reduce((acc, val) => acc + (val || 0), 0);
-    const oldTotalText = totalElement.textContent.replace(/,/g, '');
-    const oldTotal = parseFloat(oldTotalText) || 0;
-
-    if (Math.abs(total - oldTotal) > 0.0001) {
-        gsap.to(totalElement, {
-            textContent: total,
-            duration: 0.5,
-            ease: "power2.out",
-            snap: { textContent: 0.001 },
-            onUpdate: function() {
-              const currentVal = parseFloat(this.targets()[0].textContent);
-              if (!isNaN(currentVal)) {
-                totalElement.textContent = currentVal.toLocaleString('en-US', {
-                  minimumFractionDigits: 3,
-                  maximumFractionDigits: 3
-                });
-              }
-            },
-            onComplete: function() {
-               totalElement.textContent = total.toLocaleString('en-US', {
-                minimumFractionDigits: 3,
-                maximumFractionDigits: 3
-              });
-            }
-        });
-    } else if (oldTotal === 0 && total === 0 && oldTotalText !== "0.000") {
-         totalElement.textContent = "0.000";
-    } else if (total !== 0 && Math.abs(total - oldTotal) <= 0.0001) {
-         totalElement.textContent = total.toLocaleString('en-US', {
-             minimumFractionDigits: 3,
-             maximumFractionDigits: 3
-           });
-    } else if (total === 0 && oldTotalText === "0.000") {
-        // No change needed
-    } else if (total === 0 && oldTotalText === "0") {
-        totalElement.textContent = "0.000";
-    }
-     updateSubmitButtonVisibility();
-  }
-
-  function updateCardStyle(inputElement) {
-      const card = inputElement.closest('.card');
-      if (!card) return;
-
-      const valueStr = inputElement.value.trim();
-      let valueNum;
-
-      if (inputElement === totalTicketsInput || inputElement === totalExternalInput) {
-          valueNum = parseInt(valueStr, 10);
-          if (valueStr !== '' && (!/^\d+$/.test(valueStr) || valueNum > 1000000)) {
-              card.classList.add('card-invalid');
-              card.classList.remove('card-active', 'card-empty');
           } else {
-              card.classList.remove('card-invalid');
-              if (valueStr !== '' && valueNum >= 0) {
+            value = value.replace(/,/g, '.');
+            value = value.replace(/[^\d.]/g, '');
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+
+            let numValue = parseFloat(value);
+
+            if (isNaN(numValue) || numValue < 0) {
+                cardValues[index] = 0;
+            } else if (numValue > 1000000000) {
+                numValue = 1000000000;
+                value = '1000000000';
+                cardValues[index] = numValue;
+            } else {
+                cardValues[index] = numValue;
+            }
+          }
+
+          input.value = value;
+
+          updateTotal();
+          updateCardStyle(input);
+          saveToLocalStorage();
+          try {
+             input.setSelectionRange(cursorPosition, cursorPosition);
+          } catch(err) { console.warn("Couldn't set selection range", err); }
+        }
+      });
+
+      cardsContainer.addEventListener('blur', (e) => {
+        if (e.target.classList.contains('drug-input')) {
+          const input = e.target;
+          const index = parseInt(input.dataset.index);
+          let value = input.value.trim();
+
+          value = value.replace(/,/g, '.');
+          value = value.replace(/[^\d.]/g, '');
+          const parts = value.split('.');
+          if (parts.length > 2) {
+              value = parts[0] + '.' + parts.slice(1).join('');
+          }
+
+          let numValue = parseFloat(value);
+
+          if (value === '' || isNaN(numValue) || numValue <= 0) {
+            input.value = '';
+            cardValues[index] = 0;
+          } else {
+            numValue = Math.min(numValue, 1000000000);
+            numValue = Math.round(numValue * 1000) / 1000;
+            cardValues[index] = numValue;
+
+            if (numValue % 1 === 0) {
+                input.value = numValue.toString();
+            } else {
+                input.value = numValue.toFixed(3).replace(/\.?0+$/, "");
+            }
+          }
+          updateTotal();
+          updateCardStyle(input);
+          saveToLocalStorage();
+        }
+      }, true);
+
+      function updateTotal() {
+        const total = cardValues.reduce((acc, val) => acc + (val || 0), 0);
+        const oldTotalText = totalElement.textContent.replace(/,/g, '');
+        const oldTotal = parseFloat(oldTotalText) || 0;
+
+        if (Math.abs(total - oldTotal) > 0.0001) {
+            gsap.to(totalElement, {
+                textContent: total,
+                duration: 0.5,
+                ease: "power2.out",
+                snap: { textContent: 0.001 },
+                onUpdate: function() {
+                  const currentVal = parseFloat(this.targets()[0].textContent);
+                  if (!isNaN(currentVal)) {
+                    totalElement.textContent = currentVal.toLocaleString('en-US', {
+                      minimumFractionDigits: 3,
+                      maximumFractionDigits: 3
+                    });
+                  }
+                },
+                onComplete: function() {
+                   totalElement.textContent = total.toLocaleString('en-US', {
+                    minimumFractionDigits: 3,
+                    maximumFractionDigits: 3
+                  });
+                }
+            });
+        } else if (oldTotal === 0 && total === 0 && oldTotalText !== "0.000") {
+             totalElement.textContent = "0.000";
+        } else if (total !== 0 && Math.abs(total - oldTotal) <= 0.0001) {
+             totalElement.textContent = total.toLocaleString('en-US', {
+                 minimumFractionDigits: 3,
+                 maximumFractionDigits: 3
+               });
+        } else if (total === 0 && oldTotalText === "0.000") {
+            // No change needed
+        } else if (total === 0 && oldTotalText === "0") {
+            totalElement.textContent = "0.000";
+        }
+         updateSubmitButtonVisibility();
+      }
+
+      function updateCardStyle(inputElement) {
+          const card = inputElement.closest('.card');
+          if (!card) return;
+
+          const valueStr = inputElement.value.trim();
+          let valueNum;
+
+          if (inputElement === totalTicketsInput || inputElement === totalExternalInput) {
+              valueNum = parseInt(valueStr, 10);
+              if (valueStr !== '' && (!/^\d+$/.test(valueStr) || valueNum > 1000000)) {
+                  card.classList.add('card-invalid');
+                  card.classList.remove('card-active', 'card-empty');
+              } else {
+                  card.classList.remove('card-invalid');
+                  if (valueStr !== '' && valueNum >= 0) {
+                      card.classList.add('card-active');
+                      card.classList.remove('card-empty');
+                  } else {
+                      card.classList.remove('card-active');
+                      card.classList.add('card-empty');
+                  }
+              }
+          }
+          else if (inputElement.classList.contains('drug-input')) {
+              valueNum = parseFloat(valueStr.replace(/,/g, '.'));
+              const isValidFormat = valueStr === '' || /^\d*\.?\d*$/.test(valueStr.replace(/,/g, '.'));
+
+              if (valueStr !== '' && (!isValidFormat || isNaN(valueNum) || valueNum < 0)) {
+                  card.classList.remove('card-active');
+                  card.classList.add('card-empty');
+              } else if (valueStr !== '' && valueNum > 0) {
                   card.classList.add('card-active');
                   card.classList.remove('card-empty');
+                  card.classList.remove('card-invalid');
               } else {
                   card.classList.remove('card-active');
                   card.classList.add('card-empty');
+                  card.classList.remove('card-invalid');
               }
           }
-      }
-      else if (inputElement.classList.contains('drug-input')) {
-          valueNum = parseFloat(valueStr.replace(/,/g, '.'));
-          const isValidFormat = valueStr === '' || /^\d*\.?\d*$/.test(valueStr.replace(/,/g, '.'));
-
-          if (valueStr !== '' && (!isValidFormat || isNaN(valueNum) || valueNum < 0)) {
-              card.classList.remove('card-active');
-              card.classList.add('card-empty');
-          } else if (valueStr !== '' && valueNum > 0) {
-              card.classList.add('card-active');
-              card.classList.remove('card-empty');
-          } else {
-              card.classList.remove('card-active');
-              card.classList.add('card-empty');
+          if (inputElement.classList.contains('drug-input')) {
+              const isValidOnBlur = valueStr === '' || (!isNaN(valueNum) && valueNum >= 0 && valueNum <= 1000000000);
+               if (!isValidOnBlur) {
+                   // Validation state handled by validateSubmission or validateOptionalInputs
+               }
           }
       }
-  }
 
-  studentsBtn.addEventListener('click', () => toggleButton(studentsBtn));
-  workforceBtn.addEventListener('click', () => toggleButton(workforceBtn));
 
-  function toggleButton(clickedButton) {
-    const otherButton = clickedButton === studentsBtn ? workforceBtn : studentsBtn;
-    if (activeButton !== clickedButton) {
-        if (activeButton) {
-            activeButton.classList.remove('btn-active');
-            activeButton.classList.add('btn-inactive');
-            gsap.to(activeButton, { scale: 1, rotation: 0, duration: 0.2, ease: 'power1.out' });
+      studentsBtn.addEventListener('click', () => toggleButton(studentsBtn));
+      workforceBtn.addEventListener('click', () => toggleButton(workforceBtn));
+
+      function toggleButton(clickedButton) {
+        const otherButton = clickedButton === studentsBtn ? workforceBtn : studentsBtn;
+        if (activeButton !== clickedButton) {
+            if (activeButton) {
+                activeButton.classList.remove('btn-active');
+                activeButton.classList.add('btn-inactive');
+                gsap.to(activeButton, { scale: 1, rotation: 0, duration: 0.2, ease: 'power1.out' });
+            }
+            clickedButton.classList.add('btn-active');
+            clickedButton.classList.remove('btn-inactive');
+            gsap.fromTo(clickedButton, { scale: 0.95, rotation: -2 }, { scale: 1, rotation: 0, duration: 0.3, ease: 'back.out(1.7)' });
+            otherButton.classList.remove('btn-active');
+            otherButton.classList.add('btn-inactive');
+            activeButton = clickedButton;
+            const themeClass = clickedButton === studentsBtn ? 'theme-students' : 'theme-workforce';
+            document.body.className = '';
+            document.body.classList.add(themeClass);
+
+            pharmacySelect.value = "";
+
+            updatePharmacyDropdown();
+            saveToLocalStorage();
+            updateSubmitButtonVisibility();
         }
-        clickedButton.classList.add('btn-active');
-        clickedButton.classList.remove('btn-inactive');
-        gsap.fromTo(clickedButton, { scale: 0.95, rotation: -2 }, { scale: 1, rotation: 0, duration: 0.3, ease: 'back.out(1.7)' });
-        otherButton.classList.remove('btn-active');
-        otherButton.classList.add('btn-inactive');
-        activeButton = clickedButton;
-        const themeClass = clickedButton === studentsBtn ? 'theme-students' : 'theme-workforce';
-        document.body.className = `min-h-screen p-4 ${themeClass}`;
+      }
 
-        pharmacySelect.value = ""; // Reset pharmacy ONLY on switch
+       function updatePharmacyDropdown() {
+           pharmacySelect.disabled = !(regionSelect.value && activeButton);
+           const currentPharmacyValue = pharmacySelect.value;
+           pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
 
+           if (regionSelect.value && activeButton) {
+               const category = activeButton === studentsBtn ? 'students' : 'workforce';
+               const regionKey = regionSelect.value;
+               const options = pharmacyOptions[category]?.[regionKey] || [];
+
+               if (options.length > 0) {
+                   options.forEach((optionText, index) => {
+                       const optionElement = document.createElement('option');
+                       optionElement.value = index + 1;
+                       optionElement.textContent = optionText;
+                       pharmacySelect.appendChild(optionElement);
+                   });
+
+                   pharmacySelect.value = currentPharmacyValue;
+                   if (pharmacySelect.selectedIndex <= 0) {
+                        pharmacySelect.value = "";
+                   }
+
+               } else {
+                   pharmacySelect.value = "";
+               }
+           } else {
+               pharmacySelect.value = "";
+           }
+            pharmacySelect.disabled = !(regionSelect.value && activeButton && pharmacySelect.options.length > 1);
+       }
+
+
+      regionSelect.addEventListener('change', () => {
         updatePharmacyDropdown();
         saveToLocalStorage();
-        updateSubmitButtonVisibility(); // Call visibility check
-    }
-  }
-
-  function updatePharmacyDropdown() {
-    pharmacySelect.disabled = !(regionSelect.value && activeButton);
-    const currentPharmacyValue = pharmacySelect.value;
-    pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
-    if (regionSelect.value && activeButton) {
-        const category = activeButton === studentsBtn ? 'students' : 'workforce';
-        const options = pharmacyOptions[category]?.[regionSelect.value] || [];
-        if (options.length > 0) {
-            options.forEach((option, index) => {
-                const optionElement = document.createElement('option');
-                optionElement.value = index + 1;
-                optionElement.textContent = option;
-                pharmacySelect.appendChild(optionElement);
-            });
-            pharmacySelect.value = currentPharmacyValue;
-            if (pharmacySelect.value !== currentPharmacyValue) {
-                pharmacySelect.value = "";
-            }
-        }
-    } else {
-        pharmacySelect.value = "";
-    }
-  }
-
-  regionSelect.addEventListener('change', () => {
-    updatePharmacyDropdown();
-    saveToLocalStorage();
-    updateSubmitButtonVisibility(); // Call visibility check
-  });
-
-  /* Removed the separate button click listeners for pharmacy reset */
-
-  function saveToLocalStorage() {
-    const valuesToSave = cardValues.map(v => (isNaN(v) ? 0 : v));
-    const dataToSave = {
-      cardValues: valuesToSave,
-      activeButton: activeButton ? activeButton.id : null,
-      month: monthSelect.value,
-      region: regionSelect.value,
-      pharmacy: pharmacySelect.value,
-      totalTickets: totalTicketsInput.value,
-      totalExternal: totalExternalInput.value
-    };
-    try {
-        localStorage.setItem('pharmacyAppData', JSON.stringify(dataToSave));
-    } catch (error) {
-        console.error("Error saving to localStorage:", error);
-    }
-  }
-
-  function loadFromLocalStorage() {
-    try {
-        const savedData = localStorage.getItem('pharmacyAppData');
-        if (savedData) {
-          const parsedData = JSON.parse(savedData);
-          cardValues = (parsedData.cardValues || []).map(value => {
-            const numValue = parseFloat(value);
-            return isNaN(numValue) || numValue < 0 ? 0 : Math.min(numValue, 1000000000);
-          });
-
-          if (parsedData.activeButton) {
-              const btn = document.getElementById(parsedData.activeButton);
-              if (btn) {
-                   activeButton = btn;
-                   const otherButton = activeButton === studentsBtn ? workforceBtn : studentsBtn;
-                   activeButton.classList.add('btn-active');
-                   activeButton.classList.remove('btn-inactive');
-                   otherButton.classList.remove('btn-active');
-                   otherButton.classList.add('btn-inactive');
-                   const themeClass = activeButton === studentsBtn ? 'theme-students' : 'theme-workforce';
-                   document.body.className = `min-h-screen p-4 ${themeClass}`;
-              } else {
-                  activeButton = null; document.body.className = 'min-h-screen p-4';
-              }
-          } else {
-               activeButton = null; document.body.className = 'min-h-screen p-4';
-          }
-           if (!activeButton) {
-               studentsBtn.classList.remove('btn-active'); studentsBtn.classList.add('btn-inactive');
-               workforceBtn.classList.remove('btn-active'); workforceBtn.classList.add('btn-inactive');
-           }
-
-          monthSelect.value = parsedData.month || "";
-          regionSelect.value = parsedData.region || "";
-          updatePharmacyDropdown();
-          pharmacySelect.value = parsedData.pharmacy || "";
-
-          totalTicketsInput.value = parsedData.totalTickets || '';
-          totalExternalInput.value = parsedData.totalExternal || '';
-          updateCardStyle(totalTicketsInput);
-          updateCardStyle(totalExternalInput);
-
-          cardValues.forEach((value, index) => {
-            const input = document.querySelector(`input.drug-input[data-index="${index}"]`);
-            if (input) {
-              if (value > 0) {
-                  if (value % 1 === 0) {
-                      input.value = value.toString();
-                  } else {
-                      input.value = value.toFixed(3).replace(/\.?0+$/, "");
-                  }
-              } else {
-                  input.value = '';
-              }
-              updateCardStyle(input);
-            }
-          });
-          updateTotal();
-        } else {
-             resetAllFields(false);
-             updateSubmitButtonVisibility();
-        }
-    } catch (error) {
-         console.error("Error loading from localStorage:", error);
-         resetAllFields(true);
-         updateSubmitButtonVisibility();
-    }
-    updateSubmitButtonVisibility();
-  }
-
-  submitButton.addEventListener('click', async () => {
-    if (isSubmitting || !validateSubmission()) {
-      if (!validateSubmission()) {
-          alert("برجاء اكمال البيانات المطلوبة");
-          gsap.fromTo(submitButton, { x: -5 }, { x: 5, duration: 0.05, repeat: 5, yoyo: true, clearProps: "x" });
-      }
-      return;
-    }
-    try {
-      isSubmitting = true;
-      submitButton.disabled = true;
-      submitButton.textContent = 'جاري الإرسال...';
-      gsap.to(submitButton, { opacity: 0.7, duration: 0.2 });
-      await sendDataToGoogleSheets();
-      gsap.to(submitButton, { backgroundColor: '#2E7D32', duration: 0.3 });
-      submitButton.textContent = 'تم الإرسال بنجاح!';
-      alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      resetAllFields(true);
-    } catch (error) {
-      console.error('Error in submission:', error);
-      submitButton.textContent = 'فشل الإرسال - حاول مرة أخرى';
-       gsap.to(submitButton, { backgroundColor: '#D32F2F', duration: 0.3 });
-      alert('حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى.');
-       await new Promise(resolve => setTimeout(resolve, 2000));
-    } finally {
-      isSubmitting = false;
-      gsap.to(submitButton, { opacity: 1, duration: 0.2 });
-      if (submitButton.textContent !== 'إرسال البيانات') {
-          submitButton.textContent = 'إرسال البيانات';
-           const defaultGradient = 'linear-gradient(135deg, var(--accent-green), var(--accent-green-dark))';
-           gsap.to(submitButton, { backgroundImage: defaultGradient, backgroundColor: '', duration: 0.3 });
-      }
-       updateSubmitButtonVisibility();
-    }
-  });
-
-  function validateSubmission() {
-       const total = cardValues.reduce((acc, val) => acc + (isNaN(val) ? 0 : val || 0), 0);
-       const allDropdownsFilled = monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
-       const optionalInputsValid = validateOptionalInputs();
-       const allDrugInputsValid = Array.from(document.querySelectorAll('#cards-container input.drug-input')).every(input => {
-           const valueStr = input.value.trim();
-           if (valueStr === '') return true;
-           const valueNum = parseFloat(valueStr.replace(/,/g, '.'));
-           return !isNaN(valueNum) && valueNum >= 0 && valueNum <= 1000000000;
-       });
-       const totalsCardsNotInvalid = !totalTicketsInput.closest('.card').classList.contains('card-invalid') &&
-                                !totalExternalInput.closest('.card').classList.contains('card-invalid');
-
-       return total > 0 && allDropdownsFilled && optionalInputsValid && allDrugInputsValid && totalsCardsNotInvalid;
-   }
-
-  async function sendDataToGoogleSheets() {
-    const validCardValues = cardValues.map(v => (isNaN(v) ? 0 : v));
-    const pharmacologyData = cardNames.reduce((acc, name, index) => {
-      acc[name] = validCardValues[index] || 0;
-      return acc;
-    }, {});
-
-    const totalTickets = parseInt(totalTicketsInput.value.trim(), 10);
-    const totalExternal = parseInt(totalExternalInput.value.trim(), 10);
-
-    const data = {
-      date: new Date().toISOString(),
-      class: activeButton ? activeButton.textContent.trim() : '',
-      month: monthSelect.options[monthSelect.selectedIndex]?.text || '',
-      region: regionSelect.options[regionSelect.selectedIndex]?.text || '',
-      pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex]?.text || '',
-      totalPrescription: isNaN(totalTickets) ? 0 : totalTickets,
-      insuranceCoveredPrescription: isNaN(totalExternal) ? 0 : totalExternal,
-      ...pharmacologyData
-    };
-
-    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbykxsi4bwZS9CumCNxtc_isN0u7mWC-Z97BqoXL7vHyGIwxZ48vk7_zkMkTMr-Derclhw/exec';
-
-    try {
-        const params = new URLSearchParams({ data: JSON.stringify(data) });
-        const fullUrl = `${SHEETS_URL}?${params.toString()}`;
-        await fetch(fullUrl, {
-            method: 'GET',
-            mode: 'no-cors',
-        });
-        console.log('Request likely sent to Google Sheets (no-cors mode hides response).');
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `prescription_data_${data.pharmacy || 'unknown'}_${timestamp}.json`;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error during fetch or file download:', error);
-      throw new Error('Failed to send data or create backup file.');
-    }
-  }
-
-    function resetAllFields(clearStorage = true) {
-        cardValues = Array(18).fill(0);
-        document.querySelectorAll('#cards-container input.drug-input').forEach(input => {
-            input.value = '';
-            updateCardStyle(input);
-        });
-        monthSelect.selectedIndex = 0;
-        regionSelect.selectedIndex = 0;
-        pharmacySelect.selectedIndex = 0;
-        pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
-        pharmacySelect.disabled = true;
-        totalTicketsInput.value = '';
-        totalExternalInput.value = '';
-        updateCardStyle(totalTicketsInput);
-        updateCardStyle(totalExternalInput);
-        totalTicketsInput.closest('.card').classList.remove('card-invalid');
-        totalExternalInput.closest('.card').classList.remove('card-invalid');
-        if (activeButton) {
-            activeButton.classList.remove('btn-active');
-            activeButton.classList.add('btn-inactive');
-            gsap.to(activeButton, { scale: 1, rotation: 0, duration: 0.2, ease: 'power1.out' });
-            activeButton = null;
-        }
-         studentsBtn.classList.remove('btn-active');
-         studentsBtn.classList.add('btn-inactive');
-         workforceBtn.classList.remove('btn-active');
-         workforceBtn.classList.add('btn-inactive');
-        document.body.className = 'min-h-screen p-4';
-        updateTotal();
-        if (clearStorage) {
-            try {
-                localStorage.removeItem('pharmacyAppData');
-            } catch (error) {
-                 console.error("Error clearing localStorage:", error);
-            }
-        }
         updateSubmitButtonVisibility();
-    }
+      });
 
-    function updateSubmitButtonVisibility() {
-        const isValid = validateSubmission();
-
-        if (isValid) {
-            submitButton.disabled = isSubmitting;
-            submitButton.style.display = 'block';
-        } else {
-            submitButton.disabled = true;
-            submitButton.style.display = 'none';
-        }
-    }
-
-  function validateOptionalInputs() {
-    const ticketValue = totalTicketsInput.value.trim();
-    const externalValue = totalExternalInput.value.trim();
-    let ticketsValid = true;
-    let externalValid = true;
-
-    if (ticketValue !== '' && (!/^\d+$/.test(ticketValue) || parseInt(ticketValue, 10) > 1000000 || parseInt(ticketValue, 10) < 0)) {
-        ticketsValid = false;
-        totalTicketsInput.closest('.card').classList.add('card-invalid');
-    } else {
-        totalTicketsInput.closest('.card').classList.remove('card-invalid');
-    }
-    updateCardStyle(totalTicketsInput);
-
-    if (externalValue !== '' && (!/^\d+$/.test(externalValue) || parseInt(externalValue, 10) > 1000000 || parseInt(externalValue, 10) < 0)) {
-        externalValid = false;
-        totalExternalInput.closest('.card').classList.add('card-invalid');
-    } else {
-        totalExternalInput.closest('.card').classList.remove('card-invalid');
-    }
-    updateCardStyle(totalExternalInput);
-
-    return ticketsValid && externalValid;
-  }
-
-  [totalTicketsInput, totalExternalInput].forEach(input => {
-      input.addEventListener('input', () => {
-          let value = input.value.trim().replace(/[^0-9]/g, '');
-          if (value !== '') {
-              let num = parseInt(value, 10);
-              if (isNaN(num)) {
-                  value = '';
-              } else if (num > 1000000) {
-                  value = '1000000';
-              } else if (num < 0) {
-                  value = '0';
-              }
-          }
-          if (input.value !== value) {
-             input.value = value;
-          }
-           validateOptionalInputs();
+       pharmacySelect.addEventListener('change', () => {
            saveToLocalStorage();
            updateSubmitButtonVisibility();
-      });
-
-      input.addEventListener('blur', () => {
-          validateOptionalInputs();
-          saveToLocalStorage();
+       });
+        monthSelect.addEventListener('change', () => {
+           saveToLocalStorage();
            updateSubmitButtonVisibility();
-      });
-  });
+       });
 
-  updateCardStyle(totalTicketsInput);
-  updateCardStyle(totalExternalInput);
-  loadFromLocalStorage();
 
-   if (!localStorage.getItem('pharmacyAppData')) {
-        updateSubmitButtonVisibility();
-   }
-
-  [monthSelect, regionSelect, pharmacySelect].forEach(element => {
-    element.addEventListener('change', () => {
-      saveToLocalStorage();
-      if (element === monthSelect || element === pharmacySelect) {
-          updateSubmitButtonVisibility();
+      function saveToLocalStorage() {
+        const valuesToSave = cardValues.map(v => (isNaN(v) ? 0 : v));
+        const dataToSave = {
+          cardValues: valuesToSave,
+          activeButton: activeButton ? activeButton.id : null,
+          month: monthSelect.value,
+          region: regionSelect.value,
+          pharmacy: pharmacySelect.value,
+          totalTickets: totalTicketsInput.value,
+          totalExternal: totalExternalInput.value
+        };
+        try {
+            localStorage.setItem('pharmacyAppData', JSON.stringify(dataToSave));
+        } catch (error) {
+            console.error("Error saving to localStorage:", error);
+        }
       }
+
+      function loadFromLocalStorage() {
+        try {
+            const savedData = localStorage.getItem('pharmacyAppData');
+            if (savedData) {
+              const parsedData = JSON.parse(savedData);
+              cardValues = (parsedData.cardValues || []).map(value => {
+                const numValue = parseFloat(value);
+                return isNaN(numValue) || numValue < 0 ? 0 : Math.min(numValue, 1000000000);
+              });
+
+               if (parsedData.activeButton) {
+                   const btn = document.getElementById(parsedData.activeButton);
+                   if (btn) {
+                       toggleButton(btn);
+                   } else {
+                        activeButton = null;
+                        document.body.className = '';
+                        studentsBtn.classList.remove('btn-active'); studentsBtn.classList.add('btn-inactive');
+                        workforceBtn.classList.remove('btn-active'); workforceBtn.classList.add('btn-inactive');
+                   }
+               } else {
+                    activeButton = null;
+                    document.body.className = '';
+                    studentsBtn.classList.remove('btn-active'); studentsBtn.classList.add('btn-inactive');
+                    workforceBtn.classList.remove('btn-active'); workforceBtn.classList.add('btn-inactive');
+               }
+
+
+              monthSelect.value = parsedData.month || "";
+              regionSelect.value = parsedData.region || "";
+              updatePharmacyDropdown();
+              pharmacySelect.value = parsedData.pharmacy || "";
+              pharmacySelect.disabled = !(regionSelect.value && activeButton && pharmacySelect.options.length > 1);
+
+              totalTicketsInput.value = parsedData.totalTickets || '';
+              totalExternalInput.value = parsedData.totalExternal || '';
+              updateCardStyle(totalTicketsInput);
+              updateCardStyle(totalExternalInput);
+
+              cardValues.forEach((value, index) => {
+                const input = document.querySelector(`input.drug-input[data-index="${index}"]`);
+                if (input) {
+                  if (value > 0) {
+                      if (value % 1 === 0) {
+                          input.value = value.toString();
+                      } else {
+                          input.value = parseFloat(value.toFixed(3)).toString();
+                      }
+                  } else {
+                      input.value = '';
+                  }
+                  updateCardStyle(input);
+                }
+              });
+              updateTotal();
+            } else {
+                 resetAllFields(false);
+                 updateSubmitButtonVisibility();
+            }
+        } catch (error) {
+             console.error("Error loading from localStorage:", error);
+             resetAllFields(true);
+             updateSubmitButtonVisibility();
+        }
+        updateSubmitButtonVisibility();
+      }
+
+
+      submitButton.addEventListener('click', async () => {
+        if (isSubmitting || !validateSubmission()) {
+          if (!validateSubmission()) {
+              alert("برجاء اكمال البيانات المطلوبة بشكل صحيح والتأكد من المجموع.");
+              gsap.fromTo(submitButton, { x: -5 }, { x: 5, duration: 0.05, repeat: 5, yoyo: true, clearProps: "x" });
+          }
+          return;
+        }
+
+         if (!validateOptionalInputs()) {
+             alert("الرجاء تصحيح قيمة اجمالي التذاكر أو اجمالي الخارجي.");
+             gsap.fromTo(submitButton, { x: -5 }, { x: 5, duration: 0.05, repeat: 5, yoyo: true, clearProps: "x" });
+             return;
+         }
+
+
+        try {
+          isSubmitting = true;
+          submitButton.disabled = true;
+          submitButton.textContent = 'جاري الإرسال...';
+          gsap.to(submitButton, { opacity: 0.7, duration: 0.2 });
+
+          await sendDataToGoogleSheets();
+
+          gsap.to(submitButton, { backgroundColor: '#2E7D32', duration: 0.3 });
+          submitButton.textContent = 'تم الإرسال بنجاح!';
+          alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
+
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          resetAllFields(true);
+
+        } catch (error) {
+          console.error('Error in submission:', error);
+          submitButton.textContent = 'فشل الإرسال - حاول مرة أخرى';
+           gsap.to(submitButton, { backgroundColor: '#D32F2F', duration: 0.3 });
+          alert(`حدث خطأ أثناء الإرسال: ${error.message || 'يرجى المحاولة مرة أخرى.'}`);
+           await new Promise(resolve => setTimeout(resolve, 2000));
+
+        } finally {
+          isSubmitting = false;
+          if (!submitButton.disabled) {
+              submitButton.disabled = false;
+          }
+          gsap.to(submitButton, { opacity: 1, duration: 0.2 });
+          if (submitButton.textContent !== 'إرسال البيانات') {
+              submitButton.textContent = 'إرسال البيانات';
+               const defaultGradient = 'linear-gradient(135deg, var(--accent-green), var(--accent-green-dark))';
+               gsap.to(submitButton, { backgroundImage: defaultGradient, backgroundColor: '', duration: 0.3 });
+          }
+          updateSubmitButtonVisibility();
+        }
+      });
+
+       function validateSubmission() {
+           const total = cardValues.reduce((acc, val) => acc + (isNaN(val) ? 0 : val || 0), 0);
+           const allDropdownsFilled = monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
+           const optionalInputsAreValid = validateOptionalInputs();
+
+           const allDrugInputsValid = Array.from(document.querySelectorAll('#cards-container input.drug-input')).every(input => {
+               const valueStr = input.value.trim();
+               if (valueStr === '') return true;
+               const normalizedValueStr = valueStr.replace(/,/g, '.');
+               if (!/^\d*\.?\d*$/.test(normalizedValueStr)) return false;
+               const valueNum = parseFloat(normalizedValueStr);
+               return !isNaN(valueNum) && valueNum >= 0 && valueNum <= 1000000000;
+           });
+
+           const totalsCardsNotMarkedInvalid = !totalTicketsInput.closest('.card').classList.contains('card-invalid') &&
+                                         !totalExternalInput.closest('.card').classList.contains('card-invalid');
+
+
+           return total > 0 && allDropdownsFilled && optionalInputsAreValid && allDrugInputsValid && totalsCardsNotMarkedInvalid;
+       }
+
+
+      async function sendDataToGoogleSheets() {
+        const validCardValues = cardValues.map(v => (isNaN(v) ? 0 : Number(v) || 0));
+
+        const pharmacologyData = cardNames.reduce((acc, name, index) => {
+          acc[name] = validCardValues[index];
+          return acc;
+        }, {});
+
+        const totalTicketsStr = totalTicketsInput.value.trim();
+        const totalExternalStr = totalExternalInput.value.trim();
+        const totalTickets = /^\d+$/.test(totalTicketsStr) ? parseInt(totalTicketsStr, 10) : 0;
+        const totalExternal = /^\d+$/.test(totalExternalStr) ? parseInt(totalExternalStr, 10) : 0;
+
+        const data = {
+          date: new Date().toISOString(),
+          class: activeButton ? activeButton.textContent.trim() : '',
+          month: monthSelect.options[monthSelect.selectedIndex]?.text || monthSelect.value || '',
+          region: regionSelect.options[regionSelect.selectedIndex]?.text || regionSelect.value || '',
+          pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex]?.text || pharmacySelect.value || '',
+          totalPrescription: totalTickets,
+          insuranceCoveredPrescription: totalExternal,
+          ...pharmacologyData,
+           calculatedTotal: validCardValues.reduce((sum, val) => sum + val, 0)
+        };
+
+        const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbykxsi4bwZS9CumCNxtc_isN0u7mWC-Z97BqoXL7vHyGIwxZ48vk7_zkMkTMr-Derclhw/exec';
+
+        try {
+            const params = new URLSearchParams({ data: JSON.stringify(data) });
+            const fullUrl = `${SHEETS_URL}?${params.toString()}`;
+
+            const response = await fetch(fullUrl, {
+                method: 'GET',
+                mode: 'no-cors',
+            });
+
+            console.log('Request likely sent to Google Sheets (no-cors mode).');
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const safePharmacyName = (data.pharmacy || 'unknown').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const filename = `prescription_data_${safePharmacyName}_${timestamp}.json`;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+        } catch (error) {
+          console.error('Error during fetch to Google Sheets or file download:', error);
+          throw new Error('فشل إرسال البيانات أو إنشاء ملف النسخ الاحتياطي.');
+        }
+      }
+
+        function resetAllFields(clearStorage = true) {
+            cardValues = Array(18).fill(0);
+            document.querySelectorAll('#cards-container input.drug-input').forEach(input => {
+                input.value = '';
+                updateCardStyle(input);
+                 input.closest('.card')?.classList.remove('card-invalid');
+            });
+
+            monthSelect.selectedIndex = 0;
+            regionSelect.selectedIndex = 0;
+            pharmacySelect.selectedIndex = 0;
+            pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
+            pharmacySelect.disabled = true;
+
+            totalTicketsInput.value = '';
+            totalExternalInput.value = '';
+            updateCardStyle(totalTicketsInput);
+            updateCardStyle(totalExternalInput);
+            totalTicketsInput.closest('.card').classList.remove('card-invalid');
+            totalExternalInput.closest('.card').classList.remove('card-invalid');
+
+            if (activeButton) {
+                activeButton.classList.remove('btn-active');
+                activeButton.classList.add('btn-inactive');
+                gsap.to(activeButton, { scale: 1, rotation: 0, duration: 0.2, ease: 'power1.out' });
+                activeButton = null;
+            }
+             studentsBtn.classList.remove('btn-active'); studentsBtn.classList.add('btn-inactive');
+             workforceBtn.classList.remove('btn-active'); workforceBtn.classList.add('btn-inactive');
+             document.body.className = '';
+
+            updateTotal();
+
+            if (clearStorage) {
+                try {
+                    localStorage.removeItem('pharmacyAppData');
+                } catch (error) {
+                     console.error("Error clearing localStorage:", error);
+                }
+            }
+            updateSubmitButtonVisibility();
+        }
+
+        function updateSubmitButtonVisibility() {
+            const isValid = validateSubmission();
+
+            if (isValid && !isSubmitting) {
+                submitButton.disabled = false;
+                 if (submitButton.style.display === 'none') {
+                     gsap.fromTo(submitButton, { opacity: 0, y: 10 }, { display: 'block', opacity: 1, y: 0, duration: 0.3 });
+                 } else {
+                    submitButton.style.display = 'block';
+                 }
+
+            } else {
+                submitButton.disabled = true;
+                 submitButton.style.display = 'none';
+            }
+        }
+
+       function validateOptionalInputs() {
+           const ticketValue = totalTicketsInput.value.trim();
+           const externalValue = totalExternalInput.value.trim();
+           let ticketsValid = true;
+           let externalValid = true;
+           const maxVal = 1000000;
+
+           if (ticketValue !== '') {
+               if (!/^\d+$/.test(ticketValue) || parseInt(ticketValue, 10) > maxVal || parseInt(ticketValue, 10) < 0) {
+                   ticketsValid = false;
+                   totalTicketsInput.closest('.card').classList.add('card-invalid');
+               } else {
+                   totalTicketsInput.closest('.card').classList.remove('card-invalid');
+               }
+           } else {
+               totalTicketsInput.closest('.card').classList.remove('card-invalid');
+           }
+           updateCardStyle(totalTicketsInput);
+
+           if (externalValue !== '') {
+               if (!/^\d+$/.test(externalValue) || parseInt(externalValue, 10) > maxVal || parseInt(externalValue, 10) < 0) {
+                   externalValid = false;
+                   totalExternalInput.closest('.card').classList.add('card-invalid');
+               } else {
+                   totalExternalInput.closest('.card').classList.remove('card-invalid');
+               }
+           } else {
+               totalExternalInput.closest('.card').classList.remove('card-invalid');
+           }
+           updateCardStyle(totalExternalInput);
+
+           return ticketsValid && externalValid;
+       }
+
+
+      [totalTicketsInput, totalExternalInput].forEach(input => {
+          input.addEventListener('input', () => {
+              let value = input.value.trim().replace(/[^0-9]/g, '');
+              const maxVal = 1000000;
+              if (value !== '') {
+                  let num = parseInt(value, 10);
+                  if (isNaN(num)) {
+                      value = '';
+                  } else if (num > maxVal) {
+                      value = maxVal.toString();
+                  } else if (num < 0) {
+                      value = '0';
+                  }
+              }
+              if (input.value !== value) {
+                 input.value = value;
+              }
+               validateOptionalInputs();
+               updateSubmitButtonVisibility();
+          });
+
+          input.addEventListener('blur', () => {
+              validateOptionalInputs();
+              saveToLocalStorage();
+              updateSubmitButtonVisibility();
+          });
+      });
+
+      updateCardStyle(totalTicketsInput);
+      updateCardStyle(totalExternalInput);
+      loadFromLocalStorage();
+
+       if (!localStorage.getItem('pharmacyAppData')) {
+            updateSubmitButtonVisibility();
+       }
+
     });
-  });
-});
     </script>
 </body>
 </html>
