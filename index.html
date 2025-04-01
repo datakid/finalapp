@@ -351,7 +351,8 @@
             hyphens: auto;
         }
 
-        div.card input[type="number"] {
+        div.card input[type="number"],
+        div.card input[type="text"].drug-input {
             font-family: 'Cairo', sans-serif;
             font-weight: 700;
             font-size: 1.4rem;
@@ -365,8 +366,6 @@
             background-color: #FAFAFA;
             transition: all var(--transition-speed) ease;
             box-shadow: inset 2px 2px 3px rgba(0,0,0,0.1);
-            -moz-appearance: textfield;
-            appearance: textfield;
             will-change: background-color, border-color, box-shadow;
             flex-shrink: 0;
             line-height: 1.3;
@@ -375,8 +374,18 @@
         div.card input[type="number"]::-webkit-outer-spin-button {
            -webkit-appearance: none; margin: 0;
         }
+        div.card input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        div.card input[type="text"].drug-input {
+            appearance: none;
+            -moz-appearance: textfield;
+        }
 
-        div.card input[type="number"]:focus {
+
+        div.card input[type="number"]:focus,
+        div.card input[type="text"].drug-input:focus {
             outline: none;
             border-color: var(--primary-blue);
             background-color: var(--container-bg);
@@ -410,15 +419,18 @@
         .theme-students div.card.card-active h3 { color: var(--student-dark); }
         .theme-workforce div.card.card-active h3 { color: var(--workforce-dark); }
 
-        div.card.card-active input[type="number"] {
+        div.card.card-active input[type="number"],
+        div.card.card-active input[type="text"].drug-input {
             border-color: var(--primary-blue);
             background-color: #EAF5FF;
         }
-        .theme-students div.card.card-active input[type="number"] {
+        .theme-students div.card.card-active input[type="number"],
+        .theme-students div.card.card-active input[type="text"].drug-input {
             border-color: var(--student-color);
             background-color: #FFF0F0;
         }
-        .theme-workforce div.card.card-active input[type="number"] {
+        .theme-workforce div.card.card-active input[type="number"],
+        .theme-workforce div.card.card-active input[type="text"].drug-input {
             border-color: var(--workforce-color);
             background-color: #E6F3FF;
         }
@@ -489,6 +501,8 @@
             position: relative;
             overflow: hidden;
             line-height: 1.3;
+             display: block;
+             opacity: 1;
         }
         button#submitButton::after {
             content: '';
@@ -540,7 +554,8 @@
             box-shadow: var(--shadow-offset) var(--student-dark);
         }
         .theme-students select:focus,
-        .theme-students div.card input[type="number"]:focus {
+        .theme-students div.card input[type="number"]:focus,
+        .theme-students div.card input[type="text"].drug-input:focus {
             border-color: var(--student-color);
             box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05),
                         0 0 0 3px rgba(255, 107, 107, 0.4),
@@ -564,7 +579,8 @@
             box-shadow: var(--shadow-offset) var(--workforce-dark);
         }
         .theme-workforce select:focus,
-        .theme-workforce div.card input[type="number"]:focus {
+        .theme-workforce div.card input[type="number"]:focus,
+        .theme-workforce div.card input[type="text"].drug-input:focus {
             border-color: var(--workforce-color);
             box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05),
                         0 0 0 3px rgba(30, 144, 255, 0.4),
@@ -619,7 +635,8 @@
                 margin-bottom: 0.8rem;
                 line-height: 1.35;
             }
-            div.card input[type="number"] {
+            div.card input[type="number"],
+            div.card input[type="text"].drug-input {
                 font-size: 1.15rem;
                 padding: 0.6rem;
             }
@@ -666,7 +683,8 @@
                margin-bottom: 0.6rem;
                line-height: 1.3;
             }
-            div.card input[type="number"] {
+            div.card input[type="number"],
+            div.card input[type="text"].drug-input {
                font-size: 1.05rem;
                padding: 0.5rem;
             }
@@ -700,7 +718,7 @@
         @media print {
             :root { --border-width: 1px; --shadow-offset: 0px 0px 0px; }
             body { background: none !important; color: black; font-size: 10pt; }
-            .max-w-7xl.comic-border, .card, select, input[type="number"], button.comic-button, button#submitButton {
+            .max-w-7xl.comic-border, .card, select, input[type="number"], input[type="text"], button.comic-button, button#submitButton {
                 box-shadow: none !important;
                 border: 1px solid #333 !important;
                 border-radius: 0 !important;
@@ -727,7 +745,7 @@
             #total { color: black !important; text-shadow: none !important; font-size: 14pt;}
             button#submitButton, button.comic-button, select { display: none !important; }
             .grid > * { page-break-inside: avoid !important; }
-            input[type="number"] { background-color: #eee !important; font-size: 10pt !important; }
+            input[type="number"], input[type="text"] { background-color: #eee !important; font-size: 10pt !important; }
             h3 { font-size: 11pt !important; }
         }
 
@@ -797,7 +815,7 @@
             </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8" id="cards-container">
-
+            <!-- Cards Generated by JS -->
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <div class="card">
@@ -860,14 +878,14 @@ document.addEventListener('DOMContentLoaded', () => {
     card.className = 'card p-4';
     card.innerHTML = `
         <h3 class="text-lg font-bold mb-2">${cardNames[i]}</h3>
-        <input type="number" class="w-full p-2 border-2 border-black rounded text-xl drug-input" data-index="${i}" min="0" max="1000000000" step="0.001" dir="ltr">
+        <input type="text" class="w-full p-2 border-2 border-black rounded text-xl drug-input" data-index="${i}" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]+" dir="ltr">
       `;
     cardWrapper.appendChild(card);
     cardsContainer.appendChild(cardWrapper);
   }
 
   cardsContainer.addEventListener('input', (e) => {
-    if (e.target.classList.contains('drug-input') && e.target.type === 'number') {
+    if (e.target.classList.contains('drug-input')) {
       const input = e.target;
       const index = parseInt(input.dataset.index);
       let value = input.value;
@@ -876,23 +894,26 @@ document.addEventListener('DOMContentLoaded', () => {
       if (value === '') {
         cardValues[index] = 0;
       } else {
+        value = value.replace(/,/g, '.');
         value = value.replace(/[^\d.]/g, '');
         const parts = value.split('.');
         if (parts.length > 2) {
-          value = parts[0] + '.' + parts.slice(1).join('');
+            value = parts[0] + '.' + parts.slice(1).join('');
         }
+
         let numValue = parseFloat(value);
+
         if (isNaN(numValue) || numValue < 0) {
-          numValue = 0;
-          value = '0';
+            cardValues[index] = 0;
         } else if (numValue > 1000000000) {
-          numValue = 1000000000;
-          value = '1000000000';
+            numValue = 1000000000;
+            value = '1000000000';
+            cardValues[index] = numValue;
         } else {
-            numValue = Math.round(numValue * 1000) / 1000;
+            cardValues[index] = numValue;
         }
-        cardValues[index] = numValue;
       }
+
       input.value = value;
 
       updateTotal();
@@ -905,10 +926,18 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   cardsContainer.addEventListener('blur', (e) => {
-    if (e.target.classList.contains('drug-input') && e.target.type === 'number') {
+    if (e.target.classList.contains('drug-input')) {
       const input = e.target;
       const index = parseInt(input.dataset.index);
       let value = input.value.trim();
+
+      value = value.replace(/,/g, '.');
+      value = value.replace(/[^\d.]/g, '');
+      const parts = value.split('.');
+      if (parts.length > 2) {
+          value = parts[0] + '.' + parts.slice(1).join('');
+      }
+
       let numValue = parseFloat(value);
 
       if (value === '' || isNaN(numValue) || numValue <= 0) {
@@ -916,9 +945,14 @@ document.addEventListener('DOMContentLoaded', () => {
         cardValues[index] = 0;
       } else {
         numValue = Math.min(numValue, 1000000000);
-        const formattedValue = numValue.toFixed(3);
-        input.value = formattedValue;
-        cardValues[index] = parseFloat(formattedValue);
+        numValue = Math.round(numValue * 1000) / 1000;
+        cardValues[index] = numValue;
+
+        if (numValue % 1 === 0) {
+            input.value = numValue.toString();
+        } else {
+            input.value = numValue.toFixed(3).replace(/\.?0+$/, "");
+        }
       }
       updateTotal();
       updateCardStyle(input);
@@ -954,20 +988,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } else if (oldTotal === 0 && total === 0 && oldTotalText !== "0.000") {
-         totalElement.textContent = "0.000"; 
+         totalElement.textContent = "0.000";
+    } else if (total !== 0 && Math.abs(total - oldTotal) <= 0.0001) {
+         totalElement.textContent = total.toLocaleString('en-US', {
+             minimumFractionDigits: 3,
+             maximumFractionDigits: 3
+           });
+    } else if (total === 0 && oldTotalText === "0.000") {
+        // No change needed
+    } else if (total === 0 && oldTotalText === "0") {
+        totalElement.textContent = "0.000";
     }
      updateSubmitButtonVisibility();
   }
-
 
   function updateCardStyle(inputElement) {
       const card = inputElement.closest('.card');
       if (!card) return;
 
       const valueStr = inputElement.value.trim();
-      const valueNum = parseFloat(valueStr);
+      let valueNum;
 
       if (inputElement === totalTicketsInput || inputElement === totalExternalInput) {
+          valueNum = parseInt(valueStr, 10);
           if (valueStr !== '' && (!/^\d+$/.test(valueStr) || valueNum > 1000000)) {
               card.classList.add('card-invalid');
               card.classList.remove('card-active', 'card-empty');
@@ -981,8 +1024,15 @@ document.addEventListener('DOMContentLoaded', () => {
                   card.classList.add('card-empty');
               }
           }
-      } else {
-          if (valueStr !== '' && valueNum > 0) {
+      }
+      else if (inputElement.classList.contains('drug-input')) {
+          valueNum = parseFloat(valueStr.replace(/,/g, '.'));
+          const isValidFormat = valueStr === '' || /^\d*\.?\d*$/.test(valueStr.replace(/,/g, '.'));
+
+          if (valueStr !== '' && (!isValidFormat || isNaN(valueNum) || valueNum < 0)) {
+              card.classList.remove('card-active');
+              card.classList.add('card-empty');
+          } else if (valueStr !== '' && valueNum > 0) {
               card.classList.add('card-active');
               card.classList.remove('card-empty');
           } else {
@@ -991,7 +1041,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
       }
   }
-
 
   studentsBtn.addEventListener('click', () => toggleButton(studentsBtn));
   workforceBtn.addEventListener('click', () => toggleButton(workforceBtn));
@@ -1012,12 +1061,14 @@ document.addEventListener('DOMContentLoaded', () => {
         activeButton = clickedButton;
         const themeClass = clickedButton === studentsBtn ? 'theme-students' : 'theme-workforce';
         document.body.className = `min-h-screen p-4 ${themeClass}`;
+
+        pharmacySelect.value = ""; // Reset pharmacy ONLY on switch
+
         updatePharmacyDropdown();
         saveToLocalStorage();
-        updateSubmitButtonVisibility();
+        updateSubmitButtonVisibility(); // Call visibility check
     }
   }
-
 
   function updatePharmacyDropdown() {
     pharmacySelect.disabled = !(regionSelect.value && activeButton);
@@ -1038,33 +1089,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 pharmacySelect.value = "";
             }
         }
+    } else {
+        pharmacySelect.value = "";
     }
-    updateSubmitButtonVisibility();
-}
+  }
 
-regionSelect.addEventListener('change', () => {
+  regionSelect.addEventListener('change', () => {
     updatePharmacyDropdown();
     saveToLocalStorage();
-});
+    updateSubmitButtonVisibility(); // Call visibility check
+  });
 
-studentsBtn.addEventListener('click', () => {
-    activeButton = studentsBtn;
-    pharmacySelect.value = "";
-    updatePharmacyDropdown();
-    saveToLocalStorage();
-});
-
-workforceBtn.addEventListener('click', () => {
-    activeButton = workforceBtn;
-    pharmacySelect.value = "";
-    updatePharmacyDropdown();
-    saveToLocalStorage();
-});
-
+  /* Removed the separate button click listeners for pharmacy reset */
 
   function saveToLocalStorage() {
+    const valuesToSave = cardValues.map(v => (isNaN(v) ? 0 : v));
     const dataToSave = {
-      cardValues,
+      cardValues: valuesToSave,
       activeButton: activeButton ? activeButton.id : null,
       month: monthSelect.value,
       region: regionSelect.value,
@@ -1088,51 +1129,66 @@ workforceBtn.addEventListener('click', () => {
             const numValue = parseFloat(value);
             return isNaN(numValue) || numValue < 0 ? 0 : Math.min(numValue, 1000000000);
           });
+
           if (parsedData.activeButton) {
               const btn = document.getElementById(parsedData.activeButton);
               if (btn) {
-                   const otherBtn = btn === studentsBtn ? workforceBtn : studentsBtn;
-                   btn.classList.add('btn-active');
-                   btn.classList.remove('btn-inactive');
-                   otherBtn.classList.remove('btn-active');
-                   otherBtn.classList.add('btn-inactive');
                    activeButton = btn;
-                   document.body.className = `min-h-screen p-4 ${btn === studentsBtn ? 'theme-students' : 'theme-workforce'}`;
+                   const otherButton = activeButton === studentsBtn ? workforceBtn : studentsBtn;
+                   activeButton.classList.add('btn-active');
+                   activeButton.classList.remove('btn-inactive');
+                   otherButton.classList.remove('btn-active');
+                   otherButton.classList.add('btn-inactive');
+                   const themeClass = activeButton === studentsBtn ? 'theme-students' : 'theme-workforce';
+                   document.body.className = `min-h-screen p-4 ${themeClass}`;
+              } else {
+                  activeButton = null; document.body.className = 'min-h-screen p-4';
               }
           } else {
-              [studentsBtn, workforceBtn].forEach(btn => {
-                   btn.classList.remove('btn-active');
-                   btn.classList.add('btn-inactive');
-              });
-              activeButton = null;
-              document.body.className = 'min-h-screen p-4';
+               activeButton = null; document.body.className = 'min-h-screen p-4';
           }
+           if (!activeButton) {
+               studentsBtn.classList.remove('btn-active'); studentsBtn.classList.add('btn-inactive');
+               workforceBtn.classList.remove('btn-active'); workforceBtn.classList.add('btn-inactive');
+           }
+
           monthSelect.value = parsedData.month || "";
           regionSelect.value = parsedData.region || "";
           updatePharmacyDropdown();
           pharmacySelect.value = parsedData.pharmacy || "";
+
           totalTicketsInput.value = parsedData.totalTickets || '';
           totalExternalInput.value = parsedData.totalExternal || '';
           updateCardStyle(totalTicketsInput);
           updateCardStyle(totalExternalInput);
+
           cardValues.forEach((value, index) => {
-            const input = document.querySelector(`input[data-index="${index}"]`);
+            const input = document.querySelector(`input.drug-input[data-index="${index}"]`);
             if (input) {
-              input.value = (value > 0) ? value.toFixed(3) : '';
+              if (value > 0) {
+                  if (value % 1 === 0) {
+                      input.value = value.toString();
+                  } else {
+                      input.value = value.toFixed(3).replace(/\.?0+$/, "");
+                  }
+              } else {
+                  input.value = '';
+              }
               updateCardStyle(input);
             }
           });
           updateTotal();
         } else {
              resetAllFields(false);
+             updateSubmitButtonVisibility();
         }
     } catch (error) {
          console.error("Error loading from localStorage:", error);
          resetAllFields(true);
+         updateSubmitButtonVisibility();
     }
     updateSubmitButtonVisibility();
   }
-
 
   submitButton.addEventListener('click', async () => {
     if (isSubmitting || !validateSubmission()) {
@@ -1161,30 +1217,41 @@ workforceBtn.addEventListener('click', () => {
        await new Promise(resolve => setTimeout(resolve, 2000));
     } finally {
       isSubmitting = false;
-      submitButton.disabled = false;
       gsap.to(submitButton, { opacity: 1, duration: 0.2 });
       if (submitButton.textContent !== 'إرسال البيانات') {
           submitButton.textContent = 'إرسال البيانات';
            const defaultGradient = 'linear-gradient(135deg, var(--accent-green), var(--accent-green-dark))';
-           gsap.to(submitButton, { backgroundImage: defaultGradient, duration: 0.3 });
+           gsap.to(submitButton, { backgroundImage: defaultGradient, backgroundColor: '', duration: 0.3 });
       }
        updateSubmitButtonVisibility();
     }
   });
 
   function validateSubmission() {
-       const total = cardValues.reduce((acc, val) => acc + (val || 0), 0);
+       const total = cardValues.reduce((acc, val) => acc + (isNaN(val) ? 0 : val || 0), 0);
        const allDropdownsFilled = monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
        const optionalInputsValid = validateOptionalInputs();
-       return total > 0 && allDropdownsFilled && optionalInputsValid;
+       const allDrugInputsValid = Array.from(document.querySelectorAll('#cards-container input.drug-input')).every(input => {
+           const valueStr = input.value.trim();
+           if (valueStr === '') return true;
+           const valueNum = parseFloat(valueStr.replace(/,/g, '.'));
+           return !isNaN(valueNum) && valueNum >= 0 && valueNum <= 1000000000;
+       });
+       const totalsCardsNotInvalid = !totalTicketsInput.closest('.card').classList.contains('card-invalid') &&
+                                !totalExternalInput.closest('.card').classList.contains('card-invalid');
+
+       return total > 0 && allDropdownsFilled && optionalInputsValid && allDrugInputsValid && totalsCardsNotInvalid;
    }
 
-
   async function sendDataToGoogleSheets() {
+    const validCardValues = cardValues.map(v => (isNaN(v) ? 0 : v));
     const pharmacologyData = cardNames.reduce((acc, name, index) => {
-      acc[name] = cardValues[index] || 0;
+      acc[name] = validCardValues[index] || 0;
       return acc;
     }, {});
+
+    const totalTickets = parseInt(totalTicketsInput.value.trim(), 10);
+    const totalExternal = parseInt(totalExternalInput.value.trim(), 10);
 
     const data = {
       date: new Date().toISOString(),
@@ -1192,8 +1259,8 @@ workforceBtn.addEventListener('click', () => {
       month: monthSelect.options[monthSelect.selectedIndex]?.text || '',
       region: regionSelect.options[regionSelect.selectedIndex]?.text || '',
       pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex]?.text || '',
-      totalPrescription: totalTicketsInput.value.trim() === '' ? 0 : parseInt(totalTicketsInput.value, 10),
-      insuranceCoveredPrescription: totalExternalInput.value.trim() === '' ? 0 : parseInt(totalExternalInput.value, 10),
+      totalPrescription: isNaN(totalTickets) ? 0 : totalTickets,
+      insuranceCoveredPrescription: isNaN(totalExternal) ? 0 : totalExternal,
       ...pharmacologyData
     };
 
@@ -1224,7 +1291,6 @@ workforceBtn.addEventListener('click', () => {
     }
   }
 
-
     function resetAllFields(clearStorage = true) {
         cardValues = Array(18).fill(0);
         document.querySelectorAll('#cards-container input.drug-input').forEach(input => {
@@ -1240,6 +1306,8 @@ workforceBtn.addEventListener('click', () => {
         totalExternalInput.value = '';
         updateCardStyle(totalTicketsInput);
         updateCardStyle(totalExternalInput);
+        totalTicketsInput.closest('.card').classList.remove('card-invalid');
+        totalExternalInput.closest('.card').classList.remove('card-invalid');
         if (activeButton) {
             activeButton.classList.remove('btn-active');
             activeButton.classList.add('btn-inactive');
@@ -1262,28 +1330,17 @@ workforceBtn.addEventListener('click', () => {
         updateSubmitButtonVisibility();
     }
 
+    function updateSubmitButtonVisibility() {
+        const isValid = validateSubmission();
 
-  function updateSubmitButtonVisibility() {
-    const isValid = validateSubmission();
-    const isDisplayed = submitButton.style.display === 'block';
-
-    if (isValid) {
-        if (!isDisplayed) {
-             submitButton.style.display = 'block';
-             gsap.fromTo(submitButton, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power1.out' });
+        if (isValid) {
+            submitButton.disabled = isSubmitting;
+            submitButton.style.display = 'block';
+        } else {
+            submitButton.disabled = true;
+            submitButton.style.display = 'none';
         }
-         submitButton.disabled = isSubmitting;
-    } else {
-         if (isDisplayed) {
-             gsap.to(submitButton, { opacity: 0, y: 10, duration: 0.2, ease: 'power1.in', onComplete: () => {
-                 submitButton.style.display = 'none';
-             }});
-         } else {
-             submitButton.style.display = 'none';
-         }
-         submitButton.disabled = true;
     }
-  }
 
   function validateOptionalInputs() {
     const ticketValue = totalTicketsInput.value.trim();
@@ -1291,19 +1348,24 @@ workforceBtn.addEventListener('click', () => {
     let ticketsValid = true;
     let externalValid = true;
 
-    if (ticketValue !== '' && (!/^\d+$/.test(ticketValue) || parseInt(ticketValue, 10) > 1000000)) {
+    if (ticketValue !== '' && (!/^\d+$/.test(ticketValue) || parseInt(ticketValue, 10) > 1000000 || parseInt(ticketValue, 10) < 0)) {
         ticketsValid = false;
+        totalTicketsInput.closest('.card').classList.add('card-invalid');
+    } else {
+        totalTicketsInput.closest('.card').classList.remove('card-invalid');
     }
     updateCardStyle(totalTicketsInput);
 
-    if (externalValue !== '' && (!/^\d+$/.test(externalValue) || parseInt(externalValue, 10) > 1000000)) {
+    if (externalValue !== '' && (!/^\d+$/.test(externalValue) || parseInt(externalValue, 10) > 1000000 || parseInt(externalValue, 10) < 0)) {
         externalValid = false;
+        totalExternalInput.closest('.card').classList.add('card-invalid');
+    } else {
+        totalExternalInput.closest('.card').classList.remove('card-invalid');
     }
     updateCardStyle(totalExternalInput);
 
     return ticketsValid && externalValid;
   }
-
 
   [totalTicketsInput, totalExternalInput].forEach(input => {
       input.addEventListener('input', () => {
@@ -1318,7 +1380,9 @@ workforceBtn.addEventListener('click', () => {
                   value = '0';
               }
           }
-          input.value = value;
+          if (input.value !== value) {
+             input.value = value;
+          }
            validateOptionalInputs();
            saveToLocalStorage();
            updateSubmitButtonVisibility();
@@ -1331,19 +1395,20 @@ workforceBtn.addEventListener('click', () => {
       });
   });
 
-
   updateCardStyle(totalTicketsInput);
   updateCardStyle(totalExternalInput);
   loadFromLocalStorage();
+
    if (!localStorage.getItem('pharmacyAppData')) {
         updateSubmitButtonVisibility();
    }
 
-
   [monthSelect, regionSelect, pharmacySelect].forEach(element => {
     element.addEventListener('change', () => {
       saveToLocalStorage();
-      updateSubmitButtonVisibility();
+      if (element === monthSelect || element === pharmacySelect) {
+          updateSubmitButtonVisibility();
+      }
     });
   });
 });
