@@ -63,6 +63,9 @@
             --student-dark: #D32F2F;
             --workforce-color: #1E90FF;
             --workforce-dark: #1976D2;
+            --infants-color: #20B2AA;
+            --infants-dark: #008080;
+            --infants-bg-light: #E0F2F7;
             --accent-green-dark: #2E7D32;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -77,6 +80,10 @@
             --transition-speed: 0.22s;
             --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
             --border-width: 3px;
+            --disabled-bg: #E9E9E9;
+            --disabled-border: #CFCFCF;
+            --disabled-shadow: #C0C0C0;
+            --disabled-text: #888888;
         }
 
         html {
@@ -221,8 +228,23 @@
         html[dir="rtl"] select { padding: 1.1rem 1.8rem 1.1rem 3rem; background-position: left 1rem center; text-align: right; }
         select:hover { transform: rotate(0deg) scale(1.02) translate(1px, 1px); box-shadow: calc(var(--shadow-offset)/1.5) var(--shadow-color-dark); background-color: #fdfdfd; }
         select:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(70, 130, 180, 0.3), calc(var(--shadow-offset)/2) var(--shadow-color-dark); transform: rotate(0deg) translate(1px, 1px); background-color: #f0f8ff; }
-        select:disabled { background-color: #E0E0E0; color: var(--text-secondary); cursor: not-allowed; border-color: var(--border-medium); box-shadow: var(--shadow-offset) #BDBDBD; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23BDBDBD' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E"); background-position: left 1rem center; transform: rotate(0deg); opacity: 0.7; }
-        html[dir="rtl"] select:disabled { background-position: left 1rem center; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23BDBDBD' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E"); }
+
+        select.select-valid-selection {
+            transform: rotate(-0.2deg); /* Subtle active rotation */
+        }
+
+        select:disabled {
+            background-color: var(--disabled-bg);
+            color: var(--disabled-text);
+            cursor: not-allowed;
+            border-color: var(--disabled-border);
+            box-shadow: var(--shadow-offset) var(--disabled-shadow);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23BDBDBD' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-position: left 1rem center;
+            transform: rotate(0deg);
+            opacity: 0.75;
+        }
+        html[dir="rtl"] select:disabled { background-position: left 1rem center; }
         select option { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 400; background-color: var(--container-bg); color: var(--text-dark); padding: 10px 15px; text-align: right; direction: rtl; }
         html[dir="ltr"] select option { text-align: left; direction: ltr; }
 
@@ -230,7 +252,6 @@
             display: grid;
             margin-bottom: 2rem;
         }
-        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
         .gap-4 { gap: 1rem; }
         .gap-6 { gap: 1.5rem; }
@@ -285,13 +306,16 @@
         div.card.card-active { border-color: var(--primary-blue); box-shadow: var(--shadow-offset) var(--primary-blue); transform: rotate(-1deg) scale(1.02); }
         .theme-students div.card.card-active { border-color: var(--student-color); box-shadow: var(--shadow-offset) var(--student-color); }
         .theme-workforce div.card.card-active { border-color: var(--workforce-color); box-shadow: var(--shadow-offset) var(--workforce-color); }
+        .theme-infants div.card.card-active { border-color: var(--infants-color); box-shadow: var(--shadow-offset) var(--infants-color); }
         div.card.card-active:hover { transform: rotate(-0.8deg) scale(1.03); z-index: 4; }
         div.card.card-active h3 { color: var(--primary-blue); }
         .theme-students div.card.card-active h3 { color: var(--student-dark); }
         .theme-workforce div.card.card-active h3 { color: var(--workforce-dark); }
+        .theme-infants div.card.card-active h3 { color: var(--infants-dark); }
         div.card.card-active input[type="number"], div.card.card-active input[type="text"].drug-input { border-color: var(--primary-blue); background-color: #EAF5FF; }
         .theme-students div.card.card-active input[type="number"], .theme-students div.card.card-active input[type="text"].drug-input { border-color: var(--student-color); background-color: #FFF0F0; }
         .theme-workforce div.card.card-active input[type="number"], .theme-workforce div.card.card-active input[type="text"].drug-input { border-color: var(--workforce-color); background-color: #E6F3FF; }
+        .theme-infants div.card.card-active input[type="number"], .theme-infants div.card.card-active input[type="text"].drug-input { border-color: var(--infants-color); background-color: #e7f8f7; }
         div.card.card-empty { opacity: 0.9; transform: rotate(0.2deg); }
         div.card.card-empty:hover { transform: rotate(-0.4deg) scale(1.02) translate(1px, 1px); }
 
@@ -318,22 +342,72 @@
         }
 
         button#submitButton {
-            font-family: 'Fredoka One', cursive; font-weight: 500; font-size: 1.6rem; padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark)); color: white;
-            border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md);
-            box-shadow: var(--shadow-offset) var(--shadow-color-dark);
+            font-family: 'Fredoka One', cursive;
+            font-weight: 500;
+            font-size: 1.6rem;
+            padding: 1rem 2rem;
+            color: white;
+            border-width: var(--border-width);
+            border-style: solid;
+            border-radius: var(--radius-md);
             transition: all var(--transition-speed) var(--transition-ease);
-            text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; outline: none;
-            width: 100%; margin-top: 1.5rem;
-            text-shadow: 2px 2px 0 var(--accent-green-dark); z-index: 2; will-change: transform, box-shadow;
-            position: relative; overflow: hidden; line-height: 1.3; display: block; opacity: 1;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            outline: none;
+            width: 100%;
+            margin-top: 1.5rem;
+            z-index: 2;
+            will-change: transform, box-shadow, background;
+            position: relative;
+            overflow: hidden;
+            line-height: 1.3;
+            display: block;
+            opacity: 1;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark));
+            border-color: var(--border-dark);
+            box-shadow: var(--shadow-offset) var(--shadow-color-dark);
+            text-shadow: 2px 2px 0 var(--accent-green-dark);
         }
-        button#submitButton::after { content: ''; position: absolute; top: -50%; left: -150%; width: 100%; height: 200%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%); transform: skewX(-25deg); transition: left 0.6s ease; pointer-events: none; }
-        button#submitButton:hover::after { left: 150%; }
-        button#submitButton:hover { transform: translate(2px, 2px) rotate(1deg); box-shadow: calc(var(--shadow-offset)/2) var(--shadow-color-dark); background: linear-gradient(135deg, #45c47d, #36a860); }
-        button#submitButton:active { transform: translate(var(--shadow-offset)); box-shadow: none; filter: brightness(95%); }
-        button#submitButton:disabled, button#submitButton[disabled] { background: linear-gradient(135deg, #b8e0c8, #a9d4ba); color: #707070; cursor: not-allowed; box-shadow: var(--shadow-offset) #ababab; border-color: #ababab; transform: none; text-shadow: 1px 1px 0px #d3d3d3; opacity: 0.7; }
-        button#submitButton:disabled::after { display: none; }
+        button#submitButton::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -150%;
+            width: 100%;
+            height: 200%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            transition: left 0.6s ease;
+            pointer-events: none;
+        }
+        button#submitButton:hover::after {
+            left: 150%;
+        }
+        button#submitButton:hover {
+            transform: translate(2px, 2px) rotate(1deg);
+            background: linear-gradient(135deg, #45c47d, #36a860);
+            box-shadow: calc(var(--shadow-offset)/2) var(--shadow-color-dark);
+        }
+        button#submitButton:active {
+            transform: translate(var(--shadow-offset));
+            box-shadow: none;
+            filter: brightness(95%);
+        }
+        button#submitButton:disabled,
+        button#submitButton[disabled] {
+            color: #707070;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.7;
+            background: linear-gradient(135deg, #b8e0c8, #a9d4ba);
+            border-color: #ababab;
+            box-shadow: var(--shadow-offset) #ababab;
+            text-shadow: 1px 1px 0px #d3d3d3;
+        }
+        button#submitButton:disabled::after {
+            display: none;
+        }
 
         .theme-students body { background-color: #FFE4E1; }
         .theme-students h1.comic-header { background: linear-gradient(135deg, var(--student-color), #FF8C8C); text-shadow: 2px 2px 0 var(--student-dark), -1px -1px 0 var(--student-dark), 1px -1px 0 var(--student-dark), -1px 1px 0 var(--student-dark), 1px 1px 0 var(--student-dark); }
@@ -342,6 +416,38 @@
         .theme-students select:hover { background-color: #fff5f5; }
         .theme-students #total { color: var(--student-dark); text-shadow: 3px 3px 0 white, 5px 5px 0 var(--student-color); }
         .theme-students div.card:has(#total) { background-color: #ffebee; border-color: var(--student-dark); box-shadow: var(--shadow-offset) var(--student-dark); }
+        .theme-students button#submitButton {
+            background: linear-gradient(135deg, var(--student-color), var(--student-dark));
+            border-color: var(--student-dark);
+            box-shadow: var(--shadow-offset) var(--student-dark);
+            text-shadow: 2px 2px 0 var(--student-dark);
+        }
+        .theme-students button#submitButton:hover {
+            background: linear-gradient(135deg, color-mix(in srgb, var(--student-color) 90%, white), color-mix(in srgb, var(--student-dark) 90%, white));
+            box-shadow: calc(var(--shadow-offset)/2) var(--student-dark);
+        }
+        .theme-students button#submitButton:disabled,
+        .theme-students button#submitButton[disabled] {
+            background: linear-gradient(135deg, color-mix(in srgb, var(--student-color) 50%, #ddd), color-mix(in srgb, var(--student-dark) 50%, #ccc));
+            border-color: color-mix(in srgb, var(--student-dark) 60%, #bbb);
+            box-shadow: var(--shadow-offset) color-mix(in srgb, var(--student-dark) 50%, #aaa);
+            text-shadow: 1px 1px 0px color-mix(in srgb, var(--student-dark) 40%, #999);
+            color: #707070;
+        }
+        .theme-students select:disabled {
+            background-color: #FDEBEB;
+            border-color: color-mix(in srgb, var(--student-dark) 50%, var(--disabled-border));
+            box-shadow: var(--shadow-offset) color-mix(in srgb, var(--student-dark) 40%, var(--disabled-shadow));
+            color: color-mix(in srgb, var(--student-dark) 80%, var(--disabled-text));
+        }
+        .theme-students select.select-valid-selection {
+            border-color: var(--student-color);
+            box-shadow: var(--shadow-offset) var(--student-dark);
+            background-color: color-mix(in srgb, var(--student-color) 15%, var(--container-bg));
+            color: var(--student-dark);
+        }
+
+
         .theme-workforce body { background-color: #E6F3FF; }
         .theme-workforce h1.comic-header { background: linear-gradient(135deg, var(--workforce-color), #4682B4); text-shadow: 2px 2px 0 var(--workforce-dark), -1px -1px 0 var(--workforce-dark), 1px -1px 0 var(--workforce-dark), -1px 1px 0 var(--workforce-dark), 1px 1px 0 var(--workforce-dark); }
         .theme-workforce button.comic-button.btn-active { background-color: var(--workforce-color); border-color: var(--workforce-dark); box-shadow: var(--shadow-offset) var(--workforce-dark); }
@@ -349,6 +455,81 @@
         .theme-workforce select:hover { background-color: #f0f8ff; }
         .theme-workforce #total { color: var(--workforce-dark); text-shadow: 3px 3px 0 white, 5px 5px 0 var(--workforce-color); }
         .theme-workforce div.card:has(#total) { background-color: #e3f2fd; border-color: var(--workforce-dark); box-shadow: var(--shadow-offset) var(--workforce-dark); }
+        .theme-workforce button#submitButton {
+            background: linear-gradient(135deg, var(--workforce-color), var(--workforce-dark));
+            border-color: var(--workforce-dark);
+            box-shadow: var(--shadow-offset) var(--workforce-dark);
+            text-shadow: 2px 2px 0 var(--workforce-dark);
+        }
+        .theme-workforce button#submitButton:hover {
+            background: linear-gradient(135deg, color-mix(in srgb, var(--workforce-color) 90%, white), color-mix(in srgb, var(--workforce-dark) 90%, white));
+            box-shadow: calc(var(--shadow-offset)/2) var(--workforce-dark);
+        }
+        .theme-workforce button#submitButton:disabled,
+        .theme-workforce button#submitButton[disabled] {
+            background: linear-gradient(135deg, color-mix(in srgb, var(--workforce-color) 50%, #ddd), color-mix(in srgb, var(--workforce-dark) 50%, #ccc));
+            border-color: color-mix(in srgb, var(--workforce-dark) 60%, #bbb);
+            box-shadow: var(--shadow-offset) color-mix(in srgb, var(--workforce-dark) 50%, #aaa);
+            text-shadow: 1px 1px 0px color-mix(in srgb, var(--workforce-dark) 40%, #999);
+            color: #707070;
+        }
+        .theme-workforce select:disabled {
+            background-color: #EBF4FB;
+            border-color: color-mix(in srgb, var(--workforce-dark) 50%, var(--disabled-border));
+            box-shadow: var(--shadow-offset) color-mix(in srgb, var(--workforce-dark) 40%, var(--disabled-shadow));
+            color: color-mix(in srgb, var(--workforce-dark) 80%, var(--disabled-text));
+        }
+        .theme-workforce select.select-valid-selection {
+            border-color: var(--workforce-color);
+            box-shadow: var(--shadow-offset) var(--workforce-dark);
+            background-color: color-mix(in srgb, var(--workforce-color) 15%, var(--container-bg));
+            color: var(--workforce-dark);
+        }
+
+        .theme-infants body { background-color: var(--infants-bg-light); }
+        .theme-infants h1.comic-header { background: linear-gradient(135deg, var(--infants-color), #38c1ba); text-shadow: 2px 2px 0 var(--infants-dark), -1px -1px 0 var(--infants-dark), 1px -1px 0 var(--infants-dark), -1px 1px 0 var(--infants-dark), 1px 1px 0 var(--infants-dark); }
+        .theme-infants button.comic-button.btn-active { background-color: var(--infants-color); border-color: var(--infants-dark); box-shadow: var(--shadow-offset) var(--infants-dark); color: var(--text-light); }
+        .theme-infants select:focus,
+        .theme-infants div.card input[type="number"]:focus,
+        .theme-infants div.card input[type="text"].drug-input:focus {
+            border-color: var(--infants-color);
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05), 0 0 0 3px rgba(32, 178, 170, 0.4), 0 0 10px rgba(32, 178, 170, 0.2);
+            background-color: #e7fafa;
+        }
+        .theme-infants select:hover { background-color: #f0fcfc; }
+        .theme-infants #total { color: var(--infants-dark); text-shadow: 3px 3px 0 white, 5px 5px 0 var(--infants-color); }
+        .theme-infants div.card:has(#total) { background-color: #e7fafa; border-color: var(--infants-dark); box-shadow: var(--shadow-offset) var(--infants-dark); }
+        .theme-infants button#submitButton {
+            background: linear-gradient(135deg, var(--infants-color), var(--infants-dark));
+            border-color: var(--infants-dark);
+            box-shadow: var(--shadow-offset) var(--infants-dark);
+            text-shadow: 2px 2px 0 var(--infants-dark);
+        }
+        .theme-infants button#submitButton:hover {
+            background: linear-gradient(135deg, color-mix(in srgb, var(--infants-color) 90%, white), color-mix(in srgb, var(--infants-dark) 90%, white));
+            box-shadow: calc(var(--shadow-offset)/2) var(--infants-dark);
+        }
+        .theme-infants button#submitButton:disabled,
+        .theme-infants button#submitButton[disabled] {
+            background: linear-gradient(135deg, color-mix(in srgb, var(--infants-color) 50%, #ddd), color-mix(in srgb, var(--infants-dark) 50%, #ccc));
+            border-color: color-mix(in srgb, var(--infants-dark) 60%, #bbb);
+            box-shadow: var(--shadow-offset) color-mix(in srgb, var(--infants-dark) 50%, #aaa);
+            text-shadow: 1px 1px 0px color-mix(in srgb, var(--infants-dark) 40%, #999);
+            color: #707070;
+        }
+        .theme-infants select:disabled {
+            background-color: #EAF7F7;
+            border-color: color-mix(in srgb, var(--infants-dark) 50%, var(--disabled-border));
+            box-shadow: var(--shadow-offset) color-mix(in srgb, var(--infants-dark) 40%, var(--disabled-shadow));
+            color: color-mix(in srgb, var(--infants-dark) 80%, var(--disabled-text));
+        }
+        .theme-infants select.select-valid-selection {
+            border-color: var(--infants-color);
+            box-shadow: var(--shadow-offset) var(--infants-dark);
+            background-color: color-mix(in srgb, var(--infants-color) 15%, var(--container-bg));
+            color: var(--infants-dark);
+        }
+
 
         html[dir="rtl"] div.grid-container { direction: rtl; }
 
@@ -383,8 +564,11 @@
             div.card:has(#total) h3 { font-size: 1.2rem; }
             button#submitButton { font-size: 1.2rem; }
 
-             .grid-cols-2, .sm\:grid-cols-2, .sm\:grid-cols-3, .md\:grid-cols-3 {
+             .grid-cols-1.sm\:grid-cols-3, .grid-cols-2, .sm\:grid-cols-2, .sm\:grid-cols-3, .md\:grid-cols-3 {
                 grid-template-columns: repeat(1, minmax(0, 1fr));
+             }
+             @media (min-width: 640px) {
+                .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
              }
         }
 
@@ -410,9 +594,10 @@
     <div class="main-container">
         <h1 id="mainHeader" class="comic-header">بيان المجموعات الدوائية</h1>
 
-        <div class="grid-container grid-cols-2 gap-4">
+        <div class="grid-container grid-cols-1 sm:grid-cols-3 gap-4">
             <button id="studentsBtn" class="comic-button btn-inactive">الطلبة</button>
             <button id="workforceBtn" class="comic-button btn-inactive">القوى العاملة</button>
+            <button id="infantsBtn" class="comic-button btn-inactive">مواليد</button>
         </div>
 
         <div class="grid-container grid-cols-1 sm:grid-cols-3 gap-4">
@@ -449,7 +634,6 @@
         </div>
 
         <div id="cards-container" class="grid-container grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            <!-- Cards Generated by JS -->
         </div>
 
         <div class="grid-container grid-cols-1 sm:grid-cols-2 gap-4">
@@ -479,6 +663,7 @@
       const totalElement = document.getElementById('total');
       const studentsBtn = document.getElementById('studentsBtn');
       const workforceBtn = document.getElementById('workforceBtn');
+      const infantsBtn = document.getElementById('infantsBtn');
       const monthSelect = document.getElementById('month');
       const regionSelect = document.getElementById('region');
       const pharmacySelect = document.getElementById('pharmacy');
@@ -505,6 +690,11 @@
           first: ["كفر الدوار سكر", "كفر الدوار الشاملة 1", "كفر الدوار الشاملة 2", "كفر الدوار مسائي", "النوبارية", "البيضا", "ابو المطامير", "رشيد", "ادكو"],
           second: ["دمنهور الشاملة 1", "دمنهور الشاملة 2", "دمنهور مسائي", "دمنهور سكر", "دمنهور اورام", "الشرطة", "حوش عيسي", "المحمودية مسائي", "المحمودية", "الرحمانية", "ابو حمص"],
           third: ["ايتاي الشاملة 1", "ايتاي الشاملة 2", "ايتاي مسائي", "كوم حمادة", "كوم حمادة مسائي", "بدر", "شبراخيت", "الدلنجات", "وادي النطرون", "قليشان"]
+        },
+        infants: {
+          first: ["كفر الدوار ", "البيضا مواليد", "النوبارية مواليد", "ابو المطامير مواليد", "رشيد مواليد", "ادكو مواليد"],
+          second: ["دمنهور مواليد", "حوش عيسي مواليد", "المحمودية مواليد", "الرحمانية مواليد", "ابو حمص مواليد", "اورام مواليد"],
+          third: ["ايتاي مواليد", "كوم حمادة مواليد", "بدر مواليد", "شبراخيت مواليد", "الدلنجات مواليد"]
         }
       };
 
@@ -632,7 +822,6 @@
                  maximumFractionDigits: 3
                });
         } else if (total === 0 && oldTotalText === "0.000") {
-            // No change needed
         } else if (total === 0 && oldTotalText === "0") {
             totalElement.textContent = "0.000";
         }
@@ -682,39 +871,60 @@
           if (inputElement.classList.contains('drug-input')) {
               const isValidOnBlur = valueStr === '' || (!isNaN(valueNum) && valueNum >= 0 && valueNum <= 1000000000);
                if (!isValidOnBlur) {
-                   // Validation state handled by validateSubmission or validateOptionalInputs
                }
           }
       }
 
+      const allThemeButtons = [studentsBtn, workforceBtn, infantsBtn];
 
       studentsBtn.addEventListener('click', () => toggleButton(studentsBtn));
       workforceBtn.addEventListener('click', () => toggleButton(workforceBtn));
+      infantsBtn.addEventListener('click', () => toggleButton(infantsBtn));
 
       function toggleButton(clickedButton) {
-        const otherButton = clickedButton === studentsBtn ? workforceBtn : studentsBtn;
         if (activeButton !== clickedButton) {
-            if (activeButton) {
-                activeButton.classList.remove('btn-active');
-                activeButton.classList.add('btn-inactive');
-                gsap.to(activeButton, { scale: 1, rotation: 0, duration: 0.2, ease: 'power1.out' });
-            }
+            allThemeButtons.forEach(btn => {
+                if (btn !== clickedButton && btn.classList.contains('btn-active')) {
+                    btn.classList.remove('btn-active');
+                    btn.classList.add('btn-inactive');
+                    gsap.to(btn, { scale: 1, rotation: 0, duration: 0.2, ease: 'power1.out' });
+                }
+            });
+
             clickedButton.classList.add('btn-active');
             clickedButton.classList.remove('btn-inactive');
             gsap.fromTo(clickedButton, { scale: 0.95, rotation: -2 }, { scale: 1, rotation: 0, duration: 0.3, ease: 'back.out(1.7)' });
-            otherButton.classList.remove('btn-active');
-            otherButton.classList.add('btn-inactive');
             activeButton = clickedButton;
-            const themeClass = clickedButton === studentsBtn ? 'theme-students' : 'theme-workforce';
+
+            let themeClass = '';
+            if (activeButton === studentsBtn) {
+                themeClass = 'theme-students';
+            } else if (activeButton === workforceBtn) {
+                themeClass = 'theme-workforce';
+            } else if (activeButton === infantsBtn) {
+                themeClass = 'theme-infants';
+            }
             document.body.className = '';
-            document.body.classList.add(themeClass);
+            if (themeClass) {
+                document.body.classList.add(themeClass);
+            }
 
             pharmacySelect.value = "";
-
             updatePharmacyDropdown();
+            updateSelectActiveStyles();
             saveToLocalStorage();
             updateSubmitButtonVisibility();
         }
+      }
+
+      function updateSelectActiveStyles() {
+        [monthSelect, regionSelect, pharmacySelect].forEach(sel => {
+            if (!sel.disabled && sel.value !== "") {
+                sel.classList.add('select-valid-selection');
+            } else {
+                sel.classList.remove('select-valid-selection');
+            }
+        });
       }
 
        function updatePharmacyDropdown() {
@@ -723,7 +933,11 @@
            pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
 
            if (regionSelect.value && activeButton) {
-               const category = activeButton === studentsBtn ? 'students' : 'workforce';
+               let category = '';
+                if (activeButton === studentsBtn) category = 'students';
+                else if (activeButton === workforceBtn) category = 'workforce';
+                else if (activeButton === infantsBtn) category = 'infants';
+
                const regionKey = regionSelect.value;
                const options = pharmacyOptions[category]?.[regionKey] || [];
 
@@ -747,6 +961,7 @@
                pharmacySelect.value = "";
            }
             pharmacySelect.disabled = !(regionSelect.value && activeButton && pharmacySelect.options.length > 1);
+            updateSelectActiveStyles();
        }
 
 
@@ -754,15 +969,18 @@
         updatePharmacyDropdown();
         saveToLocalStorage();
         updateSubmitButtonVisibility();
+        updateSelectActiveStyles();
       });
 
        pharmacySelect.addEventListener('change', () => {
            saveToLocalStorage();
            updateSubmitButtonVisibility();
+           updateSelectActiveStyles();
        });
         monthSelect.addEventListener('change', () => {
            saveToLocalStorage();
            updateSubmitButtonVisibility();
+           updateSelectActiveStyles();
        });
 
 
@@ -796,19 +1014,17 @@
 
                if (parsedData.activeButton) {
                    const btn = document.getElementById(parsedData.activeButton);
-                   if (btn) {
+                   if (btn && allThemeButtons.includes(btn)) {
                        toggleButton(btn);
                    } else {
                         activeButton = null;
                         document.body.className = '';
-                        studentsBtn.classList.remove('btn-active'); studentsBtn.classList.add('btn-inactive');
-                        workforceBtn.classList.remove('btn-active'); workforceBtn.classList.add('btn-inactive');
+                        allThemeButtons.forEach(b => {b.classList.remove('btn-active'); b.classList.add('btn-inactive');});
                    }
                } else {
                     activeButton = null;
                     document.body.className = '';
-                    studentsBtn.classList.remove('btn-active'); studentsBtn.classList.add('btn-inactive');
-                    workforceBtn.classList.remove('btn-active'); workforceBtn.classList.add('btn-inactive');
+                    allThemeButtons.forEach(b => {b.classList.remove('btn-active'); b.classList.add('btn-inactive');});
                }
 
 
@@ -841,13 +1057,12 @@
               updateTotal();
             } else {
                  resetAllFields(false);
-                 updateSubmitButtonVisibility();
             }
         } catch (error) {
              console.error("Error loading from localStorage:", error);
              resetAllFields(true);
-             updateSubmitButtonVisibility();
         }
+        updateSelectActiveStyles();
         updateSubmitButtonVisibility();
       }
 
@@ -876,7 +1091,7 @@
 
           await sendDataToGoogleSheets();
 
-          gsap.to(submitButton, { backgroundColor: '#2E7D32', duration: 0.3 });
+          gsap.to(submitButton, { background: '#2E7D32', duration: 0.3 });
           submitButton.textContent = 'تم الإرسال بنجاح!';
           alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
 
@@ -886,20 +1101,19 @@
         } catch (error) {
           console.error('Error in submission:', error);
           submitButton.textContent = 'فشل الإرسال - حاول مرة أخرى';
-           gsap.to(submitButton, { backgroundColor: '#D32F2F', duration: 0.3 });
+           gsap.to(submitButton, { background: '#D32F2F', duration: 0.3 });
           alert(`حدث خطأ أثناء الإرسال: ${error.message || 'يرجى المحاولة مرة أخرى.'}`);
            await new Promise(resolve => setTimeout(resolve, 2000));
 
         } finally {
           isSubmitting = false;
-          if (!submitButton.disabled) {
-              submitButton.disabled = false;
-          }
           gsap.to(submitButton, { opacity: 1, duration: 0.2 });
           if (submitButton.textContent !== 'إرسال البيانات') {
               submitButton.textContent = 'إرسال البيانات';
-               const defaultGradient = 'linear-gradient(135deg, var(--accent-green), var(--accent-green-dark))';
-               gsap.to(submitButton, { backgroundImage: defaultGradient, backgroundColor: '', duration: 0.3 });
+              gsap.to(submitButton, {
+                  clearProps: "background, backgroundColor, backgroundImage",
+                  duration: 0.3
+              });
           }
           updateSubmitButtonVisibility();
         }
@@ -1011,11 +1225,14 @@
                 gsap.to(activeButton, { scale: 1, rotation: 0, duration: 0.2, ease: 'power1.out' });
                 activeButton = null;
             }
-             studentsBtn.classList.remove('btn-active'); studentsBtn.classList.add('btn-inactive');
-             workforceBtn.classList.remove('btn-active'); workforceBtn.classList.add('btn-inactive');
-             document.body.className = '';
+            allThemeButtons.forEach(btn => {
+                btn.classList.remove('btn-active');
+                btn.classList.add('btn-inactive');
+            });
+            document.body.className = '';
 
             updateTotal();
+            updateSelectActiveStyles();
 
             if (clearStorage) {
                 try {
@@ -1112,6 +1329,7 @@
       loadFromLocalStorage();
 
        if (!localStorage.getItem('pharmacyAppData')) {
+            updateSelectActiveStyles();
             updateSubmitButtonVisibility();
        }
 
