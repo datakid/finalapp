@@ -90,7 +90,7 @@
         .gap-4 { gap: 1.25rem; }
         .gap-6 { gap: 2rem; }
         @media (min-width: 640px) { .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media (min-width: 1024px) { .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media (min-width: 1024px) { .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
         div.card { display: flex; flex-direction: column; background-color: var(--container-bg); border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-offset) var(--shadow-color); transition: all var(--transition-speed) var(--transition-ease); position: relative; }
         div.card::before { content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px; border: 2px solid white; border-radius: calc(var(--radius-lg) - 5px); pointer-events: none; z-index: 1; }
@@ -120,6 +120,14 @@
         button#submitButton:disabled { background: linear-gradient(135deg, #B0BEC5, #78909C); border-color: #90A4AE; box-shadow: var(--shadow-offset) #607D8B; text-shadow: 1px 1px 0 #546E7A; cursor: not-allowed; opacity: 0.7; }
         button#submitButton:disabled:hover { transform: none; filter: none; }
 
+        #notification-area { position: fixed; top: 1.5rem; left: 1.5rem; z-index: 2000; display: flex; flex-direction: column; gap: 0.75rem; width: clamp(280px, 90vw, 400px); pointer-events: none; }
+        .notification { display: flex; align-items: center; gap: 0.75rem; pointer-events: auto; font-family: 'Changa', 'Cairo', sans-serif; font-size: 1.1rem; color: var(--text-light); padding: 1rem 1.25rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); text-shadow: 1px 1px 0 rgba(0,0,0,0.3); opacity: 0; position: relative; overflow: hidden; }
+        .notification.success { background-color: #2E8B57; box-shadow: var(--shadow-offset) #257247; }
+        .notification.error { background-color: #D32F2F; box-shadow: var(--shadow-offset) #a82727; }
+        .notification.info { background-color: var(--theme-color, var(--default-theme-color)); box-shadow: var(--shadow-offset) var(--theme-shadow-color, var(--default-theme-shadow-color)); }
+        .notification-icon { width: 1.5rem; height: 1.5rem; flex-shrink: 0; }
+        .notification-icon svg { width: 100%; height: 100%; fill: currentColor; }
+        .notification-progress { position: absolute; bottom: 0; left: 0; height: 4px; background-color: rgba(255, 255, 255, 0.4); }
 
         @media (max-width: 768px) {
             html { font-size: 15px; }
@@ -138,9 +146,10 @@
             body { padding: 0.5rem; }
             .main-container { padding: 1rem; }
             h1.comic-header { font-size: 1.8rem; transform: rotate(-1deg); }
-            .grid-container.sm\:grid-cols-3, .grid-container.sm\:grid-cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+            .grid-container.sm\:grid-cols-3, .grid-container.sm\:grid-cols-2, .grid-container.md\:grid-cols-4 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
             div.card h3 { font-size: 1.1rem; min-height: 3em; }
             #total { font-size: 2.5rem; }
+            #notification-area { left: 0.5rem; right: 0.5rem; top: 0.5rem; width: auto; }
         }
 
         ::-webkit-scrollbar { width: 12px; height: 12px; }
@@ -161,22 +170,38 @@
             <button id="infantsBtn" class="comic-button btn-inactive">المواليد</button>
         </div>
 
-        <div class="grid-container grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid-container grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="select-wrapper">
+                <select id="year">
+                    <option value="">السنة</option>
+                    <option value="2025">2024-2025</option>
+                    <option value="2026">2025-2026</option>
+                    <option value="2027">2026-2027</option>
+                    <option value="2028">2027-2028</option>
+                    <option value="2029">2028-2029</option>
+                    <option value="2030">2029-2030</option>
+                    <option value="2031">2030-2031</option>
+                    <option value="2032">2031-2032</option>
+                    <option value="2033">2032-2033</option>
+                    <option value="2034">2033-2034</option>
+                    <option value="2035">2034-2035</option>
+                </select>
+            </div>
             <div class="select-wrapper">
                 <select id="month">
-                    <option value="">اختر الشهر</option>
+                    <option value="">الشهر</option>
                     <option value="1">يناير</option> <option value="2">فبراير</option> <option value="3">مارس</option> <option value="4">أبريل</option> <option value="5">مايو</option> <option value="6">يونيو</option> <option value="7">يوليو</option> <option value="8">أغسطس</option> <option value="9">سبتمبر</option> <option value="10">أكتوبر</option> <option value="11">نوفمبر</option> <option value="12">ديسمبر</option>
                 </select>
             </div>
             <div class="select-wrapper">
                 <select id="region">
-                    <option value="">اختر المنطقة</option>
+                    <option value="">المنطقة</option>
                     <option value="first">الاولي</option> <option value="second">الثانية</option> <option value="third">الثالثة</option>
                 </select>
             </div>
             <div class="select-wrapper">
                 <select id="pharmacy" disabled>
-                    <option value="">اختر الصيدلية</option>
+                    <option value="">الصيدلية</option>
                 </select>
             </div>
         </div>
@@ -203,6 +228,8 @@
         <button id="submitButton">إرسال البيانات</button>
     </div>
 
+    <div id="notification-area"></div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
           const docElement = document.documentElement;
@@ -211,15 +238,23 @@
           const studentsBtn = document.getElementById('studentsBtn');
           const workforceBtn = document.getElementById('workforceBtn');
           const infantsBtn = document.getElementById('infantsBtn');
+          const yearSelect = document.getElementById('year');
           const monthSelect = document.getElementById('month');
           const regionSelect = document.getElementById('region');
           const pharmacySelect = document.getElementById('pharmacy');
           const submitButton = document.getElementById('submitButton');
           const totalTicketsInput = document.getElementById('totalTickets');
           const totalExternalInput = document.getElementById('totalExternal');
+          const notificationArea = document.getElementById('notification-area');
           let cardValues = Array(18).fill(0);
           let activeButton = null;
           let isSubmitting = false;
+          
+          const icons = {
+            success: `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>`,
+            error: `<svg viewBox="0 0 24 24"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2z"></path></svg>`,
+            info: `<svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path></svg>`
+          };
 
           const cardNames = [ 'المسكنات', 'مضادات حيوية', 'كلي', 'نفسية و عصبية', 'قلب', 'سكر حقن', 'سكر فم', 'نسا', 'كبد', 'جهاز هضمي', 'جهاز تنفسي', 'امراض جلدية', 'عيون و رمد', 'انف و اذن', 'مضادات تقلصات', 'اورام', 'فيتامينات', 'مختلفة' ];
           const pharmacyOptions = { students: { first: ["كفر الدوار طلاب", "البيضا طلاب", "النوبارية طلاب", "ابو المطامير طلاب", "رشيد طلاب", "ادكو طلاب"], second: ["دمنهور طلاب", "حوش عيسي طلاب", "المحمودية طلاب", "الرحمانية طلاب", "ابو حمص طلاب", "اورام طلاب"], third: ["ايتاي طلاب", "كوم حمادة طلاب", "بدر طلاب", "شبراخيت طلاب", "الدلنجات طلاب"] }, workforce: { first: ["كفر الدوار سكر", "كفر الدوار الشاملة 1", "كفر الدوار الشاملة 2", "كفر الدوار مسائي", "النوبارية", "البيضا", "ابو المطامير", "رشيد", "ادكو"], second: ["دمنهور الشاملة 1", "دمنهور الشاملة 2", "دمنهور مسائي", "دمنهور سكر", "دمنهور اورام", "الشرطة", "حوش عيسي", "المحمودية مسائي", "المحمودية", "الرحمانية", "ابو حمص"], third: ["ايتاي الشاملة 1", "ايتاي الشاملة 2", "ايتاي مسائي", "كوم حمادة", "كوم حمادة مسائي", "بدر", "شبراخيت", "الدلنجات", "وادي النطرون", "قليشان"] }, infants: { first: ["كفر الدوار ", "البيضا مواليد", "النوبارية مواليد", "ابو المطامير مواليد", "رشيد مواليد", "ادكو مواليد"], second: ["دمنهور مواليد", "حوش عيسي مواليد", "المحمودية مواليد", "الرحمانية مواليد", "ابو حمص مواليد", "اورام مواليد"], third: ["ايتاي مواليد", "كوم حمادة مواليد", "بدر مواليد", "شبراخيت مواليد", "الدلنجات مواليد"] } };
@@ -230,13 +265,26 @@
             card.innerHTML = `<h3>${cardNames[i]}</h3><input type="text" class="drug-input" data-index="${i}" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]+" dir="ltr">`;
             cardsContainer.appendChild(card);
           }
+          
+          function showNotification(message, type = 'info', duration = 5000) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            const iconHTML = icons[type] || icons['info'];
+            notification.innerHTML = `<div class="notification-icon">${iconHTML}</div><div>${message}</div><div class="notification-progress"></div>`;
+            notificationArea.appendChild(notification);
+            const progressBar = notification.querySelector('.notification-progress');
+            gsap.fromTo(notification, { opacity: 0, y: -20, scale: 0.95 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'power2.out' });
+            gsap.fromTo(progressBar, { width: '100%' }, { width: '0%', duration: duration / 1000, ease: 'none' });
+            setTimeout(() => {
+                gsap.to(notification, { opacity: 0, x: 30, duration: 0.4, ease: 'power1.in', onComplete: () => notification.remove() });
+            }, duration);
+          }
 
           function handleDrugInput(e) {
             const input = e.target;
             const index = parseInt(input.dataset.index);
             let value = input.value;
             const cursorPosition = input.selectionStart;
-
             if (value === '') { cardValues[index] = 0; }
             else {
               value = value.replace(/,/g, '.').replace(/[^\d.]/g, '');
@@ -296,11 +344,8 @@
               if (!card) return;
               const valueStr = inputElement.value.trim();
               let valueNum;
-              if (inputElement.type === 'number') {
-                  valueNum = parseInt(valueStr, 10);
-              } else {
-                  valueNum = parseFloat(valueStr.replace(/,/g, '.'));
-              }
+              if (inputElement.type === 'number') { valueNum = parseInt(valueStr, 10); } 
+              else { valueNum = parseFloat(valueStr.replace(/,/g, '.')); }
               card.classList.toggle('card-active', valueStr !== '' && !isNaN(valueNum) && valueNum >= 0);
           }
 
@@ -327,12 +372,12 @@
           }
 
           function updateSelectActiveStyles() {
-            [monthSelect, regionSelect, pharmacySelect].forEach(sel => sel.classList.toggle('select-valid-selection', !sel.disabled && sel.value !== ""));
+            [yearSelect, monthSelect, regionSelect, pharmacySelect].forEach(sel => sel.classList.toggle('select-valid-selection', !sel.disabled && sel.value !== ""));
           }
 
            function updatePharmacyDropdown() {
                const currentPharmacyValue = pharmacySelect.value;
-               pharmacySelect.innerHTML = '<option value="">اختر الصيدلية</option>';
+               pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
                let categoryKey = '';
                 if (activeButton === studentsBtn) categoryKey = 'students';
                 else if (activeButton === workforceBtn) categoryKey = 'workforce';
@@ -347,7 +392,7 @@
                 updateSelectActiveStyles();
            }
 
-          [regionSelect, monthSelect, pharmacySelect].forEach(sel => {
+          [yearSelect, regionSelect, monthSelect, pharmacySelect].forEach(sel => {
               sel.addEventListener('change', () => {
                   if (sel === regionSelect) updatePharmacyDropdown();
                   saveToLocalStorage();
@@ -358,7 +403,7 @@
 
           function saveToLocalStorage() {
             try {
-                localStorage.setItem('pharmacyAppData', JSON.stringify({ cardValues: cardValues.map(v => (isNaN(v) ? 0 : v)), activeButton: activeButton ? activeButton.id : null, month: monthSelect.value, region: regionSelect.value, pharmacy: pharmacySelect.value, totalTickets: totalTicketsInput.value, totalExternal: totalExternalInput.value }));
+                localStorage.setItem('pharmacyAppData', JSON.stringify({ cardValues: cardValues.map(v => (isNaN(v) ? 0 : v)), activeButton: activeButton ? activeButton.id : null, year: yearSelect.value, month: monthSelect.value, region: regionSelect.value, pharmacy: pharmacySelect.value, totalTickets: totalTicketsInput.value, totalExternal: totalExternalInput.value }));
             } catch (error) { console.error("Error saving to localStorage:", error); }
           }
 
@@ -369,6 +414,7 @@
                 const parsedData = JSON.parse(savedData);
                 cardValues = (parsedData.cardValues || []).map(v => { const num = parseFloat(v); return isNaN(num) || num < 0 ? 0 : Math.min(num, 1000000000); });
                 if (parsedData.activeButton) { const btn = document.getElementById(parsedData.activeButton); if (btn) toggleButton(btn); }
+                yearSelect.value = parsedData.year || "";
                 monthSelect.value = parsedData.month || "";
                 regionSelect.value = parsedData.region || "";
                 updatePharmacyDropdown();
@@ -385,8 +431,8 @@
 
           submitButton.addEventListener('click', async () => {
             if (isSubmitting) return;
-            if (!validateOptionalInputs()) { alert("الرجاء تصحيح قيمة اجمالي التذاكر أو اجمالي الخارجي."); return; }
-            if (!validateSubmission()) { alert("برجاء اكمال البيانات المطلوبة بشكل صحيح والتأكد من المجموع."); gsap.fromTo(submitButton, { x: -5 }, { x: 5, duration: 0.05, repeat: 5, yoyo: true, clearProps: "x" }); return; }
+            if (!validateOptionalInputs()) { showNotification("الرجاء تصحيح قيمة اجمالي التذاكر أو اجمالي الخارجي.", 'error'); return; }
+            if (!validateSubmission()) { showNotification("برجاء اكمال البيانات المطلوبة بشكل صحيح والتأكد من المجموع.", 'error'); gsap.fromTo(submitButton, { x: -5 }, { x: 5, duration: 0.05, repeat: 5, yoyo: true, clearProps: "x" }); return; }
             try {
               isSubmitting = true;
               submitButton.disabled = true;
@@ -395,14 +441,14 @@
               await sendDataToGoogleSheets();
               submitButton.textContent = 'تم الإرسال بنجاح!';
               gsap.to(submitButton, { backgroundColor: '#2E8B57', duration: 0.3 });
-              alert('تم تنزيل الملف وإرسال البيانات بنجاح!');
+              showNotification('تم تنزيل الملف وإرسال البيانات بنجاح!', 'success');
               await new Promise(resolve => setTimeout(resolve, 1500));
               resetAllFields(true);
             } catch (error) {
               console.error('Error in submission:', error);
               submitButton.textContent = 'فشل الإرسال';
               gsap.to(submitButton, { backgroundColor: '#D32F2F', duration: 0.3 });
-              alert(`حدث خطأ أثناء الإرسال: ${error.message || 'يرجى المحاولة مرة أخرى.'}`);
+              showNotification(`حدث خطأ أثناء الإرسال: ${error.message || 'يرجى المحاولة مرة أخرى.'}`, 'error', 6000);
               await new Promise(resolve => setTimeout(resolve, 2000));
             } finally {
               isSubmitting = false;
@@ -414,13 +460,13 @@
 
            function validateSubmission() {
                const total = cardValues.reduce((acc, val) => acc + (val || 0), 0);
-               const allDropdownsFilled = monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
+               const allDropdownsFilled = yearSelect.value && monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
                return total > 0 && allDropdownsFilled && validateOptionalInputs();
            }
 
           async function sendDataToGoogleSheets() {
-            const data = { date: new Date().toISOString(), class: activeButton ? activeButton.textContent.trim() : '', month: monthSelect.options[monthSelect.selectedIndex]?.text || '', region: regionSelect.options[regionSelect.selectedIndex]?.text || '', pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex]?.text || '', totalPrescription: +totalTicketsInput.value.trim() || 0, insuranceCoveredPrescription: +totalExternalInput.value.trim() || 0, ...cardNames.reduce((acc, name, i) => ({ ...acc, [name]: +cardValues[i] || 0 }), {}), calculatedTotal: cardValues.reduce((sum, val) => sum + (val || 0), 0) };
-            const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbykxsi4bwZS9CumCNxtc_isN0u7mWC-Z97BqoXL7vHyGIwxZ48vk7_zkMkTMr-Derclhw/exec';
+            const data = { date: new Date().toISOString(), year: yearSelect.value, class: activeButton ? activeButton.textContent.trim() : '', month: monthSelect.options[monthSelect.selectedIndex]?.text || '', region: regionSelect.options[regionSelect.selectedIndex]?.text || '', pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex]?.text || '', totalPrescription: +totalTicketsInput.value.trim() || 0, insuranceCoveredPrescription: +totalExternalInput.value.trim() || 0, ...cardNames.reduce((acc, name, i) => ({ ...acc, [name]: +cardValues[i] || 0 }), {}), calculatedTotal: cardValues.reduce((sum, val) => sum + (val || 0), 0) };
+            const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzf9AsBFFX_vTlm83Cm94Jbi68w6ncihFosEWnrnyUmzMBOJaibWQU7ffXbH1zcYpaKGg/exec';
             try {
                 await fetch(`${SHEETS_URL}?data=${encodeURIComponent(JSON.stringify(data))}`, { method: 'GET', mode: 'no-cors' });
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -437,8 +483,8 @@
           function resetAllFields(clearStorage = true) {
                 cardValues.fill(0);
                 document.querySelectorAll('input.drug-input, input[type="number"]').forEach(input => { input.value = ''; updateCardStyle(input); input.closest('.card')?.classList.remove('card-invalid'); });
-                [monthSelect, regionSelect].forEach(s => s.selectedIndex = 0);
-                pharmacySelect.innerHTML = '<option value="">اختر الصيدلية</option>';
+                [yearSelect, monthSelect, regionSelect].forEach(s => s.selectedIndex = 0);
+                pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
                 pharmacySelect.disabled = true;
                 if (activeButton) { activeButton.classList.remove('btn-active'); activeButton.classList.add('btn-inactive'); activeButton = null; }
                 docElement.className = '';
