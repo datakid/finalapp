@@ -1,917 +1,918 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <title>المجموعات الدوائية</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        *, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: #e5e7eb; }
-        html { line-height: 1.5; -webkit-text-size-adjust: 100%; -moz-tab-size: 4; tab-size: 4; font-family: 'Cairo', sans-serif; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
-        body { margin: 0; line-height: inherit; }
-        h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; margin: 0; }
-        a { color: inherit; text-decoration: inherit; }
-        b, strong { font-weight: bolder; }
-        code, kbd, samp, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 1em; }
-        button, input, optgroup, select, textarea { font-family: inherit; font-size: 100%; font-weight: inherit; line-height: inherit; color: inherit; margin: 0; padding: 0; }
-        button, select { text-transform: none; }
-        button, [type='button'], [type='reset'], [type='submit'] { -webkit-appearance: button; background-color: transparent; background-image: none; }
-        summary { display: list-item; }
-        blockquote, dl, dd, p, pre { margin: 0; }
-        fieldset, ol, ul, menu { margin: 0; padding: 0; list-style: none;}
-        textarea { resize: vertical; }
-        input::placeholder, textarea::placeholder { opacity: 1; color: #9ca3af; }
-        button, [role="button"] { cursor: pointer; }
-        :disabled { cursor: default; }
-        img, svg, video, canvas, audio, iframe, embed, object { display: block; vertical-align: middle; }
-        img, video { max-width: 100%; height: auto; }
-        [hidden] { display: none !important; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<title>المجموعات الدوائية</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: #e5e7eb; }
+html { line-height: 1.5; -webkit-text-size-adjust: 100%; -moz-tab-size: 4; tab-size: 4; font-family: 'Cairo', sans-serif; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+body { margin: 0; line-height: inherit; }
+h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; margin: 0; }
+a { color: inherit; text-decoration: inherit; }
+b, strong { font-weight: bolder; }
+code, kbd, samp, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 1em; }
+button, input, optgroup, select, textarea { font-family: inherit; font-size: 100%; font-weight: inherit; line-height: inherit; color: inherit; margin: 0; padding: 0; }
+button, select { text-transform: none; }
+button, [type='button'], [type='reset'], [type='submit'] { -webkit-appearance: button; background-color: transparent; background-image: none; }
+summary { display: list-item; }
+blockquote, dl, dd, p, pre { margin: 0; }
+fieldset, ol, ul, menu { margin: 0; padding: 0; list-style: none;}
+textarea { resize: vertical; }
+input::placeholder, textarea::placeholder { opacity: 1; color: #9ca3af; }
+button, [role="button"] { cursor: pointer; }
+:disabled { cursor: default; }
+img, svg, video, canvas, audio, iframe, embed, object { display: block; vertical-align: middle; }
+img, video { max-width: 100%; height: auto; }
+[hidden] { display: none !important; }
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Bangers&family=Changa:wght@600&family=Fredoka+One&display=swap');
 
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Bangers&family=Changa:wght@600&family=Fredoka+One&display=swap');
+    :root {
+        --bg-cream: #FFF8DC;
+        --container-bg: #FFFFFF;
+        --border-dark: #212121;
+        --text-dark: #212121;
+        --text-light: #FFFFFF;
+        --text-secondary: #6c757d;
+        --shadow-offset: 4px 4px 0px;
+        --shadow-color: rgba(0, 0, 0, 0.45);
+        --radius-md: 0.75rem;
+        --radius-lg: 1rem;
+        --transition-speed: 0.25s;
+        --transition-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --border-width: 3px;
+        --disabled-bg: #f8f9fa;
+        --disabled-border: #CED4DA;
+        --disabled-shadow: #ADB5BD;
+        --disabled-text: #6C757D;
+        --default-theme-color: #4682B4;
+        --default-theme-color-dark: #3a6a94;
+        --default-theme-shadow-color: #3a6a94;
+    }
+    
+    html {
+        --theme-color: var(--default-theme-color);
+        --theme-color-dark: var(--default-theme-color-dark);
+        --theme-shadow-color: var(--default-theme-shadow-color);
+        font-size: 16px; scroll-behavior: smooth;
+    }
+    html.theme-students { --theme-color: #FF6B6B; --theme-color-dark: #E55252; --theme-shadow-color: #D32F2F; }
+    html.theme-workforce { --theme-color: #1E90FF; --theme-color-dark: #1C80E5; --theme-shadow-color: #1976D2; }
+    html.theme-infants { --theme-color: #20B2AA; --theme-color-dark: #1B9C95; --theme-shadow-color: #008080; }
 
-        :root {
-            --bg-cream: #FFF8DC;
-            --container-bg: #FFFFFF;
-            --border-dark: #212121;
-            --text-dark: #212121;
-            --text-light: #FFFFFF;
-            --text-secondary: #6c757d;
-            --shadow-offset: 4px 4px 0px;
-            --shadow-color: rgba(0, 0, 0, 0.45);
-            --radius-md: 0.75rem;
-            --radius-lg: 1rem;
-            --transition-speed: 0.25s;
-            --transition-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-            --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
-            --border-width: 3px;
-            --disabled-bg: #f8f9fa;
-            --disabled-border: #CED4DA;
-            --disabled-shadow: #ADB5BD;
-            --disabled-text: #6C757D;
-            --default-theme-color: #4682B4;
-            --default-theme-color-dark: #3a6a94;
-            --default-theme-shadow-color: #3a6a94;
-        }
-        
-        html {
-            --theme-color: var(--default-theme-color);
-            --theme-color-dark: var(--default-theme-color-dark);
-            --theme-shadow-color: var(--default-theme-shadow-color);
-            font-size: 16px; scroll-behavior: smooth;
-        }
-        html.theme-students { --theme-color: #FF6B6B; --theme-color-dark: #E55252; --theme-shadow-color: #D32F2F; }
-        html.theme-workforce { --theme-color: #1E90FF; --theme-color-dark: #1C80E5; --theme-shadow-color: #1976D2; }
-        html.theme-infants { --theme-color: #20B2AA; --theme-color-dark: #1B9C95; --theme-shadow-color: #008080; }
+    body { background-color: var(--bg-cream); color: var(--text-dark); transition: background-color var(--transition-speed) ease; background-image: radial-gradient(var(--text-dark) 0.5px, transparent 0.5px); background-size: 15px 15px; padding: 1.5rem; overflow-x: hidden; }
+    
+    .main-container { max-width: 80rem; margin: auto; background-color: var(--container-bg); border-radius: var(--radius-lg); padding: 2rem; border: var(--border-width) solid var(--border-dark); box-shadow: var(--shadow-offset) var(--shadow-color), 0 10px 15px -3px rgba(0,0,0,0.1); position: relative; z-index: 1; }
+    .main-container > :not([hidden]) ~ :not([hidden]) { margin-top: 1.75rem; }
 
-        body { background-color: var(--bg-cream); color: var(--text-dark); transition: background-color var(--transition-speed) ease; background-image: radial-gradient(var(--text-dark) 0.5px, transparent 0.5px); background-size: 15px 15px; padding: 1.5rem; overflow-x: hidden; }
-        
-        .main-container { max-width: 80rem; margin: auto; background-color: var(--container-bg); border-radius: var(--radius-lg); padding: 2rem; border: var(--border-width) solid var(--border-dark); box-shadow: var(--shadow-offset) var(--shadow-color), 0 10px 15px -3px rgba(0,0,0,0.1); position: relative; z-index: 1; }
-        .main-container > :not([hidden]) ~ :not([hidden]) { margin-top: 1.75rem; }
+    h1.comic-header, h2.comic-header { font-family: 'Fredoka One', cursive; font-size: 2.8rem; font-weight: 700; color: var(--text-light); background: linear-gradient(135deg, var(--theme-color), var(--theme-color-dark)); padding: 1.5rem 2rem; border-radius: var(--radius-md); border: 2px solid var(--border-dark); text-align: center; text-shadow: 2px 2px 0 var(--border-dark), -1px -1px 0 var(--border-dark), 1px -1px 0 var(--border-dark), -1px 1px 0 var(--border-dark), 1px 1px 0 var(--border-dark); transition: transform var(--transition-speed) var(--transition-bounce), filter var(--transition-speed) ease; transform: rotate(-1.5deg); margin: 0.5rem; }
+    h1.comic-header:hover, h2.comic-header:hover { transform: rotate(0.5deg) scale(1.02); filter: brightness(1.05); }
 
-        h1.comic-header, h2.comic-header { font-family: 'Fredoka One', cursive; font-size: 2.8rem; font-weight: 700; color: var(--text-light); background: linear-gradient(135deg, var(--theme-color), var(--theme-color-dark)); padding: 1.5rem 2rem; border-radius: var(--radius-md); border: 2px solid var(--border-dark); text-align: center; text-shadow: 2px 2px 0 var(--border-dark), -1px -1px 0 var(--border-dark), 1px -1px 0 var(--border-dark), -1px 1px 0 var(--border-dark), 1px 1px 0 var(--border-dark); transition: transform var(--transition-speed) var(--transition-bounce), filter var(--transition-speed) ease; transform: rotate(-1.5deg); margin: 0.5rem; }
-        h1.comic-header:hover, h2.comic-header:hover { transform: rotate(0.5deg) scale(1.02); filter: brightness(1.05); }
+    button.comic-button { font-family: 'Bangers', 'Cairo', cursive; font-weight: 600; font-size: 1.3rem; padding: 1rem 1.5rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); background-color: var(--container-bg); color: var(--text-dark); box-shadow: var(--shadow-offset) var(--shadow-color); transition: all var(--transition-speed) var(--transition-bounce); text-transform: uppercase; letter-spacing: 1.5px; position: relative; will-change: transform; }
+    
+    button.comic-button.btn-active { color: var(--text-light); background-color: var(--theme-color); border-color: var(--theme-color-dark); box-shadow: var(--shadow-offset) var(--theme-shadow-color); text-shadow: 1px 1px 0 var(--theme-shadow-color); animation: pulse-active-button 2s var(--transition-ease) infinite; }
+    @keyframes pulse-active-button { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+    
+    button.comic-button.btn-inactive { background-color: var(--disabled-bg); color: var(--text-secondary); box-shadow: var(--shadow-offset) var(--disabled-shadow); border-color: var(--disabled-border); transform: none; }
+    button.comic-button:not(.btn-active, :disabled):hover { transform: translateY(-3px) rotate(-1deg); background-color: #fffbeb; }
+    button.comic-button:active:not(.btn-active, :disabled) { transform: translate(var(--shadow-offset)) !important; box-shadow: none !important; }
 
-        button.comic-button { font-family: 'Bangers', 'Cairo', cursive; font-weight: 600; font-size: 1.3rem; padding: 1rem 1.5rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); background-color: var(--container-bg); color: var(--text-dark); box-shadow: var(--shadow-offset) var(--shadow-color); transition: all var(--transition-speed) var(--transition-bounce); text-transform: uppercase; letter-spacing: 1.5px; position: relative; will-change: transform; }
-        
-        button.comic-button.btn-active { color: var(--text-light); background-color: var(--theme-color); border-color: var(--theme-color-dark); box-shadow: var(--shadow-offset) var(--theme-shadow-color); text-shadow: 1px 1px 0 var(--theme-shadow-color); animation: pulse-active-button 2s var(--transition-ease) infinite; }
-        @keyframes pulse-active-button { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
-        
-        button.comic-button.btn-inactive { background-color: var(--disabled-bg); color: var(--text-secondary); box-shadow: var(--shadow-offset) var(--disabled-shadow); border-color: var(--disabled-border); transform: none; }
-        button.comic-button:not(.btn-active, :disabled):hover { transform: translateY(-3px) rotate(-1deg); background-color: #fffbeb; }
-        button.comic-button:active:not(.btn-active, :disabled) { transform: translate(var(--shadow-offset)) !important; box-shadow: none !important; }
+    .select-wrapper { position: relative; }
+    select { font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 1.1rem; padding: 1rem 1.5rem; background-position: left 1rem center; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23212121' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: 1.3em; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); background-color: var(--container-bg); box-shadow: var(--shadow-offset) var(--shadow-color); transition: all var(--transition-speed) var(--transition-bounce); outline: none; appearance: none; -webkit-appearance: none; width: 100%; transform: rotate(-0.5deg); cursor: pointer; }
+    html[dir="rtl"] select { padding: 1rem 3.5rem 1rem 1.5rem; background-position: right 1rem center; text-align: right; direction: rtl; }
+    select:hover:not(:disabled) { transform: translateY(-2px) rotate(0.2deg) scale(1.01); background-color: #fffbeb; }
+    select:focus { transform: rotate(0deg) scale(1.01); box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 30%, transparent), var(--shadow-offset) var(--theme-shadow-color); border-color: var(--theme-color); }
+    select.select-valid-selection { border-color: var(--theme-color); box-shadow: var(--shadow-offset) var(--theme-shadow-color); background-color: color-mix(in srgb, var(--theme-color) 10%, white); color: var(--theme-color-dark); }
+    select:disabled { border-color: var(--disabled-border) !important; box-shadow: var(--shadow-offset) var(--disabled-shadow) !important; background-color: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; transform: rotate(0deg); opacity: 0.8; }
 
-        .select-wrapper { position: relative; }
-        select { font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 1.1rem; padding: 1rem 1.5rem; background-position: left 1rem center; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23212121' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-size: 1.3em; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); background-color: var(--container-bg); box-shadow: var(--shadow-offset) var(--shadow-color); transition: all var(--transition-speed) var(--transition-bounce); outline: none; appearance: none; -webkit-appearance: none; width: 100%; transform: rotate(-0.5deg); cursor: pointer; }
-        html[dir="rtl"] select { padding: 1rem 3.5rem 1rem 1.5rem; background-position: right 1rem center; text-align: right; direction: rtl; }
-        select:hover:not(:disabled) { transform: translateY(-2px) rotate(0.2deg) scale(1.01); background-color: #fffbeb; }
-        select:focus { transform: rotate(0deg) scale(1.01); box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 30%, transparent), var(--shadow-offset) var(--theme-shadow-color); border-color: var(--theme-color); }
-        select.select-valid-selection { border-color: var(--theme-color); box-shadow: var(--shadow-offset) var(--theme-shadow-color); background-color: color-mix(in srgb, var(--theme-color) 10%, white); color: var(--theme-color-dark); }
-        select:disabled { border-color: var(--disabled-border) !important; box-shadow: var(--shadow-offset) var(--disabled-shadow) !important; background-color: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; transform: rotate(0deg); opacity: 0.8; }
+    .grid-container { display: grid; }
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    .gap-4 { gap: 1.25rem; }
+    .gap-6 { gap: 2rem; }
+    @media (min-width: 640px) { .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (min-width: 1024px) { .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
-        .grid-container { display: grid; }
-        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-        .gap-4 { gap: 1.25rem; }
-        .gap-6 { gap: 2rem; }
-        @media (min-width: 640px) { .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-        @media (min-width: 1024px) { .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    div.card { display: flex; flex-direction: column; background-color: var(--container-bg); border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-offset) var(--shadow-color); transition: transform var(--transition-speed) var(--transition-bounce), box-shadow var(--transition-speed) var(--transition-bounce), border-color 0.2s; position: relative; will-change: transform; }
+    div.card::before { content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px; border: 2px solid white; border-radius: calc(var(--radius-lg) - 5px); pointer-events: none; z-index: 1; }
+    div.card:not(#total-card):not(.upload-card):hover { transform: translateY(-4px) rotate(-0.5deg) scale(1.02); box-shadow: calc(var(--shadow-offset) * 1.5) var(--shadow-color); z-index: 10; }
+    
+    div.card h3 { font-family: 'Changa', 'Cairo', sans-serif; font-weight: 600; font-size: 1.4rem; line-height: 1.4; margin-bottom: 1rem; text-shadow: 1px 1px 0px rgba(255,255,255,0.7); display: flex; flex-grow: 1; align-items: center; justify-content: center; text-align: center; min-height: 3.5em; transition: color 0.2s; }
+    
+    div.card input[type="text"].drug-input { font-family: 'Fredoka One', 'Cairo', sans-serif; }
+    div.card input[type="number"], div.card input[type="text"].drug-input { font-weight: 700; font-size: 1.5rem; padding: 0.75rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); width: 100%; text-align: center; background-color: #fafafa; transition: all 0.2s ease; box-shadow: inset 2px 2px 4px rgba(0,0,0,0.1); }
+    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+    div.card input:focus { outline: none; border-color: var(--theme-color-dark); background-color: var(--container-bg); box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05), 0 0 0 3px color-mix(in srgb, var(--theme-color) 40%, transparent); transform: scale(1.02); }
 
-        div.card { display: flex; flex-direction: column; background-color: var(--container-bg); border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-offset) var(--shadow-color); transition: transform var(--transition-speed) var(--transition-bounce), box-shadow var(--transition-speed) var(--transition-bounce), border-color 0.2s; position: relative; will-change: transform; }
-        div.card::before { content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px; border: 2px solid white; border-radius: calc(var(--radius-lg) - 5px); pointer-events: none; z-index: 1; }
-        div.card:not(#total-card):not(.upload-card):hover { transform: translateY(-4px) rotate(-0.5deg) scale(1.02); box-shadow: calc(var(--shadow-offset) * 1.5) var(--shadow-color); z-index: 10; }
-        
-        div.card h3 { font-family: 'Changa', 'Cairo', sans-serif; font-weight: 600; font-size: 1.4rem; line-height: 1.4; margin-bottom: 1rem; text-shadow: 1px 1px 0px rgba(255,255,255,0.7); display: flex; flex-grow: 1; align-items: center; justify-content: center; text-align: center; min-height: 3.5em; transition: color 0.2s; }
-        
-        div.card input[type="text"].drug-input { font-family: 'Fredoka One', 'Cairo', sans-serif; }
-        div.card input[type="number"], div.card input[type="text"].drug-input { font-weight: 700; font-size: 1.5rem; padding: 0.75rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); width: 100%; text-align: center; background-color: #fafafa; transition: all 0.2s ease; box-shadow: inset 2px 2px 4px rgba(0,0,0,0.1); }
-        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type="number"] { -moz-appearance: textfield; }
-        div.card input:focus { outline: none; border-color: var(--theme-color-dark); background-color: var(--container-bg); box-shadow: inset 1px 1px 2px rgba(0,0,0,0.05), 0 0 0 3px color-mix(in srgb, var(--theme-color) 40%, transparent); transform: scale(1.02); }
+    div.card.card-active { border-color: var(--theme-color); box-shadow: var(--shadow-offset) var(--theme-shadow-color); }
+    div.card.card-active h3 { color: var(--theme-color-dark); }
+    div.card.card-active input { border-color: var(--theme-color-dark) !important; background-color: color-mix(in srgb, var(--theme-color) 15%, white); }
+    
+    div.card.card-invalid { border-color: #D32F2F !important; box-shadow: var(--shadow-offset) #D32F2F !important; animation: shake 0.5s var(--transition-bounce); }
+    div.card.card-invalid input { border-color: #D32F2F !important; }
+    @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+    
+    div.card#total-card { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.5rem; padding: 1.5rem; background-color: color-mix(in srgb, var(--theme-color) 15%, white); border-color: var(--theme-color-dark); box-shadow: var(--shadow-offset) var(--theme-shadow-color); }
+    div.card#total-card:hover { transform: translateY(-2px) scale(1.01); }
+    div.card#total-card h3 { font-size: 1.8rem; color: var(--theme-color-dark); text-shadow: none; margin-bottom: 0; min-height: auto; flex-grow: 0; }
+    #total { font-family: 'Fredoka One', 'Cairo', sans-serif; font-size: 3.25rem; text-align: center; flex-grow: 1; color: var(--theme-color-dark); text-shadow: 2px 2px 0px color-mix(in srgb, var(--theme-color) 60%, white); transition: color var(--transition-speed) ease; line-height: 1; margin-top: 0.5rem; }
 
-        div.card.card-active { border-color: var(--theme-color); box-shadow: var(--shadow-offset) var(--theme-shadow-color); }
-        div.card.card-active h3 { color: var(--theme-color-dark); }
-        div.card.card-active input { border-color: var(--theme-color-dark) !important; background-color: color-mix(in srgb, var(--theme-color) 15%, white); }
-        
-        div.card.card-invalid { border-color: #D32F2F !important; box-shadow: var(--shadow-offset) #D32F2F !important; animation: shake 0.5s var(--transition-bounce); }
-        div.card.card-invalid input { border-color: #D32F2F !important; }
-        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
-        
-        div.card#total-card { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.5rem; padding: 1.5rem; background-color: color-mix(in srgb, var(--theme-color) 15%, white); border-color: var(--theme-color-dark); box-shadow: var(--shadow-offset) var(--theme-shadow-color); }
-        div.card#total-card:hover { transform: translateY(-2px) scale(1.01); }
-        div.card#total-card h3 { font-size: 1.8rem; color: var(--theme-color-dark); text-shadow: none; margin-bottom: 0; min-height: auto; flex-grow: 0; }
-        #total { font-family: 'Fredoka One', 'Cairo', sans-serif; font-size: 3.25rem; text-align: center; flex-grow: 1; color: var(--theme-color-dark); text-shadow: 2px 2px 0px color-mix(in srgb, var(--theme-color) 60%, white); transition: color var(--transition-speed) ease; line-height: 1; margin-top: 0.5rem; }
+    button#submitButton, button#upload-btn { font-family: 'Fredoka One', 'Cairo', cursive; font-weight: 700; font-size: 1.6rem; padding: 1.1rem 2rem; color: white; border: var(--border-width) solid var(--theme-color-dark); border-radius: var(--radius-md); transition: all var(--transition-speed) var(--transition-bounce); text-transform: uppercase; letter-spacing: 1.5px; width: 100%; margin-top: 2rem; background: linear-gradient(135deg, var(--theme-color), var(--theme-color-dark)); box-shadow: var(--shadow-offset) var(--theme-shadow-color); text-shadow: 2px 2px 0 var(--theme-shadow-color); cursor: pointer; will-change: transform; }
+    
+    button#submitButton:hover:not(:disabled), button#upload-btn:hover:not(:disabled) { transform: translateY(-3px) scale(1.01); filter: brightness(1.05); }
+    button#submitButton:active:not(:disabled), button#upload-btn:active:not(:disabled) { transform: translate(var(--shadow-offset)); box-shadow: none; filter: brightness(0.95); }
+    button#submitButton:disabled, button#upload-btn:disabled { background: linear-gradient(135deg, #B0BEC5, #78909C); border-color: #90A4AE; box-shadow: var(--shadow-offset) #607D8B; text-shadow: 1px 1px 0 #546E7A; cursor: not-allowed; opacity: 0.7; }
 
-        button#submitButton, button#upload-btn { font-family: 'Fredoka One', 'Cairo', cursive; font-weight: 700; font-size: 1.6rem; padding: 1.1rem 2rem; color: white; border: var(--border-width) solid var(--theme-color-dark); border-radius: var(--radius-md); transition: all var(--transition-speed) var(--transition-bounce); text-transform: uppercase; letter-spacing: 1.5px; width: 100%; margin-top: 2rem; background: linear-gradient(135deg, var(--theme-color), var(--theme-color-dark)); box-shadow: var(--shadow-offset) var(--theme-shadow-color); text-shadow: 2px 2px 0 var(--theme-shadow-color); cursor: pointer; will-change: transform; }
-        
-        button#submitButton:hover:not(:disabled), button#upload-btn:hover:not(:disabled) { transform: translateY(-3px) scale(1.01); filter: brightness(1.05); }
-        button#submitButton:active:not(:disabled), button#upload-btn:active:not(:disabled) { transform: translate(var(--shadow-offset)); box-shadow: none; filter: brightness(0.95); }
-        button#submitButton:disabled, button#upload-btn:disabled { background: linear-gradient(135deg, #B0BEC5, #78909C); border-color: #90A4AE; box-shadow: var(--shadow-offset) #607D8B; text-shadow: 1px 1px 0 #546E7A; cursor: not-allowed; opacity: 0.7; }
+    .comic-divider { border-top: var(--border-width) dashed var(--border-dark); margin: 3rem 0; background: transparent; height: 0; }
 
-        .comic-divider { border-top: var(--border-width) dashed var(--border-dark); margin: 3rem 0; background: transparent; height: 0; }
+    .upload-wrapper { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: stretch; }
+    .upload-info { flex: 1; min-width: 280px; display: flex; flex-direction: column; justify-content: center; }
+    .upload-zone { flex: 1; min-width: 280px; }
+    
+    .upload-heading { font-size: 1.4rem; font-family: 'Changa', 'Cairo', sans-serif; color: var(--text-dark); margin-bottom: 0.5rem; text-align: right; min-height: auto; }
+    .upload-desc { font-size: 1rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-family: 'Changa', sans-serif; }
+    .upload-code { font-family: monospace; font-size: 0.85rem; background: var(--bg-cream); padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-dark); direction: ltr; text-align: left; margin-bottom: 1rem; white-space: pre-wrap; font-weight: bold; }
+    .upload-notice { font-size: 0.95rem; color: var(--theme-color-dark); margin-bottom: 1.5rem; font-family: 'Changa', sans-serif; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; background: color-mix(in srgb, var(--theme-color) 10%, white); padding: 0.5rem; border-radius: var(--radius-md); border: 2px solid var(--theme-color); }
+    .upload-actions { display: flex; gap: 0.75rem; }
+    .upload-actions button { font-size: 0.95rem; padding: 0.5rem 1rem; text-transform: none; flex: 1; }
 
-        .upload-wrapper { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: stretch; }
-        .upload-info { flex: 1; min-width: 280px; display: flex; flex-direction: column; justify-content: center; }
-        .upload-zone { flex: 1; min-width: 280px; }
-        
-        .upload-heading { font-size: 1.4rem; font-family: 'Changa', 'Cairo', sans-serif; color: var(--text-dark); margin-bottom: 0.5rem; text-align: right; min-height: auto; }
-        .upload-desc { font-size: 1rem; color: var(--text-secondary); margin-bottom: 0.75rem; font-family: 'Changa', sans-serif; }
-        .upload-code { font-family: monospace; font-size: 0.85rem; background: var(--bg-cream); padding: 0.75rem; border-radius: var(--radius-md); border: 2px solid var(--border-dark); direction: ltr; text-align: left; margin-bottom: 1rem; white-space: pre-wrap; font-weight: bold; }
-        .upload-notice { font-size: 0.95rem; color: var(--theme-color-dark); margin-bottom: 1.5rem; font-family: 'Changa', sans-serif; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; background: color-mix(in srgb, var(--theme-color) 10%, white); padding: 0.5rem; border-radius: var(--radius-md); border: 2px solid var(--theme-color); }
-        .upload-actions { display: flex; gap: 0.75rem; }
-        .upload-actions button { font-size: 0.95rem; padding: 0.5rem 1rem; text-transform: none; flex: 1; }
+    .drop-area { border: var(--border-width) dashed var(--theme-color-dark); border-radius: var(--radius-lg); padding: 2rem 1.5rem; text-align: center; cursor: pointer; transition: all var(--transition-speed) var(--transition-bounce); background-color: color-mix(in srgb, var(--theme-color) 5%, var(--bg-cream)); box-shadow: inset 0 0 15px rgba(0,0,0,0.05); height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .drop-area:hover, .drop-area.drag-active { background-color: color-mix(in srgb, var(--theme-color) 15%, white); transform: scale(1.02) rotate(-0.5deg); border-style: solid; box-shadow: var(--shadow-offset) var(--theme-shadow-color); }
+    .drop-icon svg { width: 3rem; height: 3rem; fill: var(--theme-color); margin: 0 auto 0.5rem; transition: transform var(--transition-speed) var(--transition-bounce); }
+    .drop-area:hover .drop-icon svg { transform: scale(1.15) rotate(5deg); }
+    .drop-text { font-family: 'Changa', sans-serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.2rem; color: var(--text-dark); }
+    
+    .file-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); margin-top: 1rem; background-color: var(--container-bg); box-shadow: 3px 3px 0px var(--shadow-color); transition: transform var(--transition-speed) var(--transition-bounce); }
+    .file-item:hover { transform: translateX(-5px) translateY(-2px); box-shadow: 4px 4px 0px var(--shadow-color); }
+    .file-info { flex-grow: 1; margin-right: 1rem; font-family: 'Changa', sans-serif; }
+    .file-name { font-weight: 700; font-size: 1rem; }
+    .file-details { font-size: 0.85rem; color: var(--text-secondary); }
+    .delete-btn { color: #D32F2F; background: none; border: none; font-size: 1.5rem; line-height: 1; cursor: pointer; transition: transform 0.2s var(--transition-bounce); padding: 0 0.5rem; }
+    .delete-btn:hover { transform: scale(1.25) rotate(10deg); text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
+    
+    .progress-bar-bg { width: 100%; height: 1.25rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); background: var(--disabled-bg); overflow: hidden; position: relative; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1); margin-top: 1.5rem; }
+    .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--theme-color), var(--theme-color-dark)); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .progress-text { text-align: center; margin-top: 0.5rem; font-family: 'Changa', sans-serif; font-size: 1rem; color: var(--text-dark); }
+    
+    #results-container { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+    .result-item { padding: 1rem 1.5rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); box-shadow: 3px 3px 0px var(--shadow-color); display: flex; gap: 1rem; align-items: center; font-family: 'Changa', sans-serif; background-color: var(--container-bg); transition: transform var(--transition-speed); }
+    .result-item:hover { transform: translateY(-2px); }
+    .result-success { border-color: #2E8B57; border-right-width: 6px; }
+    .result-success svg { fill: #2E8B57; width: 2rem; height: 2rem; flex-shrink: 0; }
+    .result-error { border-color: #D32F2F; border-right-width: 6px; }
+    .result-error svg { fill: #D32F2F; width: 2rem; height: 2rem; flex-shrink: 0; }
 
-        .drop-area { border: var(--border-width) dashed var(--theme-color-dark); border-radius: var(--radius-lg); padding: 2rem 1.5rem; text-align: center; cursor: pointer; transition: all var(--transition-speed) var(--transition-bounce); background-color: color-mix(in srgb, var(--theme-color) 5%, var(--bg-cream)); box-shadow: inset 0 0 15px rgba(0,0,0,0.05); height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .drop-area:hover, .drop-area.drag-active { background-color: color-mix(in srgb, var(--theme-color) 15%, white); transform: scale(1.02) rotate(-0.5deg); border-style: solid; box-shadow: var(--shadow-offset) var(--theme-shadow-color); }
-        .drop-icon svg { width: 3rem; height: 3rem; fill: var(--theme-color); margin: 0 auto 0.5rem; transition: transform var(--transition-speed) var(--transition-bounce); }
-        .drop-area:hover .drop-icon svg { transform: scale(1.15) rotate(5deg); }
-        .drop-text { font-family: 'Changa', sans-serif; font-size: 1.2rem; font-weight: 600; margin-bottom: 0.2rem; color: var(--text-dark); }
-        
-        .file-item { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); margin-top: 1rem; background-color: var(--container-bg); box-shadow: 3px 3px 0px var(--shadow-color); transition: transform var(--transition-speed) var(--transition-bounce); }
-        .file-item:hover { transform: translateX(-5px) translateY(-2px); box-shadow: 4px 4px 0px var(--shadow-color); }
-        .file-info { flex-grow: 1; margin-right: 1rem; font-family: 'Changa', sans-serif; }
-        .file-name { font-weight: 700; font-size: 1rem; }
-        .file-details { font-size: 0.85rem; color: var(--text-secondary); }
-        .delete-btn { color: #D32F2F; background: none; border: none; font-size: 1.5rem; line-height: 1; cursor: pointer; transition: transform 0.2s var(--transition-bounce); padding: 0 0.5rem; }
-        .delete-btn:hover { transform: scale(1.25) rotate(10deg); text-shadow: 1px 1px 0 rgba(0,0,0,0.2); }
-        
-        .progress-bar-bg { width: 100%; height: 1.25rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); background: var(--disabled-bg); overflow: hidden; position: relative; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1); margin-top: 1.5rem; }
-        .progress-bar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--theme-color), var(--theme-color-dark)); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .progress-text { text-align: center; margin-top: 0.5rem; font-family: 'Changa', sans-serif; font-size: 1rem; color: var(--text-dark); }
-        
-        #results-container { display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
-        .result-item { padding: 1rem 1.5rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); box-shadow: 3px 3px 0px var(--shadow-color); display: flex; gap: 1rem; align-items: center; font-family: 'Changa', sans-serif; background-color: var(--container-bg); transition: transform var(--transition-speed); }
-        .result-item:hover { transform: translateY(-2px); }
-        .result-success { border-color: #2E8B57; border-right-width: 6px; }
-        .result-success svg { fill: #2E8B57; width: 2rem; height: 2rem; flex-shrink: 0; }
-        .result-error { border-color: #D32F2F; border-right-width: 6px; }
-        .result-error svg { fill: #D32F2F; width: 2rem; height: 2rem; flex-shrink: 0; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 3000; padding: 1rem; }
+    .modal-content { background: var(--container-bg); border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 500px; box-shadow: 8px 8px 0 rgba(0,0,0,1); text-align: right; animation: modal-pop 0.3s var(--transition-bounce) both; }
+    @keyframes modal-pop { 0% { opacity: 0; transform: scale(0.9) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+    .modal-heading { font-family: 'Changa', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--theme-color-dark); }
+    .modal-desc { color: var(--text-secondary); margin-bottom: 1.5rem; word-break: break-all; font-family: 'Cairo', sans-serif; }
+    .modal-sheet-list { max-height: 200px; overflow-y: auto; margin-bottom: 1rem; border: var(--border-width) solid var(--disabled-border); border-radius: var(--radius-md); padding: 0.5rem 1rem; background: var(--bg-cream); }
+    .modal-sheet-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; font-family: 'Changa', sans-serif; font-size: 1.1rem; cursor: pointer; }
+    .modal-sheet-item input[type="checkbox"] { width: 1.2rem; height: 1.2rem; cursor: pointer; accent-color: var(--theme-color); }
+    .modal-footer { display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: flex-end; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 3000; padding: 1rem; }
-        .modal-content { background: var(--container-bg); border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-lg); padding: 2rem; width: 100%; max-width: 500px; box-shadow: 8px 8px 0 rgba(0,0,0,1); text-align: right; animation: modal-pop 0.3s var(--transition-bounce) both; }
-        @keyframes modal-pop { 0% { opacity: 0; transform: scale(0.9) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
-        .modal-heading { font-family: 'Changa', sans-serif; font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--theme-color-dark); }
-        .modal-desc { color: var(--text-secondary); margin-bottom: 1.5rem; word-break: break-all; font-family: 'Cairo', sans-serif; }
-        .modal-sheet-list { max-height: 200px; overflow-y: auto; margin-bottom: 1rem; border: var(--border-width) solid var(--disabled-border); border-radius: var(--radius-md); padding: 0.5rem 1rem; background: var(--bg-cream); }
-        .modal-sheet-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; font-family: 'Changa', sans-serif; font-size: 1.1rem; cursor: pointer; }
-        .modal-sheet-item input[type="checkbox"] { width: 1.2rem; height: 1.2rem; cursor: pointer; accent-color: var(--theme-color); }
-        .modal-footer { display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: flex-end; }
+    #notification-area { position: fixed; top: 1.5rem; left: 1.5rem; z-index: 4000; display: flex; flex-direction: column; gap: 0.75rem; width: clamp(280px, 90vw, 400px); pointer-events: none; }
+    .notification { display: flex; align-items: center; gap: 0.75rem; pointer-events: auto; font-family: 'Changa', 'Cairo', sans-serif; font-size: 1.1rem; color: var(--text-light); padding: 1rem 1.25rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); text-shadow: 1px 1px 0 rgba(0,0,0,0.3); opacity: 0; position: relative; overflow: hidden; will-change: transform, opacity; }
+    .notification.success { background-color: #2E8B57; box-shadow: var(--shadow-offset) #257247; }
+    .notification.error { background-color: #D32F2F; box-shadow: var(--shadow-offset) #a82727; }
+    .notification.info { background-color: var(--theme-color, var(--default-theme-color)); box-shadow: var(--shadow-offset) var(--theme-shadow-color, var(--default-theme-shadow-color)); }
+    .notification-icon { width: 1.5rem; height: 1.5rem; flex-shrink: 0; }
+    .notification-icon svg { width: 100%; height: 100%; fill: currentColor; filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.2)); }
+    .notification-progress { position: absolute; bottom: 0; left: 0; height: 4px; background-color: rgba(255, 255, 255, 0.4); }
 
-        #notification-area { position: fixed; top: 1.5rem; left: 1.5rem; z-index: 4000; display: flex; flex-direction: column; gap: 0.75rem; width: clamp(280px, 90vw, 400px); pointer-events: none; }
-        .notification { display: flex; align-items: center; gap: 0.75rem; pointer-events: auto; font-family: 'Changa', 'Cairo', sans-serif; font-size: 1.1rem; color: var(--text-light); padding: 1rem 1.25rem; border: var(--border-width) solid var(--border-dark); border-radius: var(--radius-md); text-shadow: 1px 1px 0 rgba(0,0,0,0.3); opacity: 0; position: relative; overflow: hidden; will-change: transform, opacity; }
-        .notification.success { background-color: #2E8B57; box-shadow: var(--shadow-offset) #257247; }
-        .notification.error { background-color: #D32F2F; box-shadow: var(--shadow-offset) #a82727; }
-        .notification.info { background-color: var(--theme-color, var(--default-theme-color)); box-shadow: var(--shadow-offset) var(--theme-shadow-color, var(--default-theme-shadow-color)); }
-        .notification-icon { width: 1.5rem; height: 1.5rem; flex-shrink: 0; }
-        .notification-icon svg { width: 100%; height: 100%; fill: currentColor; filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.2)); }
-        .notification-progress { position: absolute; bottom: 0; left: 0; height: 4px; background-color: rgba(255, 255, 255, 0.4); }
+    @media (max-width: 768px) {
+        html { font-size: 15px; }
+        :root { --border-width: 2px; --shadow-offset: 3px 3px 0px; }
+        body { padding: 1rem; }
+        .main-container { padding: 1.5rem; }
+        h1.comic-header, h2.comic-header { font-size: 2.2rem; }
+        button.comic-button { font-size: 1.1rem; letter-spacing: 1px; }
+        div.card h3 { font-size: 1.2rem; min-height: 3.5em; }
+        #total { font-size: 3rem; }
+        button#submitButton, button#upload-btn { font-size: 1.4rem; padding: 1rem 1.5rem; }
+    }
 
-        @media (max-width: 768px) {
-            html { font-size: 15px; }
-            :root { --border-width: 2px; --shadow-offset: 3px 3px 0px; }
-            body { padding: 1rem; }
-            .main-container { padding: 1.5rem; }
-            h1.comic-header, h2.comic-header { font-size: 2.2rem; }
-            button.comic-button { font-size: 1.1rem; letter-spacing: 1px; }
-            div.card h3 { font-size: 1.2rem; min-height: 3.5em; }
-            #total { font-size: 3rem; }
-            button#submitButton, button#upload-btn { font-size: 1.4rem; padding: 1rem 1.5rem; }
-        }
+    @media (max-width: 480px) {
+        html { font-size: 14px; }
+        body { padding: 0.5rem; }
+        .main-container { padding: 1rem; }
+        h1.comic-header, h2.comic-header { font-size: 1.8rem; transform: rotate(-1deg); }
+        .grid-container.sm\:grid-cols-3, .grid-container.sm\:grid-cols-2, .grid-container.md\:grid-cols-4 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        div.card h3 { font-size: 1.1rem; min-height: 3em; }
+        #total { font-size: 2.5rem; }
+        #notification-area { left: 0.5rem; right: 0.5rem; top: 0.5rem; width: auto; }
+        .upload-actions { flex-direction: column; }
+    }
 
-        @media (max-width: 480px) {
-            html { font-size: 14px; }
-            body { padding: 0.5rem; }
-            .main-container { padding: 1rem; }
-            h1.comic-header, h2.comic-header { font-size: 1.8rem; transform: rotate(-1deg); }
-            .grid-container.sm\:grid-cols-3, .grid-container.sm\:grid-cols-2, .grid-container.md\:grid-cols-4 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-            div.card h3 { font-size: 1.1rem; min-height: 3em; }
-            #total { font-size: 2.5rem; }
-            #notification-area { left: 0.5rem; right: 0.5rem; top: 0.5rem; width: auto; }
-            .upload-actions { flex-direction: column; }
-        }
-
-        @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; transform: none !important; box-shadow: none !important; } }
-    </style>
+    @media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; transform: none !important; box-shadow: none !important; } }
+</style>
 </head>
 <body>
-    <div class="main-container">
-        <h1 id="mainHeader" class="comic-header">بيان المجموعات الدوائية</h1>
+<div class="main-container">
+<h1 id="mainHeader" class="comic-header">بيان المجموعات الدوائية</h1>
+<div class="grid-container grid-cols-1 sm:grid-cols-3 gap-4">
+        <button id="studentsBtn" class="comic-button btn-inactive">الطلبة</button>
+        <button id="workforceBtn" class="comic-button btn-inactive">القوى العاملة</button>
+        <button id="infantsBtn" class="comic-button btn-inactive">المواليد</button>
+    </div>
 
-        <div class="grid-container grid-cols-1 sm:grid-cols-3 gap-4">
-            <button id="studentsBtn" class="comic-button btn-inactive">الطلبة</button>
-            <button id="workforceBtn" class="comic-button btn-inactive">القوى العاملة</button>
-            <button id="infantsBtn" class="comic-button btn-inactive">المواليد</button>
+    <div class="grid-container grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="select-wrapper">
+            <select id="year">
+                <option value="">السنة</option>
+                <option value="2025">2024-2025</option>
+                <option value="2026">2025-2026</option>
+                <option value="2027">2026-2027</option>
+                <option value="2028">2027-2028</option>
+                <option value="2029">2028-2029</option>
+                <option value="2030">2029-2030</option>
+                <option value="2031">2030-2031</option>
+                <option value="2032">2031-2032</option>
+                <option value="2033">2032-2033</option>
+                <option value="2034">2033-2034</option>
+                <option value="2035">2034-2035</option>
+            </select>
         </div>
-
-        <div class="grid-container grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="select-wrapper">
-                <select id="year">
-                    <option value="">السنة</option>
-                    <option value="2025">2024-2025</option>
-                    <option value="2026">2025-2026</option>
-                    <option value="2027">2026-2027</option>
-                    <option value="2028">2027-2028</option>
-                    <option value="2029">2028-2029</option>
-                    <option value="2030">2029-2030</option>
-                    <option value="2031">2030-2031</option>
-                    <option value="2032">2031-2032</option>
-                    <option value="2033">2032-2033</option>
-                    <option value="2034">2033-2034</option>
-                    <option value="2035">2034-2035</option>
-                </select>
-            </div>
-            <div class="select-wrapper">
-                <select id="month">
-                    <option value="">الشهر</option>
-                    <option value="1">يناير</option> <option value="2">فبراير</option> <option value="3">مارس</option> <option value="4">أبريل</option> <option value="5">مايو</option> <option value="6">يونيو</option> <option value="7">يوليو</option> <option value="8">أغسطس</option> <option value="9">سبتمبر</option> <option value="10">أكتوبر</option> <option value="11">نوفمبر</option> <option value="12">ديسمبر</option>
-                </select>
-            </div>
-            <div class="select-wrapper">
-                <select id="region">
-                    <option value="">المنطقة</option>
-                    <option value="first">الاولي</option> <option value="second">الثانية</option> <option value="third">الثالثة</option>
-                </select>
-            </div>
-            <div class="select-wrapper">
-                <select id="pharmacy" disabled>
-                    <option value="">الصيدلية</option>
-                </select>
-            </div>
+        <div class="select-wrapper">
+            <select id="month">
+                <option value="">الشهر</option>
+                <option value="1">يناير</option> <option value="2">فبراير</option> <option value="3">مارس</option> <option value="4">أبريل</option> <option value="5">مايو</option> <option value="6">يونيو</option> <option value="7">يوليو</option> <option value="8">أغسطس</option> <option value="9">سبتمبر</option> <option value="10">أكتوبر</option> <option value="11">نوفمبر</option> <option value="12">ديسمبر</option>
+            </select>
         </div>
-
-        <div id="cards-container" class="grid-container grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div class="select-wrapper">
+            <select id="region">
+                <option value="">المنطقة</option>
+                <option value="first">الاولي</option> <option value="second">الثانية</option> <option value="third">الثالثة</option>
+            </select>
         </div>
-
-        <div class="grid-container grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="card">
-                <h3>اجمالي التذاكر</h3>
-                <input type="number" id="totalTickets" min="0" max="1000000" step="1" dir="ltr">
-            </div>
-            <div class="card">
-                <h3>اجمالي الخارجي</h3>
-                <input type="number" id="totalExternal" min="0" max="1000000" step="1" dir="ltr">
-            </div>
+        <div class="select-wrapper">
+            <select id="pharmacy" disabled>
+                <option value="">الصيدلية</option>
+            </select>
         </div>
+    </div>
 
-        <div class="card" id="total-card">
-            <h3>المجموع الكلي</h3>
-            <p id="total" dir="ltr">0.000</p>
+    <div id="cards-container" class="grid-container grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    </div>
+
+    <div class="grid-container grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="card">
+            <h3>اجمالي التذاكر</h3>
+            <input type="number" id="totalTickets" min="0" max="1000000" step="1" dir="ltr">
         </div>
+        <div class="card">
+            <h3>اجمالي الخارجي</h3>
+            <input type="number" id="totalExternal" min="0" max="1000000" step="1" dir="ltr">
+        </div>
+    </div>
 
-        <button id="submitButton" disabled>إرسال البيانات</button>
+    <div class="card" id="total-card">
+        <h3>المجموع الكلي</h3>
+        <p id="total" dir="ltr">0.000</p>
+    </div>
 
-        <hr class="comic-divider">
-        
-        <div class="card upload-card" style="margin-bottom: 2rem; border-color: var(--text-dark);">
-            <div class="upload-wrapper">
-                <div class="upload-info">
-                    <h3 class="upload-heading">رفع البيانات </h3>
-                    <p class="upload-desc">الملفات المقبولة (Excel, CSV, JSON). يجب أن تحتوي على العناوين الآتية:</p>
-                    <div class="upload-code">date, year, class, month, region, pharmacy, totalPrescription, insuranceCoveredPrescription, المسكنات, مضادات حيوية, كلي, نفسية و عصبية, قلب, سكر حقن, سكر فم, نسا, كبد, جهاز هضمي, جهاز تنفسي, امراض جلدية, عيون و رمد, انف و اذن, مضادات تقلصات, اورام, فيتامينات, مختلفة</div>
-                    
-                    <div class="upload-notice">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                        ملاحظة: يتم إرسال بيانات الملفات المرفوعة مباشرة إلى قاعدة البيانات ولن تؤثر على النموذج أعلاه.
-                    </div>
+    <button id="submitButton" disabled>إرسال البيانات</button>
 
-                    <div class="upload-actions">
-                        <button id="download-csv-btn" class="comic-button">CSV</button>
-                        <button id="download-json-btn" class="comic-button">JSON</button>
-                    </div>
-                </div>
+    <hr class="comic-divider">
+    
+    <div class="card upload-card" style="margin-bottom: 2rem; border-color: var(--text-dark);">
+        <div class="upload-wrapper">
+            <div class="upload-info">
+                <h3 class="upload-heading">رفع البيانات </h3>
+                <p class="upload-desc">الملفات المقبولة (Excel, CSV, JSON). يجب أن تحتوي على العناوين الآتية:</p>
+                <div class="upload-code">date, year, class, month, region, pharmacy, totalPrescription, insuranceCoveredPrescription, المسكنات, مضادات حيوية, كلي, نفسية و عصبية, قلب, سكر حقن, سكر فم, نسا, كبد, جهاز هضمي, جهاز تنفسي, امراض جلدية, عيون و رمد, انف و اذن, مضادات تقلصات, اورام, فيتامينات, مختلفة</div>
                 
-                <div class="upload-zone">
-                    <div id="drop-area" class="drop-area">
-                        <div class="drop-icon"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"></path></svg></div>
-                        <p class="drop-text">اسحب الملفات هنا</p>
-                        <button type="button" class="comic-button" style="margin-top: 1rem; font-size: 1rem; padding: 0.5rem 1.5rem;" onclick="document.getElementById('file-input').click()">تصفح الأجهزة</button>
-                        <input id="file-input" type="file" hidden multiple accept=".json,.csv,.xlsx,.xls">
-                    </div>
+                <div class="upload-notice">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    ملاحظة: يتم إرسال بيانات الملفات المرفوعة مباشرة إلى قاعدة البيانات ولن تؤثر على النموذج أعلاه.
+                </div>
+
+                <div class="upload-actions">
+                    <button id="download-csv-btn" class="comic-button">CSV</button>
+                    <button id="download-json-btn" class="comic-button">JSON</button>
                 </div>
             </div>
-
-            <div id="file-list"></div>
-
-            <div id="progress-container" hidden>
-                <div class="progress-bar-bg"><div id="progress-bar" class="progress-bar"></div></div>
-                <p id="progress-text" class="progress-text"></p>
-            </div>
-
-            <button id="upload-btn" class="comic-button btn-inactive" style="width: 100%; margin-top: 1.5rem; font-size: 1.3rem; padding: 0.8rem;" disabled>رفع الملفات</button>
-
-            <div id="results-container" hidden></div>
-        </div>
-    </div>
-
-    <div id="sheet-selector-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3 class="modal-heading">اختر أوراق العمل</h3>
-            <p id="modal-filename" class="modal-desc"></p>
-            <ul id="modal-sheet-list" class="modal-sheet-list"></ul>
-            <div class="modal-footer">
-                <button id="modal-cancel-btn" class="comic-button" style="background: var(--disabled-bg); font-size: 1rem; padding: 0.5rem 1rem;">إلغاء</button>
-                <button id="modal-confirm-btn" class="comic-button btn-active" style="font-size: 1rem; padding: 0.5rem 1.5rem;">تأكيد</button>
+            
+            <div class="upload-zone">
+                <div id="drop-area" class="drop-area">
+                    <div class="drop-icon"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"></path></svg></div>
+                    <p class="drop-text">اسحب الملفات هنا</p>
+                    <button type="button" class="comic-button" style="margin-top: 1rem; font-size: 1rem; padding: 0.5rem 1.5rem;" onclick="document.getElementById('file-input').click()">تصفح الأجهزة</button>
+                    <input id="file-input" type="file" hidden multiple accept=".json,.csv,.xlsx,.xls">
+                </div>
             </div>
         </div>
+
+        <div id="file-list"></div>
+
+        <div id="progress-container" hidden>
+            <div class="progress-bar-bg"><div id="progress-bar" class="progress-bar"></div></div>
+            <p id="progress-text" class="progress-text"></p>
+        </div>
+
+        <button id="upload-btn" class="comic-button btn-inactive" style="width: 100%; margin-top: 1.5rem; font-size: 1.3rem; padding: 0.8rem;" disabled>رفع الملفات</button>
+
+        <div id="results-container" hidden></div>
     </div>
+</div>
 
-    <div id="notification-area"></div>
+<div id="sheet-selector-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 class="modal-heading">اختر أوراق العمل</h3>
+        <p id="modal-filename" class="modal-desc"></p>
+        <ul id="modal-sheet-list" class="modal-sheet-list"></ul>
+        <div class="modal-footer">
+            <button id="modal-cancel-btn" class="comic-button" style="background: var(--disabled-bg); font-size: 1rem; padding: 0.5rem 1rem;">إلغاء</button>
+            <button id="modal-confirm-btn" class="comic-button btn-active" style="font-size: 1rem; padding: 0.5rem 1.5rem;">تأكيد</button>
+        </div>
+    </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-          const docElement = document.documentElement;
-          const cardsContainer = document.getElementById('cards-container');
-          const totalElement = document.getElementById('total');
-          const studentsBtn = document.getElementById('studentsBtn');
-          const workforceBtn = document.getElementById('workforceBtn');
-          const infantsBtn = document.getElementById('infantsBtn');
-          const yearSelect = document.getElementById('year');
-          const monthSelect = document.getElementById('month');
-          const regionSelect = document.getElementById('region');
-          const pharmacySelect = document.getElementById('pharmacy');
-          const submitButton = document.getElementById('submitButton');
-          const totalTicketsInput = document.getElementById('totalTickets');
-          const totalExternalInput = document.getElementById('totalExternal');
-          const notificationArea = document.getElementById('notification-area');
-          
-          const dropArea = document.getElementById('drop-area');
-          const fileInput = document.getElementById('file-input');
-          const fileListDOM = document.getElementById('file-list');
-          const uploadBtn = document.getElementById('upload-btn');
-          const resultsContainer = document.getElementById('results-container');
-          const progressContainer = document.getElementById('progress-container');
-          const progressBar = document.getElementById('progress-bar');
-          const progressText = document.getElementById('progress-text');
-          const sheetModal = document.getElementById('sheet-selector-modal');
-          const modalFilename = document.getElementById('modal-filename');
-          const modalSheetList = document.getElementById('modal-sheet-list');
-          const modalConfirmBtn = document.getElementById('modal-confirm-btn');
-          const modalCancelBtn = document.getElementById('modal-cancel-btn');
+<div id="notification-area"></div>
 
-          const downloadCsvBtn = document.getElementById('download-csv-btn');
-          const downloadJsonBtn = document.getElementById('download-json-btn');
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const escapeHTML = (str) => String(str).replace(/[&<>'"]/g, match => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[match]));
 
-          let cardValues = Array(18).fill(0);
-          let activeButton = null;
-          let isSubmitting = false;
-          let filesToUpload = [];
-          
-          const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzf9AsBFFX_vTlm83Cm94Jbi68w6ncihFosEWnrnyUmzMBOJaibWQU7ffXbH1zcYpaKGg/exec';
-          const HEADERS = ['date','year','class','month','region','pharmacy','totalPrescription','insuranceCoveredPrescription','المسكنات','مضادات حيوية','كلي','نفسية و عصبية','قلب','سكر حقن','سكر فم','نسا','كبد','جهاز هضمي','جهاز تنفسي','امراض جلدية','عيون و رمد','انف و اذن','مضادات تقلصات','اورام','فيتامينات','مختلفة'];
+      const docElement = document.documentElement;
+      const cardsContainer = document.getElementById('cards-container');
+      const totalElement = document.getElementById('total');
+      const studentsBtn = document.getElementById('studentsBtn');
+      const workforceBtn = document.getElementById('workforceBtn');
+      const infantsBtn = document.getElementById('infantsBtn');
+      const yearSelect = document.getElementById('year');
+      const monthSelect = document.getElementById('month');
+      const regionSelect = document.getElementById('region');
+      const pharmacySelect = document.getElementById('pharmacy');
+      const submitButton = document.getElementById('submitButton');
+      const totalTicketsInput = document.getElementById('totalTickets');
+      const totalExternalInput = document.getElementById('totalExternal');
+      const notificationArea = document.getElementById('notification-area');
+      
+      const dropArea = document.getElementById('drop-area');
+      const fileInput = document.getElementById('file-input');
+      const fileListDOM = document.getElementById('file-list');
+      const uploadBtn = document.getElementById('upload-btn');
+      const resultsContainer = document.getElementById('results-container');
+      const progressContainer = document.getElementById('progress-container');
+      const progressBar = document.getElementById('progress-bar');
+      const progressText = document.getElementById('progress-text');
+      const sheetModal = document.getElementById('sheet-selector-modal');
+      const modalFilename = document.getElementById('modal-filename');
+      const modalSheetList = document.getElementById('modal-sheet-list');
+      const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+      const modalCancelBtn = document.getElementById('modal-cancel-btn');
 
-          const icons = {
-            success: `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>`,
-            error: `<svg viewBox="0 0 24 24"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2z"></path></svg>`,
-            info: `<svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path></svg>`
-          };
+      const downloadCsvBtn = document.getElementById('download-csv-btn');
+      const downloadJsonBtn = document.getElementById('download-json-btn');
 
-          const cardNames = [ 'المسكنات', 'مضادات حيوية', 'كلي', 'نفسية و عصبية', 'قلب', 'سكر حقن', 'سكر فم', 'نسا', 'كبد', 'جهاز هضمي', 'جهاز تنفسي', 'امراض جلدية', 'عيون و رمد', 'انف و اذن', 'مضادات تقلصات', 'اورام', 'فيتامينات', 'مختلفة' ];
-          const pharmacyOptions = { students: { first: ["كفر الدوار طلاب", "البيضا طلاب", "النوبارية طلاب", "ابو المطامير طلاب", "رشيد طلاب", "ادكو طلاب"], second: ["دمنهور طلاب", "حوش عيسي طلاب", "المحمودية طلاب", "الرحمانية طلاب", "ابو حمص طلاب", "اورام طلاب"], third: ["ايتاي طلاب", "كوم حمادة طلاب", "بدر طلاب", "شبراخيت طلاب", "الدلنجات طلاب"] }, workforce: { first: ["كفر الدوار سكر", "كفر الدوار الشاملة 1", "كفر الدوار الشاملة 2", "كفر الدوار مسائي", "النوبارية", "البيضا", "ابو المطامير", "رشيد", "ادكو"], second: ["دمنهور الشاملة 1", "دمنهور الشاملة 2", "دمنهور مسائي", "دمنهور سكر", "دمنهور اورام", "الشرطة", "حوش عيسي", "المحمودية مسائي", "المحمودية", "الرحمانية", "ابو حمص"], third: ["ايتاي الشاملة 1", "ايتاي الشاملة 2", "ايتاي مسائي", "كوم حمادة", "كوم حمادة مسائي", "بدر","شبراخيت مسائي", "شبراخيت", "الدلنجات مسائي" , "الدلنجات", "وادي النطرون", "قليشان"] }, infants: { first: ["كفر الدوار مواليد", "البيضا مواليد", "النوبارية مواليد", "ابو المطامير مواليد", "رشيد مواليد", "ادكو مواليد"], second: ["دمنهور مواليد", "حوش عيسي مواليد", "المحمودية مواليد", "الرحمانية مواليد", "ابو حمص مواليد", "اورام مواليد"], third: ["ايتاي مواليد", "كوم حمادة مواليد", "بدر مواليد", "شبراخيت مواليد", "الدلنجات مواليد"] } };
+      let cardValues = Array(18).fill(0);
+      let activeButton = null;
+      let isSubmitting = false;
+      let filesToUpload = [];
+      
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzf9AsBFFX_vTlm83Cm94Jbi68w6ncihFosEWnrnyUmzMBOJaibWQU7ffXbH1zcYpaKGg/exec';
+      const HEADERS = ['date','year','class','month','region','pharmacy','totalPrescription','insuranceCoveredPrescription','المسكنات','مضادات حيوية','كلي','نفسية و عصبية','قلب','سكر حقن','سكر فم','نسا','كبد','جهاز هضمي','جهاز تنفسي','امراض جلدية','عيون و رمد','انف و اذن','مضادات تقلصات','اورام','فيتامينات','مختلفة'];
 
-          for (let i = 0; i < 18; i++) {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `<h3>${cardNames[i]}</h3><input type="text" class="drug-input" data-index="${i}" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]+" dir="ltr">`;
-            cardsContainer.appendChild(card);
+      const icons = {
+        success: `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>`,
+        error: `<svg viewBox="0 0 24 24"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2z"></path></svg>`,
+        info: `<svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path></svg>`
+      };
+
+      const cardNames = [ 'المسكنات', 'مضادات حيوية', 'كلي', 'نفسية و عصبية', 'قلب', 'سكر حقن', 'سكر فم', 'نسا', 'كبد', 'جهاز هضمي', 'جهاز تنفسي', 'امراض جلدية', 'عيون و رمد', 'انف و اذن', 'مضادات تقلصات', 'اورام', 'فيتامينات', 'مختلفة' ];
+      const pharmacyOptions = { students: { first: ["كفر الدوار طلاب", "البيضا طلاب", "النوبارية طلاب", "ابو المطامير طلاب", "رشيد طلاب", "ادكو طلاب"], second: ["دمنهور طلاب", "حوش عيسي طلاب", "المحمودية طلاب", "الرحمانية طلاب", "ابو حمص طلاب", "اورام طلاب"], third: ["ايتاي طلاب", "كوم حمادة طلاب", "بدر طلاب", "شبراخيت طلاب", "الدلنجات طلاب"] }, workforce: { first: ["كفر الدوار سكر", "كفر الدوار الشاملة 1", "كفر الدوار الشاملة 2", "كفر الدوار مسائي", "النوبارية", "البيضا", "ابو المطامير", "رشيد", "ادكو"], second: ["دمنهور الشاملة 1", "دمنهور الشاملة 2", "دمنهور مسائي", "دمنهور سكر", "دمنهور اورام", "الشرطة", "حوش عيسي", "المحمودية مسائي", "المحمودية", "الرحمانية", "ابو حمص"], third: ["ايتاي الشاملة 1", "ايتاي الشاملة 2", "ايتاي مسائي", "كوم حمادة", "كوم حمادة مسائي", "بدر","شبراخيت مسائي", "شبراخيت", "الدلنجات مسائي" , "الدلنجات", "وادي النطرون", "قليشان"] }, infants: { first: ["كفر الدوار مواليد", "البيضا مواليد", "النوبارية مواليد", "ابو المطامير مواليد", "رشيد مواليد", "ادكو مواليد"], second: ["دمنهور مواليد", "حوش عيسي مواليد", "المحمودية مواليد", "الرحمانية مواليد", "ابو حمص مواليد", "اورام مواليد"], third: ["ايتاي مواليد", "كوم حمادة مواليد", "بدر مواليد", "شبراخيت مواليد", "الدلنجات مواليد"] } };
+
+      for (let i = 0; i < 18; i++) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<h3>${cardNames[i]}</h3><input type="text" class="drug-input" data-index="${i}" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]+" dir="ltr">`;
+        cardsContainer.appendChild(card);
+      }
+      
+      function showNotification(message, type = 'info', duration = 5000) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        const iconHTML = icons[type] || icons['info'];
+        notification.innerHTML = `<div class="notification-icon">${iconHTML}</div><div>${escapeHTML(message)}</div><div class="notification-progress"></div>`;
+        notificationArea.appendChild(notification);
+        const progressBarEl = notification.querySelector('.notification-progress');
+        gsap.fromTo(notification, { opacity: 0, x: 50, scale: 0.9 }, { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: "back.out(1.7)" });
+        gsap.fromTo(progressBarEl, { width: '100%' }, { width: '0%', duration: duration / 1000, ease: 'none' });
+        setTimeout(() => {
+            gsap.to(notification, { opacity: 0, x: 50, scale: 0.9, duration: 0.4, ease: 'power2.in', onComplete: () => notification.remove() });
+        }, duration);
+      }
+
+      function handleDrugInput(e) {
+        if(!e.target.classList.contains('drug-input')) return;
+        const input = e.target;
+        const index = parseInt(input.dataset.index);
+        let value = input.value;
+        const cursorPosition = input.selectionStart;
+        if (value === '') { cardValues[index] = 0; }
+        else {
+          value = value.replace(/,/g, '.').replace(/[^\d.]/g, '');
+          const parts = value.split('.');
+          if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
+          let numValue = parseFloat(value);
+          if (isNaN(numValue) || numValue < 0) { cardValues[index] = 0; }
+          else if (numValue > 1000000000) { value = '1000000000'; cardValues[index] = 1000000000; }
+          else { cardValues[index] = numValue; }
+        }
+        if (input.value !== value) input.value = value;
+        updateTotal();
+        updateCardStyle(input);
+        saveToLocalStorage();
+        try { input.setSelectionRange(cursorPosition, cursorPosition); } catch (err) {}
+      }
+      cardsContainer.addEventListener('input', handleDrugInput);
+
+      function handleDrugBlur(e) {
+          if(!e.target.classList.contains('drug-input')) return;
+          const input = e.target;
+          const index = parseInt(input.dataset.index);
+          let value = input.value.trim().replace(/,/g, '.').replace(/[^\d.]/g, '');
+          const parts = value.split('.');
+          if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
+          let numValue = parseFloat(value);
+          if (value === '' || isNaN(numValue) || numValue <= 0) {
+              input.value = '';
+              cardValues[index] = 0;
+          } else {
+              numValue = Math.min(numValue, 1000000000);
+              numValue = Math.round(numValue * 1000) / 1000;
+              cardValues[index] = numValue;
+              input.value = numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(3).replace(/\.?0+$/, "");
           }
-          
-          function showNotification(message, type = 'info', duration = 5000) {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            const iconHTML = icons[type] || icons['info'];
-            notification.innerHTML = `<div class="notification-icon">${iconHTML}</div><div>${message}</div><div class="notification-progress"></div>`;
-            notificationArea.appendChild(notification);
-            const progressBarEl = notification.querySelector('.notification-progress');
-            gsap.fromTo(notification, { opacity: 0, x: 50, scale: 0.9 }, { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: "back.out(1.7)" });
-            gsap.fromTo(progressBarEl, { width: '100%' }, { width: '0%', duration: duration / 1000, ease: 'none' });
-            setTimeout(() => {
-                gsap.to(notification, { opacity: 0, x: 50, scale: 0.9, duration: 0.4, ease: 'power2.in', onComplete: () => notification.remove() });
-            }, duration);
-          }
+          updateTotal();
+          updateCardStyle(input);
+          saveToLocalStorage();
+      }
+      cardsContainer.addEventListener('blur', handleDrugBlur, true);
 
-          function handleDrugInput(e) {
-            if(!e.target.classList.contains('drug-input')) return;
-            const input = e.target;
-            const index = parseInt(input.dataset.index);
-            let value = input.value;
-            const cursorPosition = input.selectionStart;
-            if (value === '') { cardValues[index] = 0; }
-            else {
-              value = value.replace(/,/g, '.').replace(/[^\d.]/g, '');
-              const parts = value.split('.');
-              if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
-              let numValue = parseFloat(value);
-              if (isNaN(numValue) || numValue < 0) { cardValues[index] = 0; }
-              else if (numValue > 1000000000) { value = '1000000000'; cardValues[index] = 1000000000; }
-              else { cardValues[index] = numValue; }
-            }
-            if (input.value !== value) input.value = value;
-            updateTotal();
-            updateCardStyle(input);
-            saveToLocalStorage();
-            try { input.setSelectionRange(cursorPosition, cursorPosition); } catch (err) {}
-          }
-          cardsContainer.addEventListener('input', handleDrugInput);
-
-          function handleDrugBlur(e) {
-              if(!e.target.classList.contains('drug-input')) return;
-              const input = e.target;
-              const index = parseInt(input.dataset.index);
-              let value = input.value.trim().replace(/,/g, '.').replace(/[^\d.]/g, '');
-              const parts = value.split('.');
-              if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
-              let numValue = parseFloat(value);
-              if (value === '' || isNaN(numValue) || numValue <= 0) {
-                  input.value = '';
-                  cardValues[index] = 0;
-              } else {
-                  numValue = Math.min(numValue, 1000000000);
-                  numValue = Math.round(numValue * 1000) / 1000;
-                  cardValues[index] = numValue;
-                  input.value = numValue % 1 === 0 ? numValue.toString() : numValue.toFixed(3).replace(/\.?0+$/, "");
-              }
-              updateTotal();
-              updateCardStyle(input);
-              saveToLocalStorage();
-          }
-          cardsContainer.addEventListener('blur', handleDrugBlur, true);
-
-          function updateTotal() {
-            const total = cardValues.reduce((acc, val) => acc + (val || 0), 0);
-            const oldTotalText = totalElement.textContent.replace(/,/g, '');
-            const oldTotal = parseFloat(oldTotalText) || 0;
-            if (Math.abs(total - oldTotal) > 0.0001 || totalElement.textContent === "0") {
-                gsap.to(totalElement, {
-                    textContent: total, duration: 0.6, ease: "power3.out", snap: { textContent: 0.001 },
-                    onUpdate: function() { const currentVal = parseFloat(this.targets()[0].textContent); if (!isNaN(currentVal)) totalElement.textContent = currentVal.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); },
-                    onComplete: function() { totalElement.textContent = total.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); }
-                });
-            }
-            updateSubmitButtonVisibility();
-          }
-
-          function updateCardStyle(inputElement) {
-              const card = inputElement.closest('.card');
-              if (!card) return;
-              const valueStr = inputElement.value.trim();
-              let valueNum;
-              if (inputElement.type === 'number') { valueNum = parseInt(valueStr, 10); } 
-              else { valueNum = parseFloat(valueStr.replace(/,/g, '.')); }
-              card.classList.toggle('card-active', valueStr !== '' && !isNaN(valueNum) && valueNum >= 0);
-          }
-
-          const allThemeButtons = [studentsBtn, workforceBtn, infantsBtn];
-          allThemeButtons.forEach(button => button.addEventListener('click', () => toggleButton(button)));
-
-          function toggleButton(clickedButton) {
-            if (activeButton === clickedButton) return;
-            activeButton = clickedButton;
-            allThemeButtons.forEach(btn => {
-                btn.classList.toggle('btn-active', btn === clickedButton);
-                btn.classList.toggle('btn-inactive', btn !== clickedButton);
+      function updateTotal() {
+        const total = cardValues.reduce((acc, val) => acc + (val || 0), 0);
+        const oldTotalText = totalElement.textContent.replace(/,/g, '');
+        const oldTotal = parseFloat(oldTotalText) || 0;
+        if (Math.abs(total - oldTotal) > 0.0001 || totalElement.textContent === "0") {
+            gsap.to(totalElement, {
+                textContent: total, duration: 0.6, ease: "power3.out", snap: { textContent: 0.001 },
+                onUpdate: function() { const currentVal = parseFloat(this.targets()[0].textContent); if (!isNaN(currentVal)) totalElement.textContent = currentVal.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); },
+                onComplete: function() { totalElement.textContent = total.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); }
             });
-            let themeClass = '';
-            if (activeButton === studentsBtn) themeClass = 'theme-students';
-            else if (activeButton === workforceBtn) themeClass = 'theme-workforce';
-            else if (activeButton === infantsBtn) themeClass = 'theme-infants';
-            docElement.className = themeClass;
-            pharmacySelect.value = "";
-            updatePharmacyDropdown();
-            updateSelectActiveStyles();
-            saveToLocalStorage();
-            updateSubmitButtonVisibility();
-          }
+        }
+        updateSubmitButtonVisibility();
+      }
 
-          function updateSelectActiveStyles() {
-            [yearSelect, monthSelect, regionSelect, pharmacySelect].forEach(sel => sel.classList.toggle('select-valid-selection', !sel.disabled && sel.value !== ""));
-          }
+      function updateCardStyle(inputElement) {
+          const card = inputElement.closest('.card');
+          if (!card) return;
+          const valueStr = inputElement.value.trim();
+          let valueNum;
+          if (inputElement.type === 'number') { valueNum = parseInt(valueStr, 10); } 
+          else { valueNum = parseFloat(valueStr.replace(/,/g, '.')); }
+          card.classList.toggle('card-active', valueStr !== '' && !isNaN(valueNum) && valueNum >= 0);
+      }
 
-           function updatePharmacyDropdown() {
-               const currentPharmacyValue = pharmacySelect.value;
-               pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
-               let categoryKey = '';
-                if (activeButton === studentsBtn) categoryKey = 'students';
-                else if (activeButton === workforceBtn) categoryKey = 'workforce';
-                else if (activeButton === infantsBtn) categoryKey = 'infants';
-               if (regionSelect.value && categoryKey) {
-                   const options = pharmacyOptions[categoryKey]?.[regionSelect.value] || [];
-                   options.forEach((optionText, index) => pharmacySelect.appendChild(new Option(optionText, index + 1)));
-                   pharmacySelect.value = currentPharmacyValue;
-                   if (pharmacySelect.selectedIndex <= 0) pharmacySelect.value = "";
-               }
-                pharmacySelect.disabled = !(regionSelect.value && categoryKey && pharmacySelect.options.length > 1);
-                updateSelectActiveStyles();
-           }
+      const allThemeButtons = [studentsBtn, workforceBtn, infantsBtn];
+      allThemeButtons.forEach(button => button.addEventListener('click', () => toggleButton(button)));
 
-          [yearSelect, regionSelect, monthSelect, pharmacySelect].forEach(sel => {
-              sel.addEventListener('change', () => {
-                  if (sel === regionSelect) updatePharmacyDropdown();
-                  saveToLocalStorage();
-                  updateSubmitButtonVisibility();
-                  updateSelectActiveStyles();
-              });
-          });
-
-          function saveToLocalStorage() {
-            try {
-                localStorage.setItem('pharmacyAppData', JSON.stringify({ cardValues: cardValues.map(v => (isNaN(v) ? 0 : v)), activeButton: activeButton ? activeButton.id : null, year: yearSelect.value, month: monthSelect.value, region: regionSelect.value, pharmacy: pharmacySelect.value, totalTickets: totalTicketsInput.value, totalExternal: totalExternalInput.value }));
-            } catch (error) {}
-          }
-
-          function loadFromLocalStorage() {
-            try {
-                const savedData = localStorage.getItem('pharmacyAppData');
-                if (!savedData) { resetAllFields(false); return; }
-                const parsedData = JSON.parse(savedData);
-                cardValues = (parsedData.cardValues || []).map(v => { const num = parseFloat(v); return isNaN(num) || num < 0 ? 0 : Math.min(num, 1000000000); });
-                if (parsedData.activeButton) { const btn = document.getElementById(parsedData.activeButton); if (btn) toggleButton(btn); }
-                yearSelect.value = parsedData.year || "";
-                monthSelect.value = parsedData.month || "";
-                regionSelect.value = parsedData.region || "";
-                updatePharmacyDropdown();
-                pharmacySelect.value = parsedData.pharmacy || "";
-                totalTicketsInput.value = parsedData.totalTickets || '';
-                totalExternalInput.value = parsedData.totalExternal || '';
-                [totalTicketsInput, totalExternalInput].forEach(updateCardStyle);
-                cardValues.forEach((value, index) => { const input = document.querySelector(`input.drug-input[data-index="${index}"]`); if (input) { input.value = value > 0 ? (value % 1 === 0 ? value.toString() : parseFloat(value.toFixed(3)).toString()) : ''; updateCardStyle(input); } });
-                updateTotal();
-            } catch (error) { resetAllFields(true); }
-            updateSelectActiveStyles();
-            updateSubmitButtonVisibility();
-          }
-
-          submitButton.addEventListener('click', async () => {
-            if (isSubmitting) return;
-            if (!validateOptionalInputs()) { showNotification("الرجاء تصحيح قيمة اجمالي التذاكر أو اجمالي الخارجي.", 'error'); return; }
-            if (!validateSubmission()) { showNotification("برجاء اكمال البيانات المطلوبة بشكل صحيح والتأكد من المجموع.", 'error'); gsap.fromTo(submitButton, { x: -5 }, { x: 5, duration: 0.05, repeat: 5, yoyo: true, clearProps: "x" }); return; }
-            try {
-              isSubmitting = true;
-              submitButton.disabled = true;
-              submitButton.textContent = 'جاري الإرسال...';
-              gsap.to(submitButton, { opacity: 0.8, duration: 0.3 });
-              await sendDataToGoogleSheets();
-              submitButton.textContent = 'تم الإرسال بنجاح!';
-              gsap.to(submitButton, { backgroundColor: '#2E8B57', borderColor: '#1E5D3A', duration: 0.3 });
-              showNotification('تم تنزيل الملفات وإرسال البيانات بنجاح!', 'success');
-              await new Promise(resolve => setTimeout(resolve, 1500));
-              resetAllFields(true);
-            } catch (error) {
-              submitButton.textContent = 'فشل الإرسال';
-              gsap.to(submitButton, { backgroundColor: '#D32F2F', borderColor: '#8E1C1C', duration: 0.3 });
-              showNotification(`حدث خطأ أثناء الإرسال: ${error.message || 'يرجى المحاولة مرة أخرى.'}`, 'error', 6000);
-              await new Promise(resolve => setTimeout(resolve, 2000));
-            } finally {
-              isSubmitting = false;
-              submitButton.textContent = 'إرسال البيانات';
-              gsap.to(submitButton, { clearProps: "backgroundColor, borderColor, opacity", duration: 0.3 });
-              updateSubmitButtonVisibility();
-            }
-          });
-
-           function validateSubmission() {
-               const total = cardValues.reduce((acc, val) => acc + (val || 0), 0);
-               const allDropdownsFilled = yearSelect.value && monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
-               return total > 0 && allDropdownsFilled && validateOptionalInputs();
-           }
-
-          async function sendDataToGoogleSheets() {
-            const data = { date: new Date().toISOString(), year: yearSelect.value, class: activeButton ? activeButton.textContent.trim() : '', month: monthSelect.options[monthSelect.selectedIndex]?.text || '', region: regionSelect.options[regionSelect.selectedIndex]?.text || '', pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex]?.text || '', totalPrescription: +totalTicketsInput.value.trim() || 0, insuranceCoveredPrescription: +totalExternalInput.value.trim() || 0, ...cardNames.reduce((acc, name, i) => ({ ...acc, [name]: +cardValues[i] || 0 }), {}), calculatedTotal: cardValues.reduce((sum, val) => sum + (val || 0), 0) };
-            try {
-                await fetch(`${SCRIPT_URL}?data=${encodeURIComponent(JSON.stringify(data))}`, { method: 'GET', mode: 'no-cors' });
-                
-                const safeName = (data.pharmacy || 'data').replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                const timeStamp = new Date().toISOString().replace(/[:.]/g, '-');
-                const baseFilename = `${safeName}_${timeStamp}`;
-
-                const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const jsonA = document.createElement('a');
-                jsonA.href = URL.createObjectURL(jsonBlob);
-                jsonA.download = `${baseFilename}.json`;
-                jsonA.click();
-                URL.revokeObjectURL(jsonA.href);
-                jsonA.remove();
-
-                const csvHeaders = Object.keys(data);
-                const csvRow = csvHeaders.map(h => {
-                    let val = data[h];
-                    return typeof val === 'string' && val.includes(',') ? `"${val}"` : val;
-                }).join(',');
-                const csvContent = "\uFEFF" + csvHeaders.join(',') + '\n' + csvRow;
-                
-                const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const csvA = document.createElement('a');
-                csvA.href = URL.createObjectURL(csvBlob);
-                csvA.download = `${baseFilename}.csv`;
-                csvA.click();
-                URL.revokeObjectURL(csvA.href);
-                csvA.remove();
-
-            } catch (error) { throw new Error('فشل إرسال البيانات أو إنشاء ملفات النسخ الاحتياطي.'); }
-          }
-
-          function resetAllFields(clearStorage = true) {
-                cardValues.fill(0);
-                document.querySelectorAll('input.drug-input, input[type="number"]').forEach(input => { input.value = ''; updateCardStyle(input); input.closest('.card')?.classList.remove('card-invalid'); });
-                [yearSelect, monthSelect, regionSelect].forEach(s => s.selectedIndex = 0);
-                pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
-                pharmacySelect.disabled = true;
-                if (activeButton) { activeButton.classList.remove('btn-active'); activeButton.classList.add('btn-inactive'); activeButton = null; }
-                docElement.className = '';
-                updateTotal();
-                updateSelectActiveStyles();
-                if (clearStorage) try { localStorage.removeItem('pharmacyAppData'); } catch(e){}
-                updateSubmitButtonVisibility();
-            }
-
-          function updateSubmitButtonVisibility() {
-                const isValid = validateSubmission();
-                submitButton.disabled = isSubmitting || !isValid;
-                if(isValid) {
-                    submitButton.classList.add('btn-active');
-                    submitButton.classList.remove('btn-inactive');
-                } else {
-                    submitButton.classList.remove('btn-active');
-                    submitButton.classList.add('btn-inactive');
-                }
-          }
-
-           function validateOptionalInputs() {
-               let allValid = true;
-               [totalTicketsInput, totalExternalInput].forEach(input => {
-                   const card = input.closest('.card');
-                   const value = input.value.trim();
-                   if (value !== '' && (!/^\d+$/.test(value) || +value > 1000000 || +value < 0)) { card.classList.add('card-invalid'); allValid = false; }
-                   else { card.classList.remove('card-invalid'); }
-                   updateCardStyle(input);
-               });
-               return allValid;
-           }
-
-          [totalTicketsInput, totalExternalInput].forEach(input => {
-              input.addEventListener('input', (e) => { let val = e.target.value.replace(/[^0-9]/g, ''); if (+val > 1000000) val = '1000000'; e.target.value = val; updateCardStyle(e.target); });
-              input.addEventListener('blur', () => { validateOptionalInputs(); updateSubmitButtonVisibility(); saveToLocalStorage(); });
-          });
-
-          loadFromLocalStorage();
-
-          downloadCsvBtn.addEventListener('click', () => {
-              downloadFile(HEADERS.join(','), 'template.csv', 'text/csv;charset=utf-8;');
-          });
-
-          downloadJsonBtn.addEventListener('click', () => {
-              const templateObj = {};
-              HEADERS.forEach(h => { templateObj[h] = ""; });
-              downloadFile(JSON.stringify([templateObj], null, 2), 'template.json', 'application/json');
-          });
-
-          function downloadFile(content, fileName, mimeType) {
-              const blob = new Blob(["\uFEFF" + content], { type: mimeType });
-              const link = document.createElement("a");
-              link.href = URL.createObjectURL(blob);
-              link.download = fileName;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-          }
-
-          const preventDefaults = e => { e.preventDefault(); e.stopPropagation(); };
-          ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropArea.addEventListener(e, preventDefaults));
-          ['dragenter', 'dragover'].forEach(e => dropArea.addEventListener(e, () => dropArea.classList.add('drag-active')));
-          ['dragleave', 'drop'].forEach(e => dropArea.addEventListener(e, () => dropArea.classList.remove('drag-active')));
-          dropArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-          fileInput.addEventListener('change', e => handleFiles(e.target.files));
-          uploadBtn.addEventListener('click', handleUpload);
-
-          async function handleFiles(newFiles) {
-              for (const file of newFiles) {
-                  if (filesToUpload.some(f => f.file.name === file.name)) continue;
-                  const fileExt = file.name.split('.').pop().toLowerCase();
-                  if (['xlsx', 'xls'].includes(fileExt)) {
-                      await promptForSheetSelection(file);
-                  } else {
-                      filesToUpload.push({ file: file, selectedSheets: null });
-                  }
-              }
-              fileInput.value = '';
-              updateFileListUI();
-          }
-
-          function promptForSheetSelection(file) {
-              return new Promise(resolve => {
-                  const reader = new FileReader();
-                  reader.onload = (e) => {
-                      const workbook = XLSX.read(e.target.result, { type: 'array' });
-                      const sheetNames = workbook.SheetNames;
-                      if (sheetNames.length <= 1) {
-                          filesToUpload.push({ file: file, selectedSheets: sheetNames });
-                          updateFileListUI();
-                          resolve();
-                          return;
-                      }
-                      modalFilename.textContent = file.name;
-                      modalSheetList.innerHTML = '';
-                      sheetNames.forEach((name) => {
-                          const li = document.createElement('li');
-                          li.className = 'modal-sheet-item';
-                          li.innerHTML = `<input type="checkbox" value="${name}" checked> <span>${name}</span>`;
-                          modalSheetList.appendChild(li);
-                      });
-                      sheetModal.style.display = 'flex';
-                      
-                      const confirmHandler = () => {
-                          const selectedSheets = Array.from(modalSheetList.querySelectorAll('input:checked')).map(cb => cb.value);
-                          if (selectedSheets.length > 0) {
-                              filesToUpload.push({ file: file, selectedSheets: selectedSheets });
-                          }
-                          cleanupAndResolve();
-                      };
-                      const cancelHandler = () => cleanupAndResolve();
-                      const cleanupAndResolve = () => {
-                          sheetModal.style.display = 'none';
-                          modalConfirmBtn.removeEventListener('click', confirmHandler);
-                          modalCancelBtn.removeEventListener('click', cancelHandler);
-                          updateFileListUI();
-                          resolve();
-                      }
-                      modalConfirmBtn.addEventListener('click', confirmHandler);
-                      modalCancelBtn.addEventListener('click', cancelHandler);
-                  };
-                  reader.readAsArrayBuffer(file);
-              });
-          }
-
-          function updateFileListUI() {
-              fileListDOM.innerHTML = '';
-              filesToUpload.forEach((fileWrapper, index) => {
-                  const file = fileWrapper.file;
-                  const item = document.createElement('div');
-                  item.className = 'file-item';
-                  let details = fileWrapper.selectedSheets ? `<div class="file-details">${fileWrapper.selectedSheets.length} ورقة عمل محددة</div>` : '';
-                  item.innerHTML = `<div class="file-info"><div class="file-name">${file.name}</div>${details}</div><button class="delete-btn" data-index="${index}">&times;</button>`;
-                  item.querySelector('.delete-btn').onclick = e => {
-                      filesToUpload.splice(parseInt(e.currentTarget.dataset.index), 1);
-                      updateFileListUI();
-                  };
-                  fileListDOM.appendChild(item);
-              });
-              
-              if (filesToUpload.length > 0) {
-                  uploadBtn.disabled = false;
-                  uploadBtn.classList.remove('btn-inactive');
-                  uploadBtn.classList.add('btn-active');
-              } else {
-                  uploadBtn.disabled = true;
-                  uploadBtn.classList.add('btn-inactive');
-                  uploadBtn.classList.remove('btn-active');
-              }
-          }
-
-          async function handleUpload() {
-              if (filesToUpload.length === 0) return;
-              uploadBtn.disabled = true;
-              uploadBtn.classList.remove('btn-active');
-              resultsContainer.innerHTML = '';
-              resultsContainer.hidden = true;
-              progressContainer.hidden = false;
-
-              let allRows = [];
-              let fileProcessingErrors = [];
-
-              for (const fileWrapper of filesToUpload) {
-                  try {
-                      const data = await processFile(fileWrapper);
-                      if (data && data.length > 0) {
-                          allRows.push(...data.map(row => ({ ...row, _sourceFile: fileWrapper.file.name })));
-                      } else {
-                          fileProcessingErrors.push({ fileName: fileWrapper.file.name, error: "لا توجد بيانات صالحة في الملف" });
-                      }
-                  } catch (error) {
-                      fileProcessingErrors.push({ fileName: fileWrapper.file.name, error: error.message });
-                  }
-              }
-
-              fileProcessingErrors.forEach(error => {
-                  addResultItem(error.fileName, false, `فشل معالجة الملف: ${error.error}`);
-              });
-
-              if (allRows.length === 0) {
-                  uploadBtn.disabled = false;
-                  if (filesToUpload.length > 0) uploadBtn.classList.add('btn-active');
-                  progressContainer.hidden = true;
-                  if (fileProcessingErrors.length === 0) {
-                      addResultItem("الرفع", false, "لم يتم العثور على بيانات صالحة لرفعها.");
-                  }
-                  resultsContainer.hidden = false;
-                  return;
-              }
-
-              let successCount = 0, errorCount = 0;
-
-              for (let i = 0; i < allRows.length; i++) {
-                  const row = allRows[i];
-                  const percentage = Math.round(((i + 1) / allRows.length) * 100);
-                  uploadBtn.textContent = 'جاري الرفع...';
-                  progressText.textContent = `يتم رفع الصف ${i + 1} من ${allRows.length}`;
-                  progressBar.style.width = percentage + '%';
-
-                  try {
-                      await fetch(`${SCRIPT_URL}?data=${encodeURIComponent(JSON.stringify(row))}`, { method: 'GET', mode: 'no-cors' });
-                      successCount++;
-                  } catch (error) {
-                      errorCount++;
-                  }
-
-                  if (i < allRows.length - 1) {
-                      await new Promise(resolve => setTimeout(resolve, 800));
-                  }
-              }
-
-              uploadBtn.textContent = 'تم الرفع بنجاح';
-              progressText.textContent = 'اكتمل!';
-              resultsContainer.hidden = false;
-
-              if (successCount > 0) {
-                  addResultItem("ملخص الرفع", true, `تم رفع <strong>${successCount}</strong> صفوف بنجاح.`);
-              }
-
-              if (errorCount > 0) {
-                  addResultItem("أخطاء الرفع", false, `فشل رفع <strong>${errorCount}</strong> صفوف.`);
-              }
-
-              setTimeout(() => {
-                  uploadBtn.textContent = 'رفع الملفات';
-                  progressContainer.hidden = true;
-                  progressBar.style.width = '0%';
-                  filesToUpload = [];
-                  updateFileListUI();
-              }, 4000);
-          }
-
-          async function processFile(fileWrapper) {
-              const file = fileWrapper.file;
-              const fileExt = file.name.split('.').pop().toLowerCase();
-
-              if (fileExt === 'json') {
-                  const data = JSON.parse(await file.text());
-                  return validateRows(Array.isArray(data) ? data : [data], file.name);
-              }
-
-              if (['csv', 'xlsx', 'xls'].includes(fileExt)) {
-                  const data = await file.arrayBuffer();
-                  const workbook = XLSX.read(data);
-                  let allSheetData = [];
-                  const sheetsToProcess = fileWrapper.selectedSheets || workbook.SheetNames;
-                  sheetsToProcess.forEach(sheetName => {
-                      if (workbook.Sheets[sheetName]) {
-                          const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: false, dateNF: 'YYYY-MM-DD' });
-                          allSheetData.push(...sheetData);
-                      }
-                  });
-                  return validateRows(allSheetData, file.name);
-              }
-              throw new Error('نوع الملف غير مدعوم.');
-          }
-
-          function validateRows(rows, fileName) {
-              return rows.map((row, index) => {
-                  const missingHeaders = HEADERS.filter(header => !(header in row));
-                  if (missingHeaders.length > 0) {
-                      throw new Error(`الصف ${index + 2} في الملف ${fileName} ينقصه الأعمدة: ${missingHeaders.join(', ')}`);
-                  }
-                  return row;
-              });
-          }
-
-          function addResultItem(title, success, message) {
-              const item = document.createElement('div');
-              item.className = `result-item ${success ? 'result-success' : 'result-error'}`;
-              const iconSvg = success 
-                  ? `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>`
-                  : `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>`;
-              item.innerHTML = `${iconSvg}<div><div style="font-weight:700; font-size:1.1rem;">${title}</div><div style="color:var(--text-secondary);">${message}</div></div>`;
-              resultsContainer.appendChild(item);
-          }
+      function toggleButton(clickedButton) {
+        if (activeButton === clickedButton) return;
+        activeButton = clickedButton;
+        allThemeButtons.forEach(btn => {
+            btn.classList.toggle('btn-active', btn === clickedButton);
+            btn.classList.toggle('btn-inactive', btn !== clickedButton);
         });
-    </script>
+        let themeClass = '';
+        if (activeButton === studentsBtn) themeClass = 'theme-students';
+        else if (activeButton === workforceBtn) themeClass = 'theme-workforce';
+        else if (activeButton === infantsBtn) themeClass = 'theme-infants';
+        docElement.className = themeClass;
+        pharmacySelect.value = "";
+        updatePharmacyDropdown();
+        updateSelectActiveStyles();
+        saveToLocalStorage();
+        updateSubmitButtonVisibility();
+      }
+
+      function updateSelectActiveStyles() {
+        [yearSelect, monthSelect, regionSelect, pharmacySelect].forEach(sel => sel.classList.toggle('select-valid-selection', !sel.disabled && sel.value !== ""));
+      }
+
+       function updatePharmacyDropdown() {
+           const currentPharmacyValue = pharmacySelect.value;
+           pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
+           let categoryKey = '';
+            if (activeButton === studentsBtn) categoryKey = 'students';
+            else if (activeButton === workforceBtn) categoryKey = 'workforce';
+            else if (activeButton === infantsBtn) categoryKey = 'infants';
+           if (regionSelect.value && categoryKey) {
+               const options = pharmacyOptions[categoryKey]?.[regionSelect.value] || [];
+               options.forEach((optionText, index) => pharmacySelect.appendChild(new Option(optionText, index + 1)));
+               pharmacySelect.value = currentPharmacyValue;
+               if (pharmacySelect.selectedIndex <= 0) pharmacySelect.value = "";
+           }
+            pharmacySelect.disabled = !(regionSelect.value && categoryKey && pharmacySelect.options.length > 1);
+            updateSelectActiveStyles();
+       }
+
+      [yearSelect, regionSelect, monthSelect, pharmacySelect].forEach(sel => {
+          sel.addEventListener('change', () => {
+              if (sel === regionSelect) updatePharmacyDropdown();
+              saveToLocalStorage();
+              updateSubmitButtonVisibility();
+              updateSelectActiveStyles();
+          });
+      });
+
+      function saveToLocalStorage() {
+        try {
+            localStorage.setItem('pharmacyAppData', JSON.stringify({ cardValues: cardValues.map(v => (isNaN(v) ? 0 : v)), activeButton: activeButton ? activeButton.id : null, year: yearSelect.value, month: monthSelect.value, region: regionSelect.value, pharmacy: pharmacySelect.value, totalTickets: totalTicketsInput.value, totalExternal: totalExternalInput.value }));
+        } catch (error) {}
+      }
+
+      function loadFromLocalStorage() {
+        try {
+            const savedData = localStorage.getItem('pharmacyAppData');
+            if (!savedData) { resetAllFields(false); return; }
+            const parsedData = JSON.parse(savedData);
+            cardValues = (parsedData.cardValues || []).map(v => { const num = parseFloat(v); return isNaN(num) || num < 0 ? 0 : Math.min(num, 1000000000); });
+            if (parsedData.activeButton) { const btn = document.getElementById(parsedData.activeButton); if (btn) toggleButton(btn); }
+            yearSelect.value = parsedData.year || "";
+            monthSelect.value = parsedData.month || "";
+            regionSelect.value = parsedData.region || "";
+            updatePharmacyDropdown();
+            pharmacySelect.value = parsedData.pharmacy || "";
+            totalTicketsInput.value = parsedData.totalTickets || '';
+            totalExternalInput.value = parsedData.totalExternal || '';
+            [totalTicketsInput, totalExternalInput].forEach(updateCardStyle);
+            cardValues.forEach((value, index) => { const input = document.querySelector(`input.drug-input[data-index="${index}"]`); if (input) { input.value = value > 0 ? (value % 1 === 0 ? value.toString() : parseFloat(value.toFixed(3)).toString()) : ''; updateCardStyle(input); } });
+            updateTotal();
+        } catch (error) { resetAllFields(true); }
+        updateSelectActiveStyles();
+        updateSubmitButtonVisibility();
+      }
+
+      submitButton.addEventListener('click', async () => {
+        if (isSubmitting) return;
+        if (!validateOptionalInputs()) { showNotification("الرجاء تصحيح قيمة اجمالي التذاكر أو اجمالي الخارجي.", 'error'); return; }
+        if (!validateSubmission()) { showNotification("برجاء اكمال البيانات المطلوبة بشكل صحيح والتأكد من المجموع.", 'error'); gsap.fromTo(submitButton, { x: -5 }, { x: 5, duration: 0.05, repeat: 5, yoyo: true, clearProps: "x" }); return; }
+        try {
+          isSubmitting = true;
+          submitButton.disabled = true;
+          submitButton.textContent = 'جاري الإرسال...';
+          gsap.to(submitButton, { opacity: 0.8, duration: 0.3 });
+          await sendDataToGoogleSheets();
+          submitButton.textContent = 'تم الإرسال بنجاح!';
+          gsap.to(submitButton, { backgroundColor: '#2E8B57', borderColor: '#1E5D3A', duration: 0.3 });
+          showNotification('تم تنزيل الملفات وإرسال البيانات بنجاح!', 'success');
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          resetAllFields(true);
+        } catch (error) {
+          submitButton.textContent = 'فشل الإرسال';
+          gsap.to(submitButton, { backgroundColor: '#D32F2F', borderColor: '#8E1C1C', duration: 0.3 });
+          showNotification(`حدث خطأ أثناء الإرسال: ${error.message || 'يرجى المحاولة مرة أخرى.'}`, 'error', 6000);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } finally {
+          isSubmitting = false;
+          submitButton.textContent = 'إرسال البيانات';
+          gsap.to(submitButton, { clearProps: "backgroundColor, borderColor, opacity", duration: 0.3 });
+          updateSubmitButtonVisibility();
+        }
+      });
+
+       function validateSubmission() {
+           const total = cardValues.reduce((acc, val) => acc + (val || 0), 0);
+           const allDropdownsFilled = yearSelect.value && monthSelect.value && regionSelect.value && pharmacySelect.value && activeButton;
+           return total > 0 && allDropdownsFilled && validateOptionalInputs();
+       }
+
+      async function sendDataToGoogleSheets() {
+        const data = { date: new Date().toISOString(), year: yearSelect.value, class: activeButton ? activeButton.textContent.trim() : '', month: monthSelect.options[monthSelect.selectedIndex]?.text || '', region: regionSelect.options[regionSelect.selectedIndex]?.text || '', pharmacy: pharmacySelect.options[pharmacySelect.selectedIndex]?.text || '', totalPrescription: +totalTicketsInput.value.trim() || 0, insuranceCoveredPrescription: +totalExternalInput.value.trim() || 0, ...cardNames.reduce((acc, name, i) => ({ ...acc, [name]: +cardValues[i] || 0 }), {}), calculatedTotal: cardValues.reduce((sum, val) => sum + (val || 0), 0) };
+        try {
+            await fetch(`${SCRIPT_URL}?data=${encodeURIComponent(JSON.stringify(data))}`, { method: 'GET', mode: 'no-cors' });
+            
+            const safeName = (data.pharmacy || 'data').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const timeStamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const baseFilename = `${safeName}_${timeStamp}`;
+
+            const jsonBlob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const jsonA = document.createElement('a');
+            jsonA.href = URL.createObjectURL(jsonBlob);
+            jsonA.download = `${baseFilename}.json`;
+            jsonA.click();
+            URL.revokeObjectURL(jsonA.href);
+            jsonA.remove();
+
+            const csvHeaders = Object.keys(data);
+            const csvRow = csvHeaders.map(h => {
+                let val = data[h];
+                return typeof val === 'string' && val.includes(',') ? `"${val}"` : val;
+            }).join(',');
+            const csvContent = "\uFEFF" + csvHeaders.join(',') + '\n' + csvRow;
+            
+            const csvBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const csvA = document.createElement('a');
+            csvA.href = URL.createObjectURL(csvBlob);
+            csvA.download = `${baseFilename}.csv`;
+            csvA.click();
+            URL.revokeObjectURL(csvA.href);
+            csvA.remove();
+
+        } catch (error) { throw new Error('فشل إرسال البيانات أو إنشاء ملفات النسخ الاحتياطي.'); }
+      }
+
+      function resetAllFields(clearStorage = true) {
+            cardValues.fill(0);
+            document.querySelectorAll('input.drug-input, input[type="number"]').forEach(input => { input.value = ''; updateCardStyle(input); input.closest('.card')?.classList.remove('card-invalid'); });
+            [yearSelect, monthSelect, regionSelect].forEach(s => s.selectedIndex = 0);
+            pharmacySelect.innerHTML = '<option value="">الصيدلية</option>';
+            pharmacySelect.disabled = true;
+            if (activeButton) { activeButton.classList.remove('btn-active'); activeButton.classList.add('btn-inactive'); activeButton = null; }
+            docElement.className = '';
+            updateTotal();
+            updateSelectActiveStyles();
+            if (clearStorage) try { localStorage.removeItem('pharmacyAppData'); } catch(e){}
+            updateSubmitButtonVisibility();
+        }
+
+      function updateSubmitButtonVisibility() {
+            const isValid = validateSubmission();
+            submitButton.disabled = isSubmitting || !isValid;
+            if(isValid) {
+                submitButton.classList.add('btn-active');
+                submitButton.classList.remove('btn-inactive');
+            } else {
+                submitButton.classList.remove('btn-active');
+                submitButton.classList.add('btn-inactive');
+            }
+      }
+
+       function validateOptionalInputs() {
+           let allValid = true;
+           [totalTicketsInput, totalExternalInput].forEach(input => {
+               const card = input.closest('.card');
+               const value = input.value.trim();
+               if (value !== '' && (!/^\d+$/.test(value) || +value > 1000000 || +value < 0)) { card.classList.add('card-invalid'); allValid = false; }
+               else { card.classList.remove('card-invalid'); }
+               updateCardStyle(input);
+           });
+           return allValid;
+       }
+
+      [totalTicketsInput, totalExternalInput].forEach(input => {
+          input.addEventListener('input', (e) => { let val = e.target.value.replace(/[^0-9]/g, ''); if (+val > 1000000) val = '1000000'; e.target.value = val; updateCardStyle(e.target); });
+          input.addEventListener('blur', () => { validateOptionalInputs(); updateSubmitButtonVisibility(); saveToLocalStorage(); });
+      });
+
+      loadFromLocalStorage();
+
+      downloadCsvBtn.addEventListener('click', () => {
+          downloadFile(HEADERS.join(','), 'template.csv', 'text/csv;charset=utf-8;');
+      });
+
+      downloadJsonBtn.addEventListener('click', () => {
+          const templateObj = {};
+          HEADERS.forEach(h => { templateObj[h] = ""; });
+          downloadFile(JSON.stringify([templateObj], null, 2), 'template.json', 'application/json');
+      });
+
+      function downloadFile(content, fileName, mimeType) {
+          const blob = new Blob(["\uFEFF" + content], { type: mimeType });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      }
+
+      const preventDefaults = e => { e.preventDefault(); e.stopPropagation(); };
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => dropArea.addEventListener(e, preventDefaults));
+      ['dragenter', 'dragover'].forEach(e => dropArea.addEventListener(e, () => dropArea.classList.add('drag-active')));
+      ['dragleave', 'drop'].forEach(e => dropArea.addEventListener(e, () => dropArea.classList.remove('drag-active')));
+      dropArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+      fileInput.addEventListener('change', e => handleFiles(e.target.files));
+      uploadBtn.addEventListener('click', handleUpload);
+
+      async function handleFiles(newFiles) {
+          for (const file of newFiles) {
+              if (filesToUpload.some(f => f.file.name === file.name)) continue;
+              const fileExt = file.name.split('.').pop().toLowerCase();
+              if (['xlsx', 'xls'].includes(fileExt)) {
+                  await promptForSheetSelection(file);
+              } else {
+                  filesToUpload.push({ file: file, selectedSheets: null });
+              }
+          }
+          fileInput.value = '';
+          updateFileListUI();
+      }
+
+      function promptForSheetSelection(file) {
+          return new Promise(resolve => {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                  const workbook = XLSX.read(e.target.result, { type: 'array' });
+                  const sheetNames = workbook.SheetNames;
+                  if (sheetNames.length <= 1) {
+                      filesToUpload.push({ file: file, selectedSheets: sheetNames });
+                      updateFileListUI();
+                      resolve();
+                      return;
+                  }
+                  modalFilename.textContent = file.name;
+                  modalSheetList.innerHTML = '';
+                  sheetNames.forEach((name) => {
+                      const li = document.createElement('li');
+                      li.className = 'modal-sheet-item';
+                      const safeName = escapeHTML(name);
+                      li.innerHTML = `<input type="checkbox" value="${safeName}" checked> <span>${safeName}</span>`;
+                      modalSheetList.appendChild(li);
+                  });
+                  sheetModal.style.display = 'flex';
+                  
+                  const confirmHandler = () => {
+                      const selectedSheets = Array.from(modalSheetList.querySelectorAll('input:checked')).map(cb => cb.value);
+                      if (selectedSheets.length > 0) {
+                          filesToUpload.push({ file: file, selectedSheets: selectedSheets });
+                      }
+                      cleanupAndResolve();
+                  };
+                  const cancelHandler = () => cleanupAndResolve();
+                  const cleanupAndResolve = () => {
+                      sheetModal.style.display = 'none';
+                      modalConfirmBtn.removeEventListener('click', confirmHandler);
+                      modalCancelBtn.removeEventListener('click', cancelHandler);
+                      updateFileListUI();
+                      resolve();
+                  }
+                  modalConfirmBtn.addEventListener('click', confirmHandler);
+                  modalCancelBtn.addEventListener('click', cancelHandler);
+              };
+              reader.readAsArrayBuffer(file);
+          });
+      }
+
+      function updateFileListUI() {
+          fileListDOM.innerHTML = '';
+          filesToUpload.forEach((fileWrapper, index) => {
+              const file = fileWrapper.file;
+              const item = document.createElement('div');
+              item.className = 'file-item';
+              let details = fileWrapper.selectedSheets ? `<div class="file-details">${fileWrapper.selectedSheets.length} ورقة عمل محددة</div>` : '';
+              item.innerHTML = `<div class="file-info"><div class="file-name">${escapeHTML(file.name)}</div>${details}</div><button class="delete-btn" data-index="${index}">&times;</button>`;
+              item.querySelector('.delete-btn').onclick = e => {
+                  filesToUpload.splice(parseInt(e.currentTarget.dataset.index), 1);
+                  updateFileListUI();
+              };
+              fileListDOM.appendChild(item);
+          });
+          
+          if (filesToUpload.length > 0) {
+              uploadBtn.disabled = false;
+              uploadBtn.classList.remove('btn-inactive');
+              uploadBtn.classList.add('btn-active');
+          } else {
+              uploadBtn.disabled = true;
+              uploadBtn.classList.add('btn-inactive');
+              uploadBtn.classList.remove('btn-active');
+          }
+      }
+
+      async function handleUpload() {
+          if (filesToUpload.length === 0) return;
+          uploadBtn.disabled = true;
+          uploadBtn.classList.remove('btn-active');
+          resultsContainer.innerHTML = '';
+          resultsContainer.hidden = true;
+          progressContainer.hidden = false;
+
+          let allRows = [];
+          let fileProcessingErrors = [];
+
+          for (const fileWrapper of filesToUpload) {
+              try {
+                  const data = await processFile(fileWrapper);
+                  if (data && data.length > 0) {
+                      allRows.push(...data.map(row => ({ ...row, _sourceFile: fileWrapper.file.name })));
+                  } else {
+                      fileProcessingErrors.push({ fileName: fileWrapper.file.name, error: "لا توجد بيانات صالحة في الملف" });
+                  }
+              } catch (error) {
+                  fileProcessingErrors.push({ fileName: fileWrapper.file.name, error: error.message });
+              }
+          }
+
+          fileProcessingErrors.forEach(error => {
+              addResultItem(error.fileName, false, `فشل معالجة الملف: ${escapeHTML(error.error)}`);
+          });
+
+          if (allRows.length === 0) {
+              uploadBtn.disabled = false;
+              if (filesToUpload.length > 0) uploadBtn.classList.add('btn-active');
+              progressContainer.hidden = true;
+              if (fileProcessingErrors.length === 0) {
+                  addResultItem("الرفع", false, "لم يتم العثور على بيانات صالحة لرفعها.");
+              }
+              resultsContainer.hidden = false;
+              return;
+          }
+
+          let successCount = 0, errorCount = 0;
+
+          for (let i = 0; i < allRows.length; i++) {
+              const row = allRows[i];
+              const percentage = Math.round(((i + 1) / allRows.length) * 100);
+              uploadBtn.textContent = 'جاري الرفع...';
+              progressText.textContent = `يتم رفع الصف ${i + 1} من ${allRows.length}`;
+              progressBar.style.width = percentage + '%';
+
+              try {
+                  await fetch(`${SCRIPT_URL}?data=${encodeURIComponent(JSON.stringify(row))}`, { method: 'GET', mode: 'no-cors' });
+                  successCount++;
+              } catch (error) {
+                  errorCount++;
+              }
+
+              if (i < allRows.length - 1) {
+                  await new Promise(resolve => setTimeout(resolve, 800));
+              }
+          }
+
+          uploadBtn.textContent = 'تم الرفع بنجاح';
+          progressText.textContent = 'اكتمل!';
+          resultsContainer.hidden = false;
+
+          if (successCount > 0) {
+              addResultItem("ملخص الرفع", true, `تم رفع <strong>${successCount}</strong> صفوف بنجاح.`);
+          }
+
+          if (errorCount > 0) {
+              addResultItem("أخطاء الرفع", false, `فشل رفع <strong>${errorCount}</strong> صفوف.`);
+          }
+
+          setTimeout(() => {
+              uploadBtn.textContent = 'رفع الملفات';
+              progressContainer.hidden = true;
+              progressBar.style.width = '0%';
+              filesToUpload = [];
+              updateFileListUI();
+          }, 4000);
+      }
+
+      async function processFile(fileWrapper) {
+          const file = fileWrapper.file;
+          const fileExt = file.name.split('.').pop().toLowerCase();
+
+          if (fileExt === 'json') {
+              const data = JSON.parse(await file.text());
+              return validateRows(Array.isArray(data) ? data : [data], file.name);
+          }
+
+          if (['csv', 'xlsx', 'xls'].includes(fileExt)) {
+              const data = await file.arrayBuffer();
+              const workbook = XLSX.read(data);
+              let allSheetData = [];
+              const sheetsToProcess = fileWrapper.selectedSheets || workbook.SheetNames;
+              sheetsToProcess.forEach(sheetName => {
+                  if (workbook.Sheets[sheetName]) {
+                      const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: false, dateNF: 'YYYY-MM-DD' });
+                      allSheetData.push(...sheetData);
+                  }
+              });
+              return validateRows(allSheetData, file.name);
+          }
+          throw new Error('نوع الملف غير مدعوم.');
+      }
+
+      function validateRows(rows, fileName) {
+          return rows.map((row, index) => {
+              const missingHeaders = HEADERS.filter(header => !(header in row));
+              if (missingHeaders.length > 0) {
+                  throw new Error(`الصف ${index + 2} في الملف ${fileName} ينقصه الأعمدة: ${missingHeaders.join(', ')}`);
+              }
+              return row;
+          });
+      }
+
+      function addResultItem(title, success, messageHTML) {
+          const item = document.createElement('div');
+          item.className = `result-item ${success ? 'result-success' : 'result-error'}`;
+          const iconSvg = success 
+              ? `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>`
+              : `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>`;
+          item.innerHTML = `${iconSvg}<div><div style="font-weight:700; font-size:1.1rem;">${escapeHTML(title)}</div><div style="color:var(--text-secondary);">${messageHTML}</div></div>`;
+          resultsContainer.appendChild(item);
+      }
+    });
+</script>
 </body>
 </html>
