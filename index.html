@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Bangers&family=Changa:wght@500;600;700;800&family=Fredoka+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Bangers&family=Changa:wght@500;600;700;800&family=Fredoka+One&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 *, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; }
 html, body { margin: 0; padding: 0; }
@@ -121,43 +121,51 @@ body {
   padding: 0.4rem 0.9rem;
   border-radius: var(--radius-pill);
   margin-bottom: -0.5rem;
+  transition: color 0.25s var(--swift), background 0.25s var(--swift), border-color 0.25s var(--swift), transform 0.2s var(--spring);
 }
-.eyebrow::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--theme-color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color) 25%, transparent); }
+.eyebrow::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 25%, transparent); flex-shrink: 0; }
+.eyebrow.status-warning { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, white); border-color: color-mix(in srgb, var(--bad) 45%, white); }
+.eyebrow.status-ready { color: var(--good-dark); background: color-mix(in srgb, var(--good) 15%, white); border-color: color-mix(in srgb, var(--good) 50%, white); animation: pulse-btn 2.2s var(--swift) infinite; }
 
 h1.comic-header {
   font-family: 'Fredoka One', 'Cairo', sans-serif;
   font-size: 2.75rem;
   color: #fff;
-  background: linear-gradient(135deg, var(--theme-color) 0%, var(--theme-dark) 65%, var(--theme-shadow) 100%);
-  padding: 1.5rem 2rem;
+  background-repeat: no-repeat;
+  background-image:
+    radial-gradient(circle 7px at 24px 50%, var(--paper) 0 7px, var(--ink) 7px 10px, transparent 10.5px),
+    radial-gradient(circle 7px at calc(100% - 24px) 50%, var(--paper) 0 7px, var(--ink) 7px 10px, transparent 10.5px),
+    linear-gradient(135deg, var(--theme-color) 0%, var(--theme-dark) 65%, var(--theme-shadow) 100%);
+  padding: 1.6rem 2.4rem 2rem;
   border-radius: var(--radius-lg);
   border: 2px solid var(--ink);
   text-align: center;
   text-shadow: 2px 2px 0 rgba(0,0,0,0.28), -1px -1px 0 rgba(0,0,0,0.12);
   letter-spacing: 0.5px;
-  transform: rotate(-1.1deg);
-  transition: transform var(--dur) var(--spring), background 0.5s var(--swift), filter var(--dur) var(--swift), box-shadow var(--dur) var(--swift);
+  transform: rotate(-0.8deg);
+  transition: transform var(--dur) var(--spring), background 0.5s var(--swift), filter var(--dur) var(--swift);
   position: relative;
-  overflow: hidden;
-  box-shadow: var(--ink-shadow) var(--theme-shadow), 0 22px 45px -18px color-mix(in srgb, var(--theme-color) 65%, transparent);
+  overflow: visible;
+  clip-path: polygon(0% 0%, 100% 0%, 100% 92%, 100.000% 100%, 92.857% 92%, 85.714% 100%, 78.571% 92%, 71.429% 100%, 64.286% 92%, 57.143% 100%, 50.000% 92%, 42.857% 100%, 35.714% 92%, 28.571% 100%, 21.429% 92%, 14.286% 100%, 7.143% 92%, 0.000% 100%);
+  filter: drop-shadow(4px 4px 0 var(--theme-shadow)) drop-shadow(0 20px 30px color-mix(in srgb, var(--theme-color) 55%, transparent));
 }
 h1.comic-header::before {
   content: '';
   position: absolute;
   inset: -20% -10%;
   background: repeating-radial-gradient(circle at 0 0, rgba(255,255,255,0.14) 0 2px, transparent 2px 14px);
-  opacity: 0.5;
+  opacity: 0.4;
   pointer-events: none;
 }
 h1.comic-header::after {
   content: '';
   position: absolute;
   inset: 6px;
-  border: 2px solid rgba(255,255,255,0.28);
+  border: 2px dashed rgba(255,255,255,0.3);
   border-radius: calc(var(--radius-lg) - 4px);
   pointer-events: none;
 }
-h1.comic-header:hover { transform: rotate(0.3deg) scale(1.012); filter: brightness(1.05); }
+h1.comic-header:hover { transform: rotate(0.25deg) scale(1.012); filter: drop-shadow(4px 4px 0 var(--theme-shadow)) drop-shadow(0 20px 30px color-mix(in srgb, var(--theme-color) 55%, transparent)) brightness(1.05); }
 
 .grid-container { display: grid; }
 .grid-cols-1 { grid-template-columns: 1fr; }
@@ -282,11 +290,11 @@ div.card h3 {
 
 div.card input[type="text"].drug-input,
 div.card input[type="number"] {
-  font-family: 'Cairo', sans-serif;
-  font-weight: 500;
-  font-size: 1.5rem;
+  font-family: 'Space Grotesk', 'Cairo', sans-serif;
+  font-weight: 600;
+  font-size: 1.55rem;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   line-height: 1.2;
   padding: 0.8rem 0.75rem;
   border: var(--stroke) solid var(--ink);
@@ -339,7 +347,9 @@ div.card#total-card::after {
 div.card#total-card:hover { transform: translateY(-3px) scale(1.012); box-shadow: var(--ink-shadow) var(--theme-shadow), 0 24px 44px -18px color-mix(in srgb, var(--theme-color) 60%, transparent); }
 div.card#total-card h3 { font-size: 1.6rem; color: var(--theme-dark); margin-bottom: 0; min-height: auto; flex-grow: 0; letter-spacing: 0.3px; }
 #total {
-  font-family: 'Fredoka One', 'Cairo', sans-serif;
+  font-family: 'Space Grotesk', 'Cairo', sans-serif;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
   font-size: 3.4rem;
   text-align: center;
   flex-grow: 1;
@@ -711,7 +721,7 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
 <div class="ambient-glow" aria-hidden="true"><span class="glow glow-a"></span><span class="glow glow-b"></span></div>
 <div class="main-container">
 
-  <span class="eyebrow">نظام إدخال بيانات الصيدليات</span>
+  <span class="eyebrow status-neutral" id="status-pill">ابدأ باختيار الفئة</span>
   <h1 id="mainHeader" class="comic-header">بيان المجموعات الدوائية</h1>
 
   <div class="grid-container grid-cols-1 sm:grid-cols-3 gap-4">
@@ -866,6 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const regionSel = document.getElementById('region');
   const pharmacySel = document.getElementById('pharmacy');
   const submitBtn = document.getElementById('submitButton');
+  const statusPill = document.getElementById('status-pill');
   const totalTicketsInput = document.getElementById('totalTickets');
   const totalExternalInput = document.getElementById('totalExternal');
   const notifArea = document.getElementById('notification-area');
@@ -1098,6 +1109,7 @@ document.addEventListener('DOMContentLoaded', () => {
       isSubmitting = true;
       submitBtn.disabled = true;
       submitBtn.textContent = 'جاري الإرسال...';
+      updateStatusPill(false);
       gsap.to(submitBtn, {opacity:0.8,duration:0.3});
       await sendDataToGoogleSheets();
       submitBtn.textContent = 'تم الإرسال بنجاح!';
@@ -1173,6 +1185,30 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.disabled = isSubmitting || !valid;
     submitBtn.classList.toggle('btn-active', valid);
     submitBtn.classList.toggle('btn-inactive', !valid);
+    updateStatusPill(valid);
+  }
+
+  function isOptionalInputsValidPure() {
+    return [totalTicketsInput, totalExternalInput].every(input => {
+      const v = input.value.trim();
+      return v === '' || (/^\d+$/.test(v) && +v <= 1000000 && +v >= 0);
+    });
+  }
+
+  function updateStatusPill(isValid) {
+    if (!statusPill) return;
+    const filled = cardValues.filter(v => v > 0).length;
+    const total = cardValues.reduce((a, v) => a + (v || 0), 0);
+    let text, state;
+    if (isSubmitting) { text = 'جاري الإرسال...'; state = 'status-progress'; }
+    else if (!activeButton) { text = 'ابدأ باختيار الفئة'; state = 'status-neutral'; }
+    else if (!(yearSel.value && monthSel.value && regionSel.value && pharmacySel.value)) { text = 'استكمل بيانات الصيدلية'; state = 'status-neutral'; }
+    else if (!isOptionalInputsValidPure()) { text = 'تحقق من الأرقام المدخلة'; state = 'status-warning'; }
+    else if (filled === 0) { text = 'أدخل بيانات المجموعات الدوائية'; state = 'status-neutral'; }
+    else if (total > 0 && isValid) { text = 'جاهز للإرسال ✓'; state = 'status-ready'; }
+    else { text = `${filled} من ${cardValues.length} مجموعة مُدخلة`; state = 'status-progress'; }
+    statusPill.textContent = text;
+    statusPill.className = `eyebrow ${state}`;
   }
 
   function validateOptionalInputs() {
