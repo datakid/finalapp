@@ -107,25 +107,72 @@ body {
 }
 .main-container > :not([hidden]) ~ :not([hidden]) { margin-top: 1.75rem; }
 
-.eyebrow {
+.status-bar-wrap { position: relative; }
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  transition: opacity 0.3s var(--swift), transform 0.3s var(--spring), max-height 0.35s var(--swift), margin 0.35s var(--swift);
+}
+.status-bar[hidden] { display: none; }
+
+.status-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   font-family: 'Changa', 'Cairo', sans-serif;
   font-weight: 700;
-  font-size: 0.85rem;
-  letter-spacing: 0.5px;
-  color: var(--theme-dark);
-  background: color-mix(in srgb, var(--theme-color) 12%, white);
-  border: 2px solid color-mix(in srgb, var(--theme-color) 45%, white);
+  font-size: 0.82rem;
+  letter-spacing: 0.3px;
+  color: var(--muted);
+  background: var(--surface-solid);
+  border: 2px solid var(--disabled-border);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-pill);
+  transition: color 0.2s var(--swift), background 0.2s var(--swift), border-color 0.2s var(--swift);
+}
+.status-chip::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent); flex-shrink: 0; }
+.status-chip.chip-neutral { color: var(--muted); background: var(--surface-solid); border-color: var(--disabled-border); }
+.status-chip.chip-progress { color: var(--theme-dark); background: color-mix(in srgb, var(--theme-color) 12%, white); border-color: color-mix(in srgb, var(--theme-color) 45%, white); }
+.status-chip.chip-warning { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, white); border-color: color-mix(in srgb, var(--bad) 45%, white); }
+.status-chip.chip-good { color: var(--good-dark); background: color-mix(in srgb, var(--good) 15%, white); border-color: color-mix(in srgb, var(--good) 50%, white); }
+.status-chip.chip-ready { color: var(--good-dark); background: color-mix(in srgb, var(--good) 18%, white); border-color: color-mix(in srgb, var(--good) 55%, white); animation: pulse-btn 2.4s var(--swift) infinite; }
+
+.status-dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  border: 2px solid var(--disabled-border);
+  background: var(--surface-solid);
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.2s var(--swift), border-color 0.2s var(--swift), transform 0.2s var(--spring), background 0.2s var(--swift);
+}
+.status-dismiss svg { width: 0.9rem; height: 0.9rem; }
+.status-dismiss:hover { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--disabled-border)); transform: rotate(90deg); }
+
+.status-reopen {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Changa', 'Cairo', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: var(--surface-solid);
+  border: 2px dashed var(--disabled-border);
   padding: 0.4rem 0.9rem;
   border-radius: var(--radius-pill);
-  margin-bottom: -0.5rem;
-  transition: color 0.25s var(--swift), background 0.25s var(--swift), border-color 0.25s var(--swift), transform 0.2s var(--spring);
+  cursor: pointer;
+  transition: color 0.2s var(--swift), border-color 0.2s var(--swift), transform 0.2s var(--spring);
 }
-.eyebrow::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 25%, transparent); flex-shrink: 0; }
-.eyebrow.status-warning { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, white); border-color: color-mix(in srgb, var(--bad) 45%, white); }
-.eyebrow.status-ready { color: var(--good-dark); background: color-mix(in srgb, var(--good) 15%, white); border-color: color-mix(in srgb, var(--good) 50%, white); animation: pulse-btn 2.2s var(--swift) infinite; }
+.status-reopen:hover { color: var(--theme-dark); border-color: color-mix(in srgb, var(--theme-color) 45%, var(--disabled-border)); transform: translateY(-1px); }
 
 h1.comic-header {
   font-family: 'Fredoka One', 'Cairo', sans-serif;
@@ -721,7 +768,22 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
 <div class="ambient-glow" aria-hidden="true"><span class="glow glow-a"></span><span class="glow glow-b"></span></div>
 <div class="main-container">
 
-  <span class="eyebrow status-neutral" id="status-pill">ابدأ باختيار الفئة</span>
+  <div class="status-bar-wrap">
+    <div class="status-bar" id="status-bar">
+      <span class="status-chip chip-neutral" id="chip-class">لم تُحدد الفئة</span>
+      <span class="status-chip chip-neutral" id="chip-fields">لم تُحدد بيانات الصيدلية</span>
+      <span class="status-chip chip-neutral" id="chip-cards">0 من 18 مجموعة</span>
+      <span class="status-chip chip-neutral" id="chip-total">الإجمالي 0</span>
+      <span class="status-chip chip-neutral" id="chip-ready">غير جاهز بعد</span>
+      <button class="status-dismiss" id="status-dismiss" type="button" title="إخفاء شريط الحالة" aria-label="إخفاء شريط الحالة">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <button class="status-reopen" id="status-reopen" type="button" hidden>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      عرض شريط الحالة
+    </button>
+  </div>
   <h1 id="mainHeader" class="comic-header">بيان المجموعات الدوائية</h1>
 
   <div class="grid-container grid-cols-1 sm:grid-cols-3 gap-4">
@@ -876,7 +938,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const regionSel = document.getElementById('region');
   const pharmacySel = document.getElementById('pharmacy');
   const submitBtn = document.getElementById('submitButton');
-  const statusPill = document.getElementById('status-pill');
+  const statusBar = document.getElementById('status-bar');
+  const statusDismiss = document.getElementById('status-dismiss');
+  const statusReopen = document.getElementById('status-reopen');
+  const chipClass = document.getElementById('chip-class');
+  const chipFields = document.getElementById('chip-fields');
+  const chipCards = document.getElementById('chip-cards');
+  const chipTotal = document.getElementById('chip-total');
+  const chipReady = document.getElementById('chip-ready');
   const totalTicketsInput = document.getElementById('totalTickets');
   const totalExternalInput = document.getElementById('totalExternal');
   const notifArea = document.getElementById('notification-area');
@@ -1032,7 +1101,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clicked === studentsBtn) cls = 'theme-students';
     else if (clicked === workforceBtn) cls = 'theme-workforce';
     else if (clicked === infantsBtn) cls = 'theme-infants';
-    docEl.className = cls;
+    docEl.classList.remove('theme-students', 'theme-workforce', 'theme-infants');
+    if (cls) docEl.classList.add(cls);
     pharmacySel.value = '';
     updatePharmacyDropdown();
     updateSelectStyles();
@@ -1109,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', () => {
       isSubmitting = true;
       submitBtn.disabled = true;
       submitBtn.textContent = 'جاري الإرسال...';
-      updateStatusPill(false);
+      renderStatusChips(false);
       gsap.to(submitBtn, {opacity:0.8,duration:0.3});
       await sendDataToGoogleSheets();
       submitBtn.textContent = 'تم الإرسال بنجاح!';
@@ -1174,7 +1244,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pharmacySel.innerHTML = '<option value="">الصيدلية</option>';
     pharmacySel.disabled = true;
     if (activeButton) { activeButton.classList.remove('btn-active'); activeButton.classList.add('btn-inactive'); activeButton = null; }
-    docEl.className = '';
+    docEl.classList.remove('theme-students', 'theme-workforce', 'theme-infants');
     updateTotal(); updateSelectStyles();
     if (clearStorage) try { localStorage.removeItem('pharmacyAppData'); } catch(e) {}
     updateSubmitBtnState();
@@ -1185,7 +1255,7 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.disabled = isSubmitting || !valid;
     submitBtn.classList.toggle('btn-active', valid);
     submitBtn.classList.toggle('btn-inactive', !valid);
-    updateStatusPill(valid);
+    renderStatusChips(valid);
   }
 
   function isOptionalInputsValidPure() {
@@ -1195,20 +1265,52 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function updateStatusPill(isValid) {
-    if (!statusPill) return;
+  function renderStatusChips(isValid) {
+    if (!chipClass) return;
+
+    if (activeButton) {
+      chipClass.textContent = activeButton.textContent.trim();
+      chipClass.className = 'status-chip chip-good';
+    } else {
+      chipClass.textContent = 'لم تُحدد الفئة';
+      chipClass.className = 'status-chip chip-warning';
+    }
+
+    const missing = [];
+    if (!yearSel.value) missing.push('السنة');
+    if (!monthSel.value) missing.push('الشهر');
+    if (!regionSel.value) missing.push('المنطقة');
+    if (!pharmacySel.value) missing.push('الصيدلية');
+    if (missing.length === 0) {
+      chipFields.textContent = 'بيانات الصيدلية مكتملة';
+      chipFields.className = 'status-chip chip-good';
+    } else {
+      chipFields.textContent = `ناقص: ${missing.join('، ')}`;
+      chipFields.className = 'status-chip chip-warning';
+    }
+
     const filled = cardValues.filter(v => v > 0).length;
+    chipCards.textContent = `${filled} من ${cardValues.length} مجموعة`;
+    chipCards.className = `status-chip ${filled === cardValues.length ? 'chip-good' : filled > 0 ? 'chip-progress' : 'chip-neutral'}`;
+
     const total = cardValues.reduce((a, v) => a + (v || 0), 0);
-    let text, state;
-    if (isSubmitting) { text = 'جاري الإرسال...'; state = 'status-progress'; }
-    else if (!activeButton) { text = 'ابدأ باختيار الفئة'; state = 'status-neutral'; }
-    else if (!(yearSel.value && monthSel.value && regionSel.value && pharmacySel.value)) { text = 'استكمل بيانات الصيدلية'; state = 'status-neutral'; }
-    else if (!isOptionalInputsValidPure()) { text = 'تحقق من الأرقام المدخلة'; state = 'status-warning'; }
-    else if (filled === 0) { text = 'أدخل بيانات المجموعات الدوائية'; state = 'status-neutral'; }
-    else if (total > 0 && isValid) { text = 'جاهز للإرسال ✓'; state = 'status-ready'; }
-    else { text = `${filled} من ${cardValues.length} مجموعة مُدخلة`; state = 'status-progress'; }
-    statusPill.textContent = text;
-    statusPill.className = `eyebrow ${state}`;
+    const totalText = total.toLocaleString('en-US', {minimumFractionDigits: total % 1 === 0 ? 0 : 3, maximumFractionDigits: 3});
+    chipTotal.textContent = `الإجمالي ${totalText}`;
+    chipTotal.className = `status-chip ${total > 0 ? 'chip-progress' : 'chip-neutral'}`;
+
+    if (isSubmitting) {
+      chipReady.textContent = 'جاري الإرسال...';
+      chipReady.className = 'status-chip chip-progress';
+    } else if (!isOptionalInputsValidPure()) {
+      chipReady.textContent = 'تحقق من الأرقام المدخلة';
+      chipReady.className = 'status-chip chip-warning';
+    } else if (isValid) {
+      chipReady.textContent = 'جاهز للإرسال ✓';
+      chipReady.className = 'status-chip chip-ready';
+    } else {
+      chipReady.textContent = 'غير جاهز بعد';
+      chipReady.className = 'status-chip chip-neutral';
+    }
   }
 
   function validateOptionalInputs() {
@@ -1228,6 +1330,15 @@ document.addEventListener('DOMContentLoaded', () => {
     input.addEventListener('input', e => { let v = e.target.value.replace(/[^0-9]/g,''); if (+v > 1000000) v = '1000000'; e.target.value = v; updateCardStyle(e.target); });
     input.addEventListener('blur', () => { validateOptionalInputs(); updateSubmitBtnState(); saveToLocalStorage(); });
   });
+
+  function setStatusBarHidden(hidden) {
+    statusBar.hidden = hidden;
+    statusReopen.hidden = !hidden;
+    try { localStorage.setItem('pharmacyAppStatusHidden', hidden ? '1' : '0'); } catch(e) {}
+  }
+  statusDismiss.addEventListener('click', () => setStatusBarHidden(true));
+  statusReopen.addEventListener('click', () => setStatusBarHidden(false));
+  try { setStatusBarHidden(localStorage.getItem('pharmacyAppStatusHidden') === '1'); } catch(e) { setStatusBarHidden(false); }
 
   loadFromLocalStorage();
 
