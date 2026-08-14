@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Bangers&family=Changa:wght@500;600;700;800&family=Fredoka+One&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800;900&family=Changa:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 *, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; }
 html, body { margin: 0; padding: 0; }
@@ -34,12 +34,12 @@ input[type="number"] { -moz-appearance: textfield; }
 
 :root {
   --ink: #14151b;
+  --ink-70: rgba(20,21,27,0.70);
   --paper: #fbf4e6;
   --paper-deep: #f3ead6;
   --surface: rgba(255,255,255,0.86);
   --surface-solid: #ffffff;
   --muted: #656b7a;
-  --text-secondary: #656b7a;
   --good: #1f9d5c;
   --good-dark: #157a47;
   --bad: #c0392b;
@@ -61,6 +61,11 @@ input[type="number"] { -moz-appearance: textfield; }
   --disabled-shadow: #a9a9a5;
   --disabled-text: #8b8f98;
 
+  --font-ui: 'Cairo', sans-serif;
+  --font-display: 'Baloo Bhaijaan 2', 'Cairo', sans-serif;
+  --font-heading: 'Changa', 'Cairo', sans-serif;
+  --font-num: 'Space Grotesk', 'Cairo', sans-serif;
+
   --theme-color: #4682B4;
   --theme-dark: #3a6a94;
   --theme-shadow: #2d5270;
@@ -70,7 +75,7 @@ html.theme-students { --theme-color: #FF6B6B; --theme-dark: #e55252; --theme-sha
 html.theme-workforce { --theme-color: #1E90FF; --theme-dark: #1678d4; --theme-shadow: #1260ad; }
 html.theme-infants { --theme-color: #20B2AA; --theme-dark: #189890; --theme-shadow: #107870; }
 
-html { font-size: 16px; scroll-behavior: smooth; font-family: 'Cairo', sans-serif; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+html { font-size: 16px; scroll-behavior: smooth; font-family: var(--font-ui); text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
 
 body {
   background-color: var(--paper);
@@ -89,8 +94,8 @@ body {
 
 .ambient-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
 .ambient-glow .glow { position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.35; transition: background 0.7s var(--swift); }
-.ambient-glow .glow-a { width: 26rem; height: 26rem; top: -8rem; right: -6rem; background: radial-gradient(circle, var(--theme-color), transparent 70%); }
-.ambient-glow .glow-b { width: 22rem; height: 22rem; bottom: -8rem; left: -6rem; background: radial-gradient(circle, var(--theme-dark), transparent 70%); }
+.ambient-glow .glow-a { width: 26rem; height: 26rem; top: -8rem; inset-inline-end: -6rem; background: radial-gradient(circle, var(--theme-color), transparent 70%); }
+.ambient-glow .glow-b { width: 22rem; height: 22rem; bottom: -8rem; inset-inline-start: -6rem; background: radial-gradient(circle, var(--theme-dark), transparent 70%); }
 
 .main-container {
   max-width: 80rem;
@@ -122,7 +127,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-family: 'Changa', 'Cairo', sans-serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 0.82rem;
   letter-spacing: 0.3px;
@@ -161,7 +166,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: 'Changa', 'Cairo', sans-serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 0.82rem;
   color: var(--muted);
@@ -175,7 +180,8 @@ body {
 .status-reopen:hover { color: var(--theme-dark); border-color: color-mix(in srgb, var(--theme-color) 45%, var(--disabled-border)); transform: translateY(-1px); }
 
 h1.comic-header {
-  font-family: 'Fredoka One', 'Cairo', sans-serif;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 2.75rem;
   color: #fff;
   background-repeat: no-repeat;
@@ -221,10 +227,30 @@ h1.comic-header:hover { transform: rotate(0.25deg) scale(1.012); filter: drop-sh
 @media(min-width:640px) { .sm\:grid-cols-2 { grid-template-columns: repeat(2,1fr); } .sm\:grid-cols-3 { grid-template-columns: repeat(3,1fr); } }
 @media(min-width:1024px) { .md\:grid-cols-3 { grid-template-columns: repeat(3,1fr); } .md\:grid-cols-4 { grid-template-columns: repeat(4,1fr); } }
 
+.caption-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--ink);
+  background: var(--surface-solid);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-md);
+  padding: 0.35em 1em;
+  box-shadow: var(--ink-shadow-sm);
+  margin-bottom: 0.85rem;
+  transform: rotate(-0.4deg);
+}
+.caption-box .caption-eyebrow { font-family: var(--font-ui); font-weight: 700; font-size: 0.82rem; color: var(--theme-dark); background: var(--paper-deep); border: 1px solid var(--theme-color); border-radius: var(--radius-pill); padding: 0.15em 0.6em; }
+
+.radiogroup { display: contents; }
+
 button.comic-button {
-  font-family: 'Bangers', 'Cairo', cursive;
-  font-weight: 600;
-  font-size: 1.25rem;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.15rem;
   padding: 1rem 1.5rem;
   border: var(--stroke) solid var(--ink);
   border-radius: var(--radius-md);
@@ -232,7 +258,7 @@ button.comic-button {
   color: var(--ink);
   box-shadow: var(--ink-shadow-sm);
   transition: transform var(--dur) var(--spring), box-shadow var(--dur) var(--spring), background var(--dur) var(--swift), color var(--dur) var(--swift), filter var(--dur) var(--swift);
-  letter-spacing: 1.5px;
+  letter-spacing: 0.4px;
   position: relative;
   will-change: transform;
   line-height: 1;
@@ -264,10 +290,11 @@ button.comic-button.btn-active {
 button.comic-button.btn-inactive { background-color: var(--disabled-bg); color: var(--muted); box-shadow: var(--ink-shadow-sm) var(--disabled-shadow); border-color: var(--disabled-border); }
 button.comic-button:not(.btn-active,:disabled):hover { transform: translateY(-4px) rotate(-1deg); background-color: #fffdf3; box-shadow: var(--ink-shadow); }
 button.comic-button:active:not(.btn-active,:disabled) { transform: translate(4px,4px) !important; box-shadow: none !important; }
+button.comic-button.btn-compact { font-size: 1rem; padding: 0.55rem 1.4rem; }
 
 .select-wrapper { position: relative; }
 select {
-  font-family: 'Cairo', sans-serif;
+  font-family: var(--font-ui);
   font-weight: 700;
   font-size: 1.02rem;
   line-height: 1.4;
@@ -297,6 +324,33 @@ select:focus { outline: none; transform: scale(1.01); box-shadow: 0 0 0 4px colo
 select.select-valid { border-color: var(--theme-color); box-shadow: var(--ink-shadow-sm) var(--theme-shadow); background-color: color-mix(in srgb, var(--theme-color) 8%, white); color: var(--theme-dark); }
 select:disabled { border-color: var(--disabled-border) !important; box-shadow: var(--ink-shadow-sm) var(--disabled-shadow) !important; background-color: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; transform: none; opacity: 0.75; }
 
+.panel-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+@media(min-width:640px) { .panel-grid { grid-template-columns: repeat(2,1fr); } }
+@media(min-width:1024px) { .panel-grid { grid-template-columns: repeat(3,1fr); } }
+
+.reveal { position: relative; }
+.reveal::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: radial-gradient(220px circle at var(--mx) var(--my), rgba(255,255,255,.95), transparent 62%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--dur) var(--swift);
+  pointer-events: none;
+}
+
 div.card {
   display: flex;
   flex-direction: column;
@@ -318,10 +372,12 @@ div.card::before {
   pointer-events: none;
   z-index: 1;
 }
-div.card:not(#total-card,.upload-card):hover { transform: translateY(-6px) rotate(-0.5deg) scale(1.02); box-shadow: var(--ink-shadow-lift), 0 22px 40px -20px color-mix(in srgb, var(--theme-color) 55%, transparent); z-index: 10; }
+div.card:not(#total-card):hover { transform: translateY(-6px) rotate(-0.5deg) scale(1.02); box-shadow: var(--ink-shadow-lift), 0 22px 40px -20px color-mix(in srgb, var(--theme-color) 55%, transparent); z-index: 10; }
+div.card:not(#total-card):hover.reveal::after,
+div.card:not(#total-card):focus-within.reveal::after { opacity: 1; }
 
 div.card h3 {
-  font-family: 'Changa', 'Cairo', sans-serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 1.35rem;
   line-height: 1.4;
@@ -337,7 +393,7 @@ div.card h3 {
 
 div.card input[type="text"].drug-input,
 div.card input[type="number"] {
-  font-family: 'Space Grotesk', 'Cairo', sans-serif;
+  font-family: var(--font-num);
   font-weight: 600;
   font-size: 1.55rem;
   font-variant-numeric: tabular-nums;
@@ -378,6 +434,7 @@ div.card#total-card {
   justify-content: center;
   align-items: center;
   gap: 0.35rem;
+  margin-top: 1.75rem;
   background: linear-gradient(160deg, color-mix(in srgb, var(--theme-color) 14%, white), color-mix(in srgb, var(--theme-color) 4%, white));
   border-color: var(--theme-dark);
   box-shadow: var(--ink-shadow-sm) var(--theme-shadow), 0 20px 40px -18px color-mix(in srgb, var(--theme-color) 55%, transparent);
@@ -392,9 +449,9 @@ div.card#total-card::after {
   pointer-events: none;
 }
 div.card#total-card:hover { transform: translateY(-3px) scale(1.012); box-shadow: var(--ink-shadow) var(--theme-shadow), 0 24px 44px -18px color-mix(in srgb, var(--theme-color) 60%, transparent); }
-div.card#total-card h3 { font-size: 1.6rem; color: var(--theme-dark); margin-bottom: 0; min-height: auto; flex-grow: 0; letter-spacing: 0.3px; }
+div.card#total-card h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.6rem; color: var(--theme-dark); margin-bottom: 0; min-height: auto; flex-grow: 0; letter-spacing: 0.3px; }
 #total {
-  font-family: 'Space Grotesk', 'Cairo', sans-serif;
+  font-family: var(--font-num);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   font-size: 3.4rem;
@@ -408,7 +465,8 @@ div.card#total-card h3 { font-size: 1.6rem; color: var(--theme-dark); margin-bot
 }
 
 button#submitButton {
-  font-family: 'Fredoka One', 'Cairo', sans-serif;
+  font-family: var(--font-display);
+  font-weight: 700;
   font-size: 1.55rem;
   padding: 1.1rem 2rem;
   color: white;
@@ -429,15 +487,26 @@ button#submitButton {
 button#submitButton::before {
   content: '';
   position: absolute;
-  top: 0; left: -100%;
+  top: 0; inset-inline-start: -100%;
   width: 100%; height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
-  transition: left 0.55s var(--swift);
+  transition: inset-inline-start 0.55s var(--swift);
 }
-button#submitButton:hover:not(:disabled)::before { left: 100%; }
+button#submitButton:hover:not(:disabled)::before { inset-inline-start: 100%; }
 button#submitButton:hover:not(:disabled) { transform: translateY(-3px) scale(1.01); filter: brightness(1.06); }
 button#submitButton:active:not(:disabled) { transform: translate(5px,5px); box-shadow: none; filter: brightness(0.94); }
 button#submitButton:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828a); border-color: #93989f; box-shadow: 4px 4px 0 #5f636b; text-shadow: 1px 1px 0 #4c4f56; cursor: not-allowed; opacity: 0.7; }
+
+.success-burst { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+.success-burst::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background-image: repeating-conic-gradient(from 0deg, rgba(255,255,255,.9) 0deg 3deg, transparent 3deg 18deg);
+  border-radius: 50%;
+}
+.success-burst.is-active { animation: burst-pop 0.5s var(--swift); }
+@keyframes burst-pop { 0%{opacity:0;transform:scale(.5)} 30%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(1.35)} }
 
 .comic-divider {
   border: none;
@@ -458,7 +527,7 @@ button#submitButton:disabled { background: linear-gradient(135deg, #b7bcc2, #7c8
   border: var(--stroke) solid var(--ink);
   border-radius: var(--radius-lg);
   box-shadow: var(--ink-shadow-sm);
-  font-family: 'Changa', 'Cairo', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--ink);
@@ -467,7 +536,7 @@ button#submitButton:disabled { background: linear-gradient(135deg, #b7bcc2, #7c8
   position: relative;
   letter-spacing: 0.4px;
 }
-.upload-toggle:hover { transform: translateY(-2px); background: color-mix(in srgb, var(--theme-color) 8%, white); box-shadow: var(--ink-shadow); }
+.upload-toggle:hover, .upload-toggle:focus-visible { transform: translateY(-2px); background: color-mix(in srgb, var(--theme-color) 8%, white); box-shadow: var(--ink-shadow); }
 .upload-toggle:active { transform: translate(4px,4px); box-shadow: none; }
 .upload-toggle.open { border-color: var(--theme-color); box-shadow: var(--ink-shadow-sm) var(--theme-shadow); background: linear-gradient(135deg, color-mix(in srgb, var(--theme-color) 10%, white), color-mix(in srgb, var(--theme-color) 4%, white)); }
 .toggle-label { display: flex; align-items: center; gap: 0.75rem; }
@@ -510,7 +579,7 @@ button#submitButton:disabled { background: linear-gradient(135deg, #b7bcc2, #7c8
 .upload-zone { flex: 1; min-width: 280px; }
 
 .upload-heading {
-  font-family: 'Changa', 'Cairo', sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.4rem;
   font-weight: 700;
   color: var(--ink);
@@ -518,7 +587,7 @@ button#submitButton:disabled { background: linear-gradient(135deg, #b7bcc2, #7c8
   min-height: auto;
   text-align: right;
 }
-.upload-desc { font-size: 0.95rem; color: var(--muted); margin-bottom: 0.75rem; font-family: 'Changa', sans-serif; line-height: 1.6; }
+.upload-desc { font-size: 0.95rem; color: var(--muted); margin-bottom: 0.75rem; font-family: var(--font-ui); line-height: 1.6; }
 .upload-code {
   font-family: 'Cairo', monospace;
   font-size: 0.8rem;
@@ -538,7 +607,7 @@ button#submitButton:disabled { background: linear-gradient(135deg, #b7bcc2, #7c8
   font-size: 0.9rem;
   color: var(--theme-dark);
   margin-bottom: 1.5rem;
-  font-family: 'Changa', sans-serif;
+  font-family: var(--font-ui);
   font-weight: 600;
   display: flex;
   align-items: flex-start;
@@ -567,17 +636,19 @@ button#submitButton:disabled { background: linear-gradient(135deg, #b7bcc2, #7c8
   align-items: center;
   justify-content: center;
   min-height: 200px;
+  position: relative;
 }
-.drop-area:hover, .drop-area.drag-active {
+.drop-area:hover, .drop-area.drag-active, .drop-area:focus-visible {
   background-color: color-mix(in srgb, var(--theme-color) 12%, white);
   transform: scale(1.02) rotate(-0.35deg);
   border-style: solid;
   box-shadow: var(--ink-shadow-sm) var(--theme-shadow);
 }
+.drop-area:hover.reveal::after, .drop-area:focus-visible.reveal::after { opacity: 1; }
 .drop-icon svg { width: 3.25rem; height: 3.25rem; fill: var(--theme-color); margin: 0 auto 0.75rem; transition: transform var(--dur) var(--spring); }
 .drop-area:hover .drop-icon svg { transform: scale(1.2) rotate(6deg) translateY(-3px); }
-.drop-text { font-family: 'Changa', sans-serif; font-size: 1.12rem; font-weight: 700; margin-bottom: 0.15rem; color: var(--ink); }
-.drop-sub { font-family: 'Cairo', sans-serif; font-size: 0.9rem; color: var(--muted); margin-bottom: 1rem; }
+.drop-text { font-family: var(--font-ui); font-size: 1.12rem; font-weight: 700; margin-bottom: 0.15rem; color: var(--ink); }
+.drop-sub { font-family: var(--font-ui); font-size: 0.9rem; color: var(--muted); margin-bottom: 1rem; }
 
 .file-item {
   display: flex;
@@ -592,7 +663,7 @@ button#submitButton:disabled { background: linear-gradient(135deg, #b7bcc2, #7c8
   transition: transform var(--dur) var(--spring), box-shadow var(--dur) var(--spring);
 }
 .file-item:hover { transform: translateX(-4px) translateY(-2px); box-shadow: var(--ink-shadow); }
-.file-info { flex-grow: 1; margin-right: 1rem; font-family: 'Changa', sans-serif; }
+.file-info { flex-grow: 1; margin-inline-end: 1rem; font-family: var(--font-ui); }
 .file-name { font-weight: 700; font-size: 1rem; }
 .file-details { font-size: 0.85rem; color: var(--muted); margin-top: 0.1rem; }
 .delete-btn { color: var(--bad); background: none; border: none; font-size: 1.6rem; line-height: 1; cursor: pointer; transition: transform 0.2s var(--spring); padding: 0 0.5rem; }
@@ -618,15 +689,15 @@ button#submitButton:disabled { background: linear-gradient(135deg, #b7bcc2, #7c8
 .progress-bar::after {
   content: '';
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  inset: 0;
   background: repeating-linear-gradient(90deg, transparent 0, transparent 10px, rgba(255,255,255,0.16) 10px, rgba(255,255,255,0.16) 20px);
   animation: shimmer 1s linear infinite;
 }
 @keyframes shimmer { from{background-position:0 0} to{background-position:20px 0} }
-.progress-text { text-align: center; margin-top: 0.5rem; font-family: 'Changa', sans-serif; font-size: 1rem; color: var(--ink); }
+.progress-text { text-align: center; margin-top: 0.5rem; font-family: var(--font-ui); font-size: 1rem; color: var(--ink); }
 
 button#upload-btn {
-  font-family: 'Fredoka One', 'Cairo', sans-serif;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.3rem;
   padding: 0.9rem 2rem;
@@ -655,14 +726,14 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
   display: flex;
   gap: 1rem;
   align-items: center;
-  font-family: 'Changa', sans-serif;
+  font-family: var(--font-ui);
   background-color: var(--surface-solid);
   transition: transform var(--dur) var(--swift);
 }
 .result-item:hover { transform: translateY(-2px); }
-.result-success { border-color: var(--good); border-right-width: 6px; }
+.result-success { border-color: var(--good); border-inline-end-width: 6px; }
 .result-success svg { fill: var(--good); width: 2rem; height: 2rem; flex-shrink: 0; }
-.result-error { border-color: var(--bad); border-right-width: 6px; }
+.result-error { border-color: var(--bad); border-inline-end-width: 6px; }
 .result-error svg { fill: var(--bad); width: 2rem; height: 2rem; flex-shrink: 0; }
 
 .modal-overlay {
@@ -689,17 +760,17 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
   animation: modal-pop 0.35s var(--spring) both;
 }
 @keyframes modal-pop { from{opacity:0;transform:scale(0.88) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
-.modal-heading { font-family: 'Changa', sans-serif; font-size: 1.45rem; margin-bottom: 0.5rem; color: var(--theme-dark); font-weight: 700; }
-.modal-desc { color: var(--muted); margin-bottom: 1.5rem; word-break: break-all; font-family: 'Cairo', sans-serif; font-size: 0.95rem; }
+.modal-heading { font-family: var(--font-heading); font-size: 1.45rem; margin-bottom: 0.5rem; color: var(--theme-dark); font-weight: 700; }
+.modal-desc { color: var(--muted); margin-bottom: 1.5rem; word-break: break-all; font-family: var(--font-ui); font-size: 0.95rem; }
 .modal-sheet-list { max-height: 200px; overflow-y: auto; margin-bottom: 1rem; border: var(--stroke) solid var(--disabled-border); border-radius: var(--radius-md); padding: 0.5rem 1rem; background: var(--paper); }
-.modal-sheet-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; font-family: 'Changa', sans-serif; font-size: 1.08rem; cursor: pointer; }
+.modal-sheet-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; font-family: var(--font-heading); font-size: 1.08rem; cursor: pointer; }
 .modal-sheet-item input[type="checkbox"] { width: 1.2rem; height: 1.2rem; cursor: pointer; accent-color: var(--theme-color); }
 .modal-footer { display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: flex-end; }
 
 #notification-area {
   position: fixed;
   top: 1.5rem;
-  left: 1.5rem;
+  inset-inline-start: 1.5rem;
   z-index: 4000;
   display: flex;
   flex-direction: column;
@@ -712,7 +783,7 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
   align-items: center;
   gap: 0.85rem;
   pointer-events: auto;
-  font-family: 'Changa', 'Cairo', sans-serif;
+  font-family: var(--font-ui);
   font-size: 1rem;
   line-height: 1.4;
   color: #fff;
@@ -733,7 +804,7 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
 .notification.info { background-color: var(--theme-color); box-shadow: 4px 4px 0 var(--theme-shadow); }
 .notification-icon { width: 1.4rem; height: 1.4rem; flex-shrink: 0; }
 .notification-icon svg { width: 100%; height: 100%; fill: currentColor; }
-.notification-progress { position: absolute; bottom: 0; left: 0; height: 3px; background-color: rgba(255,255,255,0.5); border-radius: 0 2px 2px 0; }
+.notification-progress { position: absolute; bottom: 0; inset-inline-start: 0; height: 3px; background-color: rgba(255,255,255,0.5); border-radius: 0 2px 2px 0; }
 
 @media(max-width:768px) {
   html { font-size: 15px; }
@@ -756,20 +827,23 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
   .grid-container.md\:grid-cols-4 { grid-template-columns: 1fr; }
   div.card h3 { font-size: 1.08rem; }
   #total { font-size: 2.4rem; }
-  #notification-area { left: 0.5rem; right: 0.5rem; top: 0.5rem; width: auto; }
+  #notification-area { inset-inline: 0.5rem; top: 0.5rem; width: auto; }
   .upload-actions { flex-direction: column; }
 }
 @media(prefers-reduced-motion:reduce) {
   *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  .success-burst.is-active { animation: none; }
+  .modal-content { animation: none; }
 }
 </style>
 </head>
 <body>
+
 <div class="ambient-glow" aria-hidden="true"><span class="glow glow-a"></span><span class="glow glow-b"></span></div>
 <div class="main-container">
 
   <div class="status-bar-wrap">
-    <div class="status-bar" id="status-bar">
+    <div class="status-bar" id="status-bar" aria-live="polite" aria-atomic="false">
       <span class="status-chip chip-neutral" id="chip-class">لم تُحدد الفئة</span>
       <span class="status-chip chip-neutral" id="chip-fields">لم تُحدد بيانات الصيدلية</span>
       <span class="status-chip chip-neutral" id="chip-cards">0 من 18 مجموعة</span>
@@ -784,78 +858,94 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
       عرض شريط الحالة
     </button>
   </div>
+
   <h1 id="mainHeader" class="comic-header">بيان المجموعات الدوائية</h1>
 
-  <div class="grid-container grid-cols-1 sm:grid-cols-3 gap-4">
-    <button id="studentsBtn" class="comic-button btn-inactive">الطلبة</button>
-    <button id="workforceBtn" class="comic-button btn-inactive">القوى العاملة</button>
-    <button id="infantsBtn" class="comic-button btn-inactive">المواليد</button>
-  </div>
-
-  <div class="grid-container grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-    <div class="select-wrapper">
-      <select id="year">
-        <option value="">السنة</option>
-        <option value="2025">2024-2025</option>
-        <option value="2026">2025-2026</option>
-        <option value="2027">2026-2027</option>
-        <option value="2028">2027-2028</option>
-        <option value="2029">2028-2029</option>
-        <option value="2030">2029-2030</option>
-        <option value="2031">2030-2031</option>
-        <option value="2032">2031-2032</option>
-        <option value="2033">2032-2033</option>
-        <option value="2034">2033-2034</option>
-        <option value="2035">2034-2035</option>
-      </select>
-    </div>
-    <div class="select-wrapper">
-      <select id="month">
-        <option value="">الشهر</option>
-        <option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option>
-        <option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option>
-        <option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option>
-        <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
-      </select>
-    </div>
-    <div class="select-wrapper">
-      <select id="region">
-        <option value="">المنطقة</option>
-        <option value="first">الاولي</option>
-        <option value="second">الثانية</option>
-        <option value="third">الثالثة</option>
-      </select>
-    </div>
-    <div class="select-wrapper">
-      <select id="pharmacy" disabled>
-        <option value="">الصيدلية</option>
-      </select>
+  <div>
+    <div class="caption-box">اختر الفئة</div>
+    <div class="grid-container grid-cols-1 sm:grid-cols-3 gap-4" role="radiogroup" aria-label="اختر الفئة">
+      <button id="studentsBtn" class="comic-button btn-inactive" type="button" role="radio" aria-checked="false" tabindex="0">الطلبة</button>
+      <button id="workforceBtn" class="comic-button btn-inactive" type="button" role="radio" aria-checked="false" tabindex="-1">القوى العاملة</button>
+      <button id="infantsBtn" class="comic-button btn-inactive" type="button" role="radio" aria-checked="false" tabindex="-1">المواليد</button>
     </div>
   </div>
 
-  <div id="cards-container" class="grid-container grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
-
-  <div class="grid-container grid-cols-1 sm:grid-cols-2 gap-4">
-    <div class="card">
-      <h3>اجمالي التذاكر</h3>
-      <input type="number" id="totalTickets" min="0" max="1000000" step="1" dir="ltr" placeholder="0">
-    </div>
-    <div class="card">
-      <h3>اجمالي الخارجي</h3>
-      <input type="number" id="totalExternal" min="0" max="1000000" step="1" dir="ltr" placeholder="0">
+  <div>
+    <div class="caption-box">بيانات الصيدلية</div>
+    <div class="grid-container grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="select-wrapper">
+        <select id="year" aria-label="السنة">
+          <option value="">السنة</option>
+          <option value="2025">2024-2025</option>
+          <option value="2026">2025-2026</option>
+          <option value="2027">2026-2027</option>
+          <option value="2028">2027-2028</option>
+          <option value="2029">2028-2029</option>
+          <option value="2030">2029-2030</option>
+          <option value="2031">2030-2031</option>
+          <option value="2032">2031-2032</option>
+          <option value="2033">2032-2033</option>
+          <option value="2034">2033-2034</option>
+          <option value="2035">2034-2035</option>
+        </select>
+      </div>
+      <div class="select-wrapper">
+        <select id="month" aria-label="الشهر">
+          <option value="">الشهر</option>
+          <option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option>
+          <option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option>
+          <option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option>
+          <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+        </select>
+      </div>
+      <div class="select-wrapper">
+        <select id="region" aria-label="المنطقة">
+          <option value="">المنطقة</option>
+          <option value="first">الاولي</option>
+          <option value="second">الثانية</option>
+          <option value="third">الثالثة</option>
+        </select>
+      </div>
+      <div class="select-wrapper">
+        <select id="pharmacy" aria-label="الصيدلية" disabled>
+          <option value="">الصيدلية</option>
+        </select>
+      </div>
     </div>
   </div>
 
-  <div class="card" id="total-card">
-    <h3>المجموع الكلي</h3>
-    <p id="total" dir="ltr">0.000</p>
+  <div>
+    <div class="caption-box">المجموعات الدوائية</div>
+    <div id="cards-container" class="panel-grid"></div>
   </div>
 
-  <button id="submitButton" disabled>إرسال البيانات</button>
+  <div>
+    <div class="caption-box">الإجماليات</div>
+    <div class="grid-container grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="card">
+        <h3>اجمالي التذاكر</h3>
+        <input type="number" id="totalTickets" min="0" max="1000000" step="1" dir="ltr" placeholder="0">
+      </div>
+      <div class="card">
+        <h3>اجمالي الخارجي</h3>
+        <input type="number" id="totalExternal" min="0" max="1000000" step="1" dir="ltr" placeholder="0">
+      </div>
+    </div>
+
+    <div class="card" id="total-card">
+      <h3>المجموع الكلي</h3>
+      <p id="total" dir="ltr">0.000</p>
+    </div>
+  </div>
+
+  <button id="submitButton" disabled>
+    <span class="success-burst" aria-hidden="true"></span>
+    <span id="submitButtonLabel">إرسال البيانات</span>
+  </button>
 
   <hr class="comic-divider">
 
-  <button class="upload-toggle" id="upload-toggle">
+  <button class="upload-toggle" id="upload-toggle" type="button" aria-expanded="false" aria-controls="upload-panel">
     <span class="toggle-label">
       <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"></path></svg>
       رفع البيانات
@@ -874,21 +964,21 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
           <div class="upload-code">date, year, class, month, region, pharmacy, totalPrescription, insuranceCoveredPrescription, المسكنات, مضادات حيوية, كلي, نفسية و عصبية, قلب, سكر حقن, سكر فم, نسا, كبد, جهاز هضمي, جهاز تنفسي, امراض جلدية, عيون و رمد, انف و اذن, مضادات تقلصات, اورام, فيتامينات, مختلفة</div>
           <div class="upload-notice">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-            بيانات الملفات المرفوعة تُرسل مباشرةً إلى قاعدة البيانات ولن تؤثر على النموذج أعلاه.
+            <span>بيانات الملفات المرفوعة تُرسل مباشرةً إلى قاعدة البيانات ولن تؤثر على النموذج أعلاه. يتم الإرسال دون تأكيد استلام من الخادم، وتُحفظ نسخة احتياطية من الصفوف المُرسلة على جهازك تلقائيًا بعد انتهاء الرفع.</span>
           </div>
           <div class="upload-actions">
-            <button id="download-csv-btn" class="comic-button">تنزيل CSV</button>
-            <button id="download-json-btn" class="comic-button">تنزيل JSON</button>
+            <button id="download-csv-btn" class="comic-button" type="button">تنزيل CSV</button>
+            <button id="download-json-btn" class="comic-button" type="button">تنزيل JSON</button>
           </div>
         </div>
         <div class="upload-zone">
-          <div id="drop-area" class="drop-area">
+          <div id="drop-area" class="drop-area reveal" role="button" tabindex="0" aria-label="اسحب الملفات هنا أو اضغط لاختيارها من جهازك">
             <div class="drop-icon">
               <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"></path></svg>
             </div>
             <p class="drop-text">اسحب الملفات هنا</p>
             <p class="drop-sub">أو اختر من جهازك</p>
-            <button type="button" class="comic-button" style="font-size:1rem;padding:0.55rem 1.5rem;" onclick="document.getElementById('file-input').click()">تصفح الملفات</button>
+            <button type="button" class="comic-button btn-compact" id="browse-btn" tabindex="-1">تصفح الملفات</button>
             <input id="file-input" type="file" hidden multiple accept=".json,.csv,.xlsx,.xls">
           </div>
         </div>
@@ -897,11 +987,11 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
       <div id="file-list"></div>
 
       <div id="progress-container" hidden>
-        <div class="progress-bar-bg"><div id="progress-bar" class="progress-bar"></div></div>
+        <div class="progress-bar-bg" id="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم الرفع"><div id="progress-bar" class="progress-bar"></div></div>
         <p id="progress-text" class="progress-text"></p>
       </div>
 
-      <button id="upload-btn" disabled>رفع الملفات</button>
+      <button id="upload-btn" type="button" disabled>رفع الملفات</button>
 
       <div id="results-container" hidden></div>
     </div>
@@ -909,25 +999,27 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
 
 </div>
 
-<div id="sheet-selector-modal" class="modal-overlay">
+<div id="sheet-selector-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-heading-text" aria-describedby="modal-filename">
   <div class="modal-content">
-    <h3 class="modal-heading">اختر أوراق العمل</h3>
+    <h3 class="modal-heading" id="modal-heading-text">اختر أوراق العمل</h3>
     <p id="modal-filename" class="modal-desc"></p>
     <ul id="modal-sheet-list" class="modal-sheet-list"></ul>
     <div class="modal-footer">
-      <button id="modal-cancel-btn" class="comic-button" style="background:var(--disabled-bg);font-size:1rem;padding:0.55rem 1.1rem;">إلغاء</button>
-      <button id="modal-confirm-btn" class="comic-button btn-active" style="font-size:1rem;padding:0.55rem 1.5rem;">تأكيد</button>
+      <button id="modal-cancel-btn" class="comic-button btn-compact" type="button">إلغاء</button>
+      <button id="modal-confirm-btn" class="comic-button btn-active btn-compact" type="button">تأكيد</button>
     </div>
   </div>
 </div>
 
 <div id="notification-area"></div>
 
+</body>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const escapeHTML = str => String(str).replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
 
   const docEl = document.documentElement;
+  const mainContainer = document.querySelector('.main-container');
   const cardsContainer = document.getElementById('cards-container');
   const totalEl = document.getElementById('total');
   const studentsBtn = document.getElementById('studentsBtn');
@@ -938,6 +1030,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const regionSel = document.getElementById('region');
   const pharmacySel = document.getElementById('pharmacy');
   const submitBtn = document.getElementById('submitButton');
+  const submitButtonLabel = document.getElementById('submitButtonLabel');
   const statusBar = document.getElementById('status-bar');
   const statusDismiss = document.getElementById('status-dismiss');
   const statusReopen = document.getElementById('status-reopen');
@@ -952,11 +1045,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadToggle = document.getElementById('upload-toggle');
   const uploadPanel = document.getElementById('upload-panel');
   const dropArea = document.getElementById('drop-area');
+  const browseBtn = document.getElementById('browse-btn');
   const fileInput = document.getElementById('file-input');
   const fileListDOM = document.getElementById('file-list');
   const uploadBtn = document.getElementById('upload-btn');
   const resultsContainer = document.getElementById('results-container');
   const progressContainer = document.getElementById('progress-container');
+  const progressTrack = document.getElementById('progress-track');
   const progressBar = document.getElementById('progress-bar');
   const progressText = document.getElementById('progress-text');
   const sheetModal = document.getElementById('sheet-selector-modal');
@@ -1003,14 +1098,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   cardNames.forEach((name, i) => {
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'card reveal';
     card.innerHTML = `<h3>${name}</h3><input type="text" class="drug-input" data-index="${i}" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]+" dir="ltr">`;
     cardsContainer.appendChild(card);
   });
 
+  let revealPending = false, revealEl = null, revealMx = 50, revealMy = 50;
+  mainContainer.addEventListener('pointermove', e => {
+    const el = e.target.closest('.reveal');
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    revealEl = el;
+    revealMx = ((e.clientX - rect.left) / rect.width) * 100;
+    revealMy = ((e.clientY - rect.top) / rect.height) * 100;
+    if (revealPending) return;
+    revealPending = true;
+    requestAnimationFrame(() => {
+      if (revealEl) {
+        revealEl.style.setProperty('--mx', revealMx + '%');
+        revealEl.style.setProperty('--my', revealMy + '%');
+      }
+      revealPending = false;
+    });
+  }, { passive: true });
+
   uploadToggle.addEventListener('click', () => {
     const open = uploadPanel.classList.toggle('open');
     uploadToggle.classList.toggle('open', open);
+    uploadToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 
   function showNotification(message, type = 'info', duration = 5000) {
@@ -1019,9 +1134,9 @@ document.addEventListener('DOMContentLoaded', () => {
     n.innerHTML = `<div class="notification-icon">${SVG[type] || SVG.info}</div><div>${escapeHTML(message)}</div><div class="notification-progress"></div>`;
     notifArea.appendChild(n);
     const prog = n.querySelector('.notification-progress');
-    gsap.fromTo(n, {opacity:0,x:50,scale:0.9}, {opacity:1,x:0,scale:1,duration:0.45,ease:'back.out(1.7)'});
+    gsap.fromTo(n, {opacity:0,x:50,scale:0.9}, {opacity:1,x:0,scale:1,duration:0.3,ease:'back.out(1.7)'});
     gsap.fromTo(prog, {width:'100%'}, {width:'0%',duration:duration/1000,ease:'none'});
-    setTimeout(() => gsap.to(n, {opacity:0,x:50,scale:0.9,duration:0.35,ease:'power2.in',onComplete:()=>n.remove()}), duration);
+    setTimeout(() => gsap.to(n, {opacity:0,x:50,scale:0.9,duration:0.3,ease:'power2.in',onComplete:()=>n.remove()}), duration);
   }
 
   function handleDrugInput(e) {
@@ -1071,7 +1186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const old = parseFloat(totalEl.textContent.replace(/,/g,'')) || 0;
     if (Math.abs(total - old) > 0.0001 || totalEl.textContent === '0') {
       gsap.to(totalEl, {
-        textContent: total, duration: 0.55, ease: 'power3.out', snap: {textContent: 0.001},
+        textContent: total, duration: 0.5, ease: 'power3.out', snap: {textContent: 0.001},
         onUpdate() { const v = parseFloat(this.targets()[0].textContent); if (!isNaN(v)) totalEl.textContent = v.toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3}); },
         onComplete() { totalEl.textContent = total.toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3}); }
       });
@@ -1088,15 +1203,28 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const allThemeBtns = [studentsBtn, workforceBtn, infantsBtn];
-  allThemeBtns.forEach(btn => btn.addEventListener('click', () => toggleThemeBtn(btn)));
+  allThemeBtns.forEach((btn, i) => {
+    btn.addEventListener('click', () => toggleThemeBtn(btn));
+    btn.addEventListener('keydown', e => {
+      let next = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = allThemeBtns[(i + 1) % allThemeBtns.length];
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = allThemeBtns[(i - 1 + allThemeBtns.length) % allThemeBtns.length];
+      else if (e.key === 'Home') next = allThemeBtns[0];
+      else if (e.key === 'End') next = allThemeBtns[allThemeBtns.length - 1];
+      if (next) { e.preventDefault(); next.focus(); toggleThemeBtn(next); }
+    });
+  });
 
   function toggleThemeBtn(clicked) {
+    allThemeBtns.forEach(btn => {
+      const isClicked = btn === clicked;
+      btn.classList.toggle('btn-active', isClicked);
+      btn.classList.toggle('btn-inactive', !isClicked);
+      btn.setAttribute('aria-checked', isClicked ? 'true' : 'false');
+      btn.tabIndex = isClicked ? 0 : -1;
+    });
     if (activeButton === clicked) return;
     activeButton = clicked;
-    allThemeBtns.forEach(btn => {
-      btn.classList.toggle('btn-active', btn === clicked);
-      btn.classList.toggle('btn-inactive', btn !== clicked);
-    });
     let cls = '';
     if (clicked === studentsBtn) cls = 'theme-students';
     else if (clicked === workforceBtn) cls = 'theme-workforce';
@@ -1171,6 +1299,15 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSelectStyles(); updateSubmitBtnState();
   }
 
+  function triggerSuccessBurst() {
+    const burst = submitBtn.querySelector('.success-burst');
+    if (!burst) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    burst.classList.remove('is-active');
+    void burst.offsetWidth;
+    burst.classList.add('is-active');
+  }
+
   submitBtn.addEventListener('click', async () => {
     if (isSubmitting) return;
     if (!validateOptionalInputs()) { showNotification('الرجاء تصحيح قيمة اجمالي التذاكر أو اجمالي الخارجي.', 'error'); return; }
@@ -1178,23 +1315,23 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       isSubmitting = true;
       submitBtn.disabled = true;
-      submitBtn.textContent = 'جاري الإرسال...';
+      submitButtonLabel.textContent = 'جاري الإرسال...';
       renderStatusChips(false);
       gsap.to(submitBtn, {opacity:0.8,duration:0.3});
       await sendDataToGoogleSheets();
-      submitBtn.textContent = 'تم الإرسال بنجاح!';
-      gsap.to(submitBtn, {backgroundColor:'#27ae60',borderColor:'#1e8449',duration:0.3});
-      showNotification('تم تنزيل الملفات وإرسال البيانات بنجاح!', 'success');
+      submitButtonLabel.textContent = 'تم الإرسال';
+      triggerSuccessBurst();
+      showNotification('تم إرسال البيانات، وحُفظت نسخة احتياطية منها على جهازك للمراجعة.', 'success');
       await new Promise(r => setTimeout(r, 1500));
       resetAllFields(true);
     } catch(err) {
-      submitBtn.textContent = 'فشل الإرسال';
-      gsap.to(submitBtn, {backgroundColor:'#c0392b',borderColor:'#922b21',duration:0.3});
+      submitButtonLabel.textContent = 'فشل الإرسال';
+      gsap.to(submitBtn, {backgroundColor:'#c23b2e',borderColor:'#8f2a20',duration:0.3});
       showNotification(`حدث خطأ أثناء الإرسال: ${err.message || 'يرجى المحاولة مرة أخرى.'}`, 'error', 6000);
       await new Promise(r => setTimeout(r, 2000));
     } finally {
       isSubmitting = false;
-      submitBtn.textContent = 'إرسال البيانات';
+      submitButtonLabel.textContent = 'إرسال البيانات';
       gsap.to(submitBtn, {clearProps:'backgroundColor,borderColor,opacity',duration:0.3});
       updateSubmitBtnState();
     }
@@ -1243,7 +1380,12 @@ document.addEventListener('DOMContentLoaded', () => {
     [yearSel, monthSel, regionSel].forEach(s => s.selectedIndex = 0);
     pharmacySel.innerHTML = '<option value="">الصيدلية</option>';
     pharmacySel.disabled = true;
-    if (activeButton) { activeButton.classList.remove('btn-active'); activeButton.classList.add('btn-inactive'); activeButton = null; }
+    if (activeButton) {
+      activeButton.classList.remove('btn-active'); activeButton.classList.add('btn-inactive');
+      activeButton.setAttribute('aria-checked', 'false');
+    }
+    allThemeBtns.forEach((btn, i) => { btn.tabIndex = i === 0 ? 0 : -1; });
+    activeButton = null;
     docEl.classList.remove('theme-students', 'theme-workforce', 'theme-infants');
     updateTotal(); updateSelectStyles();
     if (clearStorage) try { localStorage.removeItem('pharmacyAppData'); } catch(e) {}
@@ -1361,6 +1503,13 @@ document.addEventListener('DOMContentLoaded', () => {
   fileInput.addEventListener('change', e => handleFiles(e.target.files));
   uploadBtn.addEventListener('click', handleUpload);
 
+  function openFilePicker() { fileInput.click(); }
+  dropArea.addEventListener('click', openFilePicker);
+  dropArea.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFilePicker(); }
+  });
+  browseBtn.addEventListener('click', e => { e.stopPropagation(); openFilePicker(); });
+
   async function handleFiles(newFiles) {
     for (const file of newFiles) {
       if (filesToUpload.some(f => f.file.name === file.name)) continue;
@@ -1370,6 +1519,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     fileInput.value = '';
     updateFileListUI();
+  }
+
+  let modalReturnFocus = null;
+  let modalActiveCancel = null;
+
+  function getModalFocusable() {
+    return Array.from(sheetModal.querySelectorAll('button, input, [href], select, textarea, [tabindex]:not([tabindex="-1"])'))
+      .filter(el => !el.disabled && el.getClientRects().length > 0);
+  }
+  function trapModalKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); if (modalActiveCancel) modalActiveCancel(); return; }
+    if (e.key !== 'Tab') return;
+    const f = getModalFocusable();
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  function openSheetModal() {
+    modalReturnFocus = document.activeElement;
+    sheetModal.style.display = 'flex';
+    document.addEventListener('keydown', trapModalKey);
+    const f = getModalFocusable();
+    if (f.length) f[0].focus();
+  }
+  function closeSheetModal() {
+    sheetModal.style.display = 'none';
+    document.removeEventListener('keydown', trapModalKey);
+    modalActiveCancel = null;
+    if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') modalReturnFocus.focus();
   }
 
   function promptForSheetSelection(file) {
@@ -1388,7 +1567,6 @@ document.addEventListener('DOMContentLoaded', () => {
           li.innerHTML = `<input type="checkbox" value="${safe}" checked><span>${safe}</span>`;
           modalSheetList.appendChild(li);
         });
-        sheetModal.style.display = 'flex';
         const confirm = () => {
           const sel = Array.from(modalSheetList.querySelectorAll('input:checked')).map(cb => cb.value);
           if (sel.length > 0) filesToUpload.push({file, selectedSheets: sel});
@@ -1396,13 +1574,15 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         const cancel = () => cleanup();
         const cleanup = () => {
-          sheetModal.style.display = 'none';
+          closeSheetModal();
           modalConfirmBtn.removeEventListener('click', confirm);
           modalCancelBtn.removeEventListener('click', cancel);
           updateFileListUI(); resolve();
         };
+        modalActiveCancel = cancel;
         modalConfirmBtn.addEventListener('click', confirm);
         modalCancelBtn.addEventListener('click', cancel);
+        openSheetModal();
       };
       reader.readAsArrayBuffer(file);
     });
@@ -1414,7 +1594,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const item = document.createElement('div');
       item.className = 'file-item';
       const details = fw.selectedSheets ? `<div class="file-details">${fw.selectedSheets.length} ورقة عمل محددة</div>` : '';
-      item.innerHTML = `<div class="file-info"><div class="file-name">${escapeHTML(fw.file.name)}</div>${details}</div><button class="delete-btn" data-index="${idx}">&times;</button>`;
+      item.innerHTML = `<div class="file-info"><div class="file-name">${escapeHTML(fw.file.name)}</div>${details}</div><button class="delete-btn" data-index="${idx}" type="button" aria-label="إزالة ${escapeHTML(fw.file.name)}">&times;</button>`;
       item.querySelector('.delete-btn').onclick = e => {
         filesToUpload.splice(parseInt(e.currentTarget.dataset.index), 1);
         updateFileListUI();
@@ -1425,6 +1605,16 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadBtn.disabled = !has;
     uploadBtn.classList.toggle('btn-inactive', !has);
     uploadBtn.classList.toggle('btn-active', has);
+  }
+
+  function downloadBulkBackup(rows) {
+    try {
+      const ts = new Date().toISOString().replace(/[:.]/g,'-');
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(rows, null, 2)], {type:'application/json'}));
+      a.download = `bulk_upload_backup_${ts}.json`;
+      a.click(); URL.revokeObjectURL(a.href); a.remove();
+    } catch(e) {}
   }
 
   async function handleUpload() {
@@ -1462,9 +1652,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     for (let i = 0; i < allRows.length; i++) {
       const pct = Math.round(((i + 1) / allRows.length) * 100);
-      uploadBtn.textContent = 'جاري الرفع...';
-      progressText.textContent = `يتم رفع الصف ${i + 1} من ${allRows.length}`;
+      uploadBtn.textContent = 'جاري الإرسال...';
+      progressText.textContent = `يتم إرسال الصف ${i + 1} من ${allRows.length}`;
       progressBar.style.width = pct + '%';
+      progressTrack.setAttribute('aria-valuenow', String(pct));
       try {
         await fetch(`${SCRIPT_URL}?data=${encodeURIComponent(JSON.stringify(allRows[i]))}`, {method:'GET',mode:'no-cors'});
         success++;
@@ -1472,16 +1663,20 @@ document.addEventListener('DOMContentLoaded', () => {
       if (i < allRows.length - 1) await new Promise(r => setTimeout(r, 800));
     }
 
-    uploadBtn.textContent = 'تم الرفع بنجاح';
-    progressText.textContent = 'اكتمل!';
+    uploadBtn.textContent = 'تم إرسال الملفات';
+    progressText.textContent = 'اكتمل الإرسال';
     resultsContainer.hidden = false;
-    if (success > 0) addResultItem('ملخص الرفع', true, `تم رفع <strong>${success}</strong> صفوف بنجاح.`);
-    if (errors > 0) addResultItem('أخطاء الرفع', false, `فشل رفع <strong>${errors}</strong> صفوف.`);
+    if (success > 0) {
+      addResultItem('ملخص الإرسال', true, `تم إرسال <strong>${success}</strong> صفوف. لم يتم تأكيد الاستلام من الخادم، وتُحفظ نسخة احتياطية منها على جهازك.`);
+      downloadBulkBackup(allRows);
+    }
+    if (errors > 0) addResultItem('أخطاء الإرسال', false, `تعذّر إرسال <strong>${errors}</strong> صفوف.`);
 
     setTimeout(() => {
       uploadBtn.textContent = 'رفع الملفات';
       progressContainer.hidden = true;
       progressBar.style.width = '0%';
+      progressTrack.setAttribute('aria-valuenow', '0');
       filesToUpload = [];
       updateFileListUI();
     }, 4000);
@@ -1515,10 +1710,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const icon = success
       ? `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>`
       : `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>`;
-    item.innerHTML = `${icon}<div><div style="font-weight:700;font-size:1.05rem;">${escapeHTML(title)}</div><div style="color:var(--text-secondary);font-size:0.95rem;">${msgHTML}</div></div>`;
+    item.innerHTML = `${icon}<div><div style="font-weight:700;font-size:1.05rem;">${escapeHTML(title)}</div><div style="color:var(--muted);font-size:0.9rem;">${msgHTML}</div></div>`;
     resultsContainer.appendChild(item);
   }
 });
 </script>
-</body>
 </html>
