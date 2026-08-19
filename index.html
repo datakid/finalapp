@@ -1015,6 +1015,25 @@ button#upload-btn:disabled { background: linear-gradient(135deg, #b7bcc2, #7c828
 
 </body>
 <script>
+(function(){
+  if(window.parent === window) return;
+  function ready(){
+    window.parent.postMessage({ t:'lx:ready', title:document.title }, '*');
+    var last = document.title;
+    var titleEl = document.querySelector('title');
+    if(!titleEl) return;
+    new MutationObserver(function(){
+      if(document.title !== last){
+        last = document.title;
+        window.parent.postMessage({ t:'lx:title', title:last }, '*');
+      }
+    }).observe(titleEl, { childList:true });
+  }
+  if(document.readyState === 'complete') ready();
+  else window.addEventListener('load', ready);
+})();
+</script>
+<script>
 document.addEventListener('DOMContentLoaded', () => {
   const escapeHTML = str => String(str).replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
 
