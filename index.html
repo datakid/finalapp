@@ -2,1912 +2,317 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <title>المجموعات الدوائية</title>
-<meta id="theme-color-meta" name="theme-color" content="#fbf4e6">
+<meta id="theme-color-meta" name="theme-color" content="#f6efe1">
 <script>
 (function(){
   try {
     var stored = localStorage.getItem('pharmacyAppTheme');
     var mode = (stored === 'light' || stored === 'dark' || stored === 'system') ? stored : 'system';
-    var resolved = mode === 'system'
-      ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      : mode;
+    var resolved = mode === 'system' ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : mode;
     document.documentElement.setAttribute('data-theme', resolved);
     document.documentElement.setAttribute('data-theme-pref', mode);
+    var saved = JSON.parse(localStorage.getItem('pharmacyAppData') || 'null');
+    var map = { studentsBtn: 'theme-students', workforceBtn: 'theme-workforce', infantsBtn: 'theme-infants' };
+    if (saved && map[saved.activeButton]) document.documentElement.classList.add(map[saved.activeButton]);
   } catch(e) {
     document.documentElement.setAttribute('data-theme', 'light');
     document.documentElement.setAttribute('data-theme-pref', 'system');
   }
 })();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800;900&family=Changa:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
-
-*, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; }
-html, body { margin: 0; padding: 0; }
-h1,h2,h3,h4,h5,h6 { font-size: inherit; font-weight: inherit; margin: 0; }
-a { color: inherit; text-decoration: inherit; }
-button, input, optgroup, select, textarea { font-family: inherit; font-size: 100%; font-weight: inherit; line-height: inherit; color: inherit; margin: 0; padding: 0; }
-button, select { text-transform: none; }
-button, [type='button'] { -webkit-appearance: button; background-color: transparent; background-image: none; }
-blockquote, dl, dd, p, pre { margin: 0; }
-fieldset, ol, ul, menu { margin: 0; padding: 0; list-style: none; }
-textarea { resize: vertical; }
-input::placeholder, textarea::placeholder { opacity: 1; color: var(--placeholder); font-weight: 400; letter-spacing: 0; }
-input { caret-color: var(--theme-color); }
-button, [role="button"] { cursor: pointer; }
-:disabled { cursor: default; }
-img, svg, video, canvas, audio, iframe, embed, object { display: block; vertical-align: middle; }
-img, video { max-width: 100%; height: auto; }
-[hidden] { display: none !important; }
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-input[type="number"] { -moz-appearance: textfield; }
-:focus-visible { outline: 3px solid color-mix(in srgb, var(--theme-color) 65%, black); outline-offset: 2px; border-radius: 4px; }
-
-:root {
-  --ink: #14151b;
-  --shadow-rgb: 20,21,27;
-  --ink-70: rgba(var(--shadow-rgb),0.70);
-  --paper: #fbf4e6;
-  --paper-deep: #f3ead6;
-  --surface: rgba(255,255,255,0.86);
-  --surface-solid: #ffffff;
-  --muted: #656b7a;
-  --good: #1f9d5c;
-  --good-dark: #157a47;
-  --bad: #c0392b;
-  --bad-dark: #922b21;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.85rem;
-  --radius-lg: 1.15rem;
-  --radius-xl: 1.65rem;
-  --radius-pill: 999px;
-  --stroke: 3px;
-  --ink-shadow: 4px 4px 0 rgba(var(--shadow-rgb),0.55);
-  --ink-shadow-sm: 3px 3px 0 rgba(var(--shadow-rgb),0.4);
-  --ink-shadow-lift: 6px 6px 0 rgba(var(--shadow-rgb),0.5);
-  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --swift: cubic-bezier(0.4, 0, 0.2, 1);
-  --dur: 0.24s;
-  --disabled-bg: #f1f1ef;
-  --disabled-border: #d7d7d3;
-  --disabled-shadow: #a9a9a5;
-  --disabled-text: #8b8f98;
-
-  --mix-base: #ffffff;
-  --input-bg: #f8f9fb;
-  --input-bg-hover: #f1f2f5;
-  --input-bg-focus: #ffffff;
-  --hover-tint: #fffdf3;
-  --placeholder: #b9c2cd;
-  --card-rim: rgba(255,255,255,0.85);
-  --overlay-scrim: rgba(15,16,20,0.55);
-  --btn-disabled-1: #b7bcc2;
-  --btn-disabled-2: #7c828a;
-  --btn-disabled-border: #93989f;
-  --btn-disabled-shadow: #5f636b;
-  --btn-disabled-text: #4c4f56;
-
-  --font-ui: 'Cairo', sans-serif;
-  --font-display: 'Baloo Bhaijaan 2', 'Cairo', sans-serif;
-  --font-heading: 'Changa', 'Cairo', sans-serif;
-  --font-num: 'Space Grotesk', 'Cairo', sans-serif;
-
-  --theme-color: #4682B4;
-  --theme-dark: #3a6a94;
-  --theme-shadow: #2d5270;
-
-  color-scheme: light;
-}
-
-html.theme-students { --theme-color: #FF6B6B; --theme-dark: #e55252; --theme-shadow: #c43c3c; }
-html.theme-workforce { --theme-color: #1E90FF; --theme-dark: #1678d4; --theme-shadow: #1260ad; }
-html.theme-infants { --theme-color: #20B2AA; --theme-dark: #189890; --theme-shadow: #107870; }
-
-/* ---------- Dark mode: night-comic palette (ink flips to warm parchment on deep indigo-black paper) ---------- */
-html[data-theme="dark"] {
-  --ink: #f1ece0;
-  --shadow-rgb: 0,0,0;
-  --ink-70: rgba(241,236,224,0.72);
-  --paper: #16171f;
-  --paper-deep: #101017;
-  --surface: rgba(35,37,48,0.82);
-  --surface-solid: #23252f;
-  --muted: #9096a8;
-  --good: #34d399;
-  --good-dark: #1fa872;
-  --bad: #f87171;
-  --bad-dark: #dc4c46;
-
-  --disabled-bg: #262832;
-  --disabled-border: #3a3d49;
-  --disabled-shadow: #0d0e12;
-  --disabled-text: #6b7080;
-
-  --mix-base: #262835;
-  --input-bg: #1c1e27;
-  --input-bg-hover: #23252f;
-  --input-bg-focus: #2a2c38;
-  --hover-tint: #2a2c38;
-  --placeholder: #565a68;
-  --card-rim: rgba(255,255,255,0.06);
-  --overlay-scrim: rgba(0,0,0,0.7);
-  --btn-disabled-1: #4b4e58;
-  --btn-disabled-2: #34363e;
-  --btn-disabled-border: #54575f;
-  --btn-disabled-shadow: #0d0e12;
-  --btn-disabled-text: #0a0a0c;
-
-  --theme-color: #5B9EDB;
-  --theme-dark: #4682B4;
-  --theme-shadow: #345f82;
-
-  color-scheme: dark;
-}
-html[data-theme="dark"].theme-students { --theme-color: #FF8A80; --theme-dark: #FF6B6B; --theme-shadow: #d9534f; }
-html[data-theme="dark"].theme-workforce { --theme-color: #4FA3FF; --theme-dark: #1E90FF; --theme-shadow: #1678d4; }
-html[data-theme="dark"].theme-infants { --theme-color: #3ECFC6; --theme-dark: #20B2AA; --theme-shadow: #189890; }
-
-html { font-size: 16px; scroll-behavior: smooth; font-family: var(--font-ui); text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
-
-body {
-  background-color: var(--paper);
-  background-image:
-    radial-gradient(var(--ink) 0.5px, transparent 0.5px),
-    radial-gradient(circle at 15% 8%, color-mix(in srgb, var(--theme-color) 10%, transparent), transparent 45%),
-    radial-gradient(circle at 85% 92%, color-mix(in srgb, var(--theme-color) 8%, transparent), transparent 40%);
-  background-size: 16px 16px, auto, auto;
-  color: var(--ink);
-  padding: 1.75rem;
-  overflow-x: hidden;
-  min-height: 100vh;
-  position: relative;
-  transition: background-image 0.6s var(--swift);
-}
-
-.ambient-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-.ambient-glow .glow { position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.35; transition: background 0.7s var(--swift); }
-.ambient-glow .glow-a { width: 26rem; height: 26rem; top: -8rem; inset-inline-end: -6rem; background: radial-gradient(circle, var(--theme-color), transparent 70%); }
-.ambient-glow .glow-b { width: 22rem; height: 22rem; bottom: -8rem; inset-inline-start: -6rem; background: radial-gradient(circle, var(--theme-dark), transparent 70%); }
-
-.main-container {
-  max-width: 80rem;
-  margin: auto;
-  background: var(--surface);
-  backdrop-filter: blur(22px) saturate(1.2);
-  -webkit-backdrop-filter: blur(22px) saturate(1.2);
-  border-radius: var(--radius-xl);
-  padding: 2.25rem;
-  border: var(--stroke) solid var(--ink);
-  box-shadow: 7px 7px 0 rgba(var(--shadow-rgb),0.55), 0 30px 60px -20px rgba(var(--shadow-rgb),0.25);
-  position: relative;
-  z-index: 1;
-}
-.main-container > :not([hidden]) ~ :not([hidden]) { margin-top: 1.75rem; }
-
-.status-bar-wrap { position: relative; }
-
-.status-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  transition: opacity 0.3s var(--swift), transform 0.3s var(--spring), max-height 0.35s var(--swift), margin 0.35s var(--swift);
-}
-.status-bar[hidden] { display: none; }
-
-.status-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.82rem;
-  letter-spacing: 0.3px;
-  color: var(--muted);
-  background: var(--surface-solid);
-  border: 2px solid var(--disabled-border);
-  padding: 0.4rem 0.85rem;
-  border-radius: var(--radius-pill);
-  transition: color 0.2s var(--swift), background 0.2s var(--swift), border-color 0.2s var(--swift);
-}
-.status-chip::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 22%, transparent); flex-shrink: 0; }
-.status-chip.chip-neutral { color: var(--muted); background: var(--surface-solid); border-color: var(--disabled-border); }
-.status-chip.chip-progress { color: var(--theme-dark); background: color-mix(in srgb, var(--theme-color) 12%, var(--mix-base)); border-color: color-mix(in srgb, var(--theme-color) 45%, var(--mix-base)); }
-.status-chip.chip-warning { color: var(--bad); background: color-mix(in srgb, var(--bad) 12%, var(--mix-base)); border-color: color-mix(in srgb, var(--bad) 45%, var(--mix-base)); }
-.status-chip.chip-good { color: var(--good-dark); background: color-mix(in srgb, var(--good) 15%, var(--mix-base)); border-color: color-mix(in srgb, var(--good) 50%, var(--mix-base)); }
-.status-chip.chip-ready { color: var(--good-dark); background: color-mix(in srgb, var(--good) 18%, var(--mix-base)); border-color: color-mix(in srgb, var(--good) 55%, var(--mix-base)); animation: pulse-btn 2.4s var(--swift) infinite; }
-
-.status-dismiss {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.9rem;
-  height: 1.9rem;
-  border-radius: 50%;
-  border: 2px solid var(--disabled-border);
-  background: var(--surface-solid);
-  color: var(--muted);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: color 0.2s var(--swift), border-color 0.2s var(--swift), transform 0.2s var(--spring), background 0.2s var(--swift);
-}
-.status-dismiss svg { width: 0.9rem; height: 0.9rem; }
-.status-dismiss:hover { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--disabled-border)); transform: rotate(90deg); }
-
-.status-reopen {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 0.82rem;
-  color: var(--muted);
-  background: var(--surface-solid);
-  border: 2px dashed var(--disabled-border);
-  padding: 0.4rem 0.9rem;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  transition: color 0.2s var(--swift), border-color 0.2s var(--swift), transform 0.2s var(--spring);
-}
-.status-reopen:hover { color: var(--theme-dark); border-color: color-mix(in srgb, var(--theme-color) 45%, var(--disabled-border)); transform: translateY(-1px); }
-
-h1.comic-header {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 2.75rem;
-  color: #fff;
-  background-repeat: no-repeat;
-  background-image:
-    radial-gradient(circle 7px at 24px 50%, var(--paper) 0 7px, var(--ink) 7px 10px, transparent 10.5px),
-    radial-gradient(circle 7px at calc(100% - 24px) 50%, var(--paper) 0 7px, var(--ink) 7px 10px, transparent 10.5px),
-    linear-gradient(135deg, var(--theme-color) 0%, var(--theme-dark) 65%, var(--theme-shadow) 100%);
-  padding: 1.6rem 2.4rem 2rem;
-  border-radius: var(--radius-lg);
-  border: 2px solid var(--ink);
-  text-align: center;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.28), -1px -1px 0 rgba(0,0,0,0.12);
-  letter-spacing: 0.5px;
-  transform: rotate(-0.8deg);
-  transition: transform var(--dur) var(--spring), background 0.5s var(--swift), filter var(--dur) var(--swift);
-  position: relative;
-  overflow: visible;
-  clip-path: polygon(0% 0%, 100% 0%, 100% 92%, 100.000% 100%, 92.857% 92%, 85.714% 100%, 78.571% 92%, 71.429% 100%, 64.286% 92%, 57.143% 100%, 50.000% 92%, 42.857% 100%, 35.714% 92%, 28.571% 100%, 21.429% 92%, 14.286% 100%, 7.143% 92%, 0.000% 100%);
-  filter: drop-shadow(4px 4px 0 var(--theme-shadow)) drop-shadow(0 20px 30px color-mix(in srgb, var(--theme-color) 55%, transparent));
-}
-h1.comic-header::before {
-  content: '';
-  position: absolute;
-  inset: -20% -10%;
-  background: repeating-radial-gradient(circle at 0 0, rgba(255,255,255,0.14) 0 2px, transparent 2px 14px);
-  opacity: 0.4;
-  pointer-events: none;
-}
-h1.comic-header::after {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border: 2px dashed rgba(255,255,255,0.3);
-  border-radius: calc(var(--radius-lg) - 4px);
-  pointer-events: none;
-}
-h1.comic-header:hover { transform: rotate(0.25deg) scale(1.012); filter: drop-shadow(4px 4px 0 var(--theme-shadow)) drop-shadow(0 20px 30px color-mix(in srgb, var(--theme-color) 55%, transparent)) brightness(1.05); }
-
-.grid-container { display: grid; }
-.grid-cols-1 { grid-template-columns: 1fr; }
-.gap-4 { gap: 1.25rem; }
-.gap-6 { gap: 1.75rem; }
-@media(min-width:640px) { .sm\:grid-cols-2 { grid-template-columns: repeat(2,1fr); } .sm\:grid-cols-3 { grid-template-columns: repeat(3,1fr); } }
-@media(min-width:1024px) { .md\:grid-cols-3 { grid-template-columns: repeat(3,1fr); } .md\:grid-cols-4 { grid-template-columns: repeat(4,1fr); } }
-
-.caption-box {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 1.15rem;
-  color: var(--ink);
-  background: var(--surface-solid);
-  border: 2px solid var(--ink);
-  border-radius: var(--radius-md);
-  padding: 0.35em 1em;
-  box-shadow: var(--ink-shadow-sm);
-  margin-bottom: 0.85rem;
-  transform: rotate(-0.4deg);
-}
-.caption-box .caption-eyebrow { font-family: var(--font-ui); font-weight: 700; font-size: 0.82rem; color: var(--theme-dark); background: var(--paper-deep); border: 1px solid var(--theme-color); border-radius: var(--radius-pill); padding: 0.15em 0.6em; }
-
-.radiogroup { display: contents; }
-
-button.comic-button {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 1.15rem;
-  padding: 1rem 1.5rem;
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-md);
-  background-color: var(--surface-solid);
-  color: var(--ink);
-  box-shadow: var(--ink-shadow-sm);
-  transition: transform var(--dur) var(--spring), box-shadow var(--dur) var(--spring), background var(--dur) var(--swift), color var(--dur) var(--swift), filter var(--dur) var(--swift);
-  letter-spacing: 0.4px;
-  position: relative;
-  will-change: transform;
-  line-height: 1;
-  user-select: none;
-  -webkit-user-select: none;
-  isolation: isolate;
-  overflow: hidden;
-}
-button.comic-button::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 48%, transparent 66%);
-  transform: translateX(-120%);
-  transition: transform 0.6s var(--swift);
-  z-index: 1;
-  pointer-events: none;
-}
-button.comic-button:hover::before { transform: translateX(120%); }
-button.comic-button.btn-active {
-  color: #fff;
-  background: linear-gradient(135deg, var(--theme-color), var(--theme-dark));
-  border-color: var(--theme-shadow);
-  box-shadow: var(--ink-shadow) var(--theme-shadow), 0 16px 30px -14px color-mix(in srgb, var(--theme-color) 70%, transparent);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
-  animation: pulse-btn 2.6s var(--swift) infinite;
-}
-@keyframes pulse-btn { 0%,100%{transform:scale(1);filter:brightness(1)} 50%{transform:scale(1.014);filter:brightness(1.05)} }
-button.comic-button.btn-inactive { background-color: var(--disabled-bg); color: var(--muted); box-shadow: var(--ink-shadow-sm) var(--disabled-shadow); border-color: var(--disabled-border); }
-button.comic-button:not(.btn-active,:disabled):hover { transform: translateY(-4px) rotate(-1deg); background-color: var(--hover-tint); box-shadow: var(--ink-shadow); }
-button.comic-button:active:not(.btn-active,:disabled) { transform: translate(4px,4px) !important; box-shadow: none !important; }
-button.comic-button.btn-compact { font-size: 1rem; padding: 0.55rem 1.4rem; }
-
-.select-wrapper { position: relative; }
-select {
-  font-family: var(--font-ui);
-  font-weight: 700;
-  font-size: 1.02rem;
-  line-height: 1.4;
-  padding: 1rem 3.5rem 1rem 1.5rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2314151b' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='18 9 12 15 6 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  background-size: 1.2em;
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-md);
-  background-color: var(--surface-solid);
-  box-shadow: var(--ink-shadow-sm);
-  transition: transform var(--dur) var(--spring), box-shadow var(--dur) var(--spring), background-color var(--dur) var(--swift), border-color var(--dur) var(--swift);
-  outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  width: 100%;
-  transform: rotate(-0.35deg);
-  cursor: pointer;
-  direction: rtl;
-  text-align: right;
-  user-select: none;
-  -webkit-user-select: none;
-}
-select:hover:not(:disabled) { transform: translateY(-2px) rotate(0.15deg); background-color: var(--hover-tint); box-shadow: var(--ink-shadow); }
-select:focus { outline: none; transform: scale(1.01); box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-color) 28%, transparent), var(--ink-shadow-sm); border-color: var(--theme-color); }
-select.select-valid { border-color: var(--theme-color); box-shadow: var(--ink-shadow-sm) var(--theme-shadow); background-color: color-mix(in srgb, var(--theme-color) 8%, var(--mix-base)); color: var(--theme-dark); }
-select:disabled { border-color: var(--disabled-border) !important; box-shadow: var(--ink-shadow-sm) var(--disabled-shadow) !important; background-color: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; transform: none; opacity: 0.75; }
-
-.panel-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-  background: transparent;
-  border: none;
-  padding: 0;
-}
-@media(min-width:640px) { .panel-grid { grid-template-columns: repeat(2,1fr); } }
-@media(min-width:1024px) { .panel-grid { grid-template-columns: repeat(3,1fr); } }
-
-.reveal { position: relative; }
-.reveal::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: inherit;
-  padding: 2px;
-  background: radial-gradient(220px circle at var(--mx) var(--my), rgba(255,255,255,.95), transparent 62%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity var(--dur) var(--swift);
-  pointer-events: none;
-}
-
-div.card {
-  display: flex;
-  flex-direction: column;
-  background-color: var(--surface-solid);
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: var(--ink-shadow-sm);
-  transition: transform var(--dur) var(--spring), box-shadow var(--dur) var(--spring), border-color 0.2s var(--swift);
-  position: relative;
-  will-change: transform;
-}
-div.card::before {
-  content: '';
-  position: absolute;
-  inset: 5px;
-  border: 1.5px solid var(--card-rim);
-  border-radius: calc(var(--radius-lg) - 6px);
-  pointer-events: none;
-  z-index: 1;
-}
-div.card:not(#total-card):hover { transform: translateY(-6px) rotate(-0.5deg) scale(1.02); box-shadow: var(--ink-shadow-lift), 0 22px 40px -20px color-mix(in srgb, var(--theme-color) 55%, transparent); z-index: 10; }
-div.card:not(#total-card):hover.reveal::after,
-div.card:not(#total-card):focus-within.reveal::after { opacity: 1; }
-
-div.card h3 {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 1.35rem;
-  line-height: 1.4;
-  margin-bottom: 0.85rem;
-  display: flex;
-  flex-grow: 1;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  min-height: 3.5em;
-  transition: color 0.2s var(--swift);
-}
-
-div.card input[type="text"].drug-input,
-div.card input[type="number"] {
-  font-family: var(--font-num);
-  font-weight: 600;
-  font-size: 1.55rem;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  line-height: 1.2;
-  padding: 0.8rem 0.75rem;
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-md);
-  width: 100%;
-  text-align: center;
-  background-color: var(--input-bg);
-  transition: background-color 0.18s var(--swift), border-color 0.18s var(--swift), box-shadow 0.18s var(--swift), transform 0.18s var(--swift);
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.07);
-}
-div.card input[type="text"].drug-input:hover:not(:focus),
-div.card input[type="number"]:hover:not(:focus) {
-  background-color: var(--input-bg-hover);
-  border-color: color-mix(in srgb, var(--ink) 60%, transparent);
-}
-div.card input:focus {
-  outline: none;
-  border-color: var(--theme-color);
-  background-color: var(--input-bg-focus);
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04), 0 0 0 4px color-mix(in srgb, var(--theme-color) 26%, transparent);
-  transform: scale(1.015);
-}
-
-div.card.card-active { border-color: var(--theme-color); box-shadow: var(--ink-shadow-sm) var(--theme-shadow); }
-div.card.card-active h3 { color: var(--theme-dark); }
-div.card.card-active input { border-color: var(--theme-color) !important; background-color: color-mix(in srgb, var(--theme-color) 7%, var(--mix-base)); }
-
-div.card.card-invalid { border-color: var(--bad) !important; box-shadow: var(--ink-shadow-sm) var(--bad) !important; animation: shake 0.45s var(--spring); }
-div.card.card-invalid input { border-color: var(--bad) !important; }
-@keyframes shake { 10%,90%{transform:translate3d(-2px,0,0)} 20%,80%{transform:translate3d(3px,0,0)} 30%,50%,70%{transform:translate3d(-5px,0,0)} 40%,60%{transform:translate3d(5px,0,0)} }
-
-div.card#total-card {
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 0.35rem;
-  margin-top: 1.75rem;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--theme-color) 14%, var(--mix-base)), color-mix(in srgb, var(--theme-color) 4%, var(--mix-base)));
-  border-color: var(--theme-dark);
-  box-shadow: var(--ink-shadow-sm) var(--theme-shadow), 0 20px 40px -18px color-mix(in srgb, var(--theme-color) 55%, transparent);
-  border-radius: 1.75rem 1.75rem 1.75rem 0.4rem;
-}
-div.card#total-card::after {
-  content: '';
-  position: absolute;
-  inset: 5px;
-  border: 1px dashed color-mix(in srgb, var(--theme-color) 45%, transparent);
-  border-radius: calc(1.75rem - 5px);
-  pointer-events: none;
-}
-div.card#total-card:hover { transform: translateY(-3px) scale(1.012); box-shadow: var(--ink-shadow) var(--theme-shadow), 0 24px 44px -18px color-mix(in srgb, var(--theme-color) 60%, transparent); }
-div.card#total-card h3 { font-family: var(--font-heading); font-weight: 700; font-size: 1.6rem; color: var(--theme-dark); margin-bottom: 0; min-height: auto; flex-grow: 0; letter-spacing: 0.3px; }
-#total {
-  font-family: var(--font-num);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  font-size: 3.4rem;
-  text-align: center;
-  flex-grow: 1;
-  color: var(--theme-dark);
-  text-shadow: 2px 2px 0 color-mix(in srgb, var(--theme-color) 38%, transparent);
-  line-height: 1;
-  margin-top: 0.4rem;
-  transition: color var(--dur) var(--swift);
-}
-
-button#submitButton {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.55rem;
-  padding: 1.1rem 2rem;
-  color: white;
-  border: var(--stroke) solid var(--theme-dark);
-  border-radius: var(--radius-md);
-  width: 100%;
-  margin-top: 2rem;
-  background: linear-gradient(135deg, var(--theme-color), var(--theme-dark));
-  box-shadow: 5px 5px 0 var(--theme-shadow), 0 20px 40px -16px color-mix(in srgb, var(--theme-color) 60%, transparent);
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.22);
-  cursor: pointer;
-  letter-spacing: 1px;
-  will-change: transform;
-  transition: all var(--dur) var(--spring);
-  position: relative;
-  overflow: hidden;
-}
-button#submitButton::before {
-  content: '';
-  position: absolute;
-  top: 0; inset-inline-start: -100%;
-  width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
-  transition: inset-inline-start 0.55s var(--swift);
-}
-button#submitButton:hover:not(:disabled)::before { inset-inline-start: 100%; }
-button#submitButton:hover:not(:disabled) { transform: translateY(-3px) scale(1.01); filter: brightness(1.06); }
-button#submitButton:active:not(:disabled) { transform: translate(5px,5px); box-shadow: none; filter: brightness(0.94); }
-button#submitButton:disabled { background: linear-gradient(135deg, var(--btn-disabled-1), var(--btn-disabled-2)); border-color: var(--btn-disabled-border); box-shadow: 4px 4px 0 var(--btn-disabled-shadow); text-shadow: 1px 1px 0 var(--btn-disabled-text); cursor: not-allowed; opacity: 0.7; }
-
-.success-burst { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
-.success-burst::before {
-  content: '';
-  position: absolute;
-  inset: -40%;
-  background-image: repeating-conic-gradient(from 0deg, rgba(255,255,255,.9) 0deg 3deg, transparent 3deg 18deg);
-  border-radius: 50%;
-}
-.success-burst.is-active { animation: burst-pop 0.5s var(--swift); }
-@keyframes burst-pop { 0%{opacity:0;transform:scale(.5)} 30%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(1.35)} }
-
-.comic-divider {
-  border: none;
-  height: 0;
-  border-top: var(--stroke) dashed var(--ink);
-  margin: 2.75rem 0;
-  opacity: 0.3;
-}
-
-.upload-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.1rem 1.75rem;
-  background: linear-gradient(135deg, var(--surface-solid), color-mix(in srgb, var(--theme-color) 5%, var(--mix-base)));
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--ink-shadow-sm);
-  font-family: var(--font-heading);
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--ink);
-  cursor: pointer;
-  transition: all var(--dur) var(--spring);
-  position: relative;
-  letter-spacing: 0.4px;
-}
-.upload-toggle:hover, .upload-toggle:focus-visible { transform: translateY(-2px); background: color-mix(in srgb, var(--theme-color) 8%, var(--mix-base)); box-shadow: var(--ink-shadow); }
-.upload-toggle:active { transform: translate(4px,4px); box-shadow: none; }
-.upload-toggle.open { border-color: var(--theme-color); box-shadow: var(--ink-shadow-sm) var(--theme-shadow); background: linear-gradient(135deg, color-mix(in srgb, var(--theme-color) 10%, var(--mix-base)), color-mix(in srgb, var(--theme-color) 4%, var(--mix-base))); }
-.toggle-label { display: flex; align-items: center; gap: 0.75rem; }
-.toggle-label svg { width: 1.5rem; height: 1.5rem; fill: var(--theme-color); flex-shrink: 0; transition: fill 0.2s var(--swift); }
-.toggle-chevron { width: 1.5rem; height: 1.5rem; transition: transform 0.4s var(--spring); flex-shrink: 0; }
-.upload-toggle.open .toggle-chevron { transform: rotate(180deg); }
-
-.upload-panel {
-  overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  transition: max-height 0.5s var(--swift), opacity 0.35s var(--swift), margin-top 0.35s var(--swift);
-  margin-top: 0;
-}
-.upload-panel.open {
-  max-height: 2000px;
-  opacity: 1;
-  margin-top: 1rem;
-}
-
-.upload-card-inner {
-  background-color: var(--surface-solid);
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-lg);
-  padding: 2rem;
-  box-shadow: var(--ink-shadow-sm);
-  position: relative;
-}
-.upload-card-inner::before {
-  content: '';
-  position: absolute;
-  inset: 5px;
-  border: 1.5px solid var(--card-rim);
-  border-radius: calc(var(--radius-lg) - 6px);
-  pointer-events: none;
-}
-
-.upload-wrapper { display: flex; flex-wrap: wrap; gap: 1.75rem; align-items: stretch; }
-.upload-info { flex: 1; min-width: 280px; display: flex; flex-direction: column; justify-content: center; }
-.upload-zone { flex: 1; min-width: 280px; }
-
-.upload-heading {
-  font-family: var(--font-heading);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--ink);
-  margin-bottom: 0.6rem;
-  min-height: auto;
-  text-align: right;
-}
-.upload-desc { font-size: 0.95rem; color: var(--muted); margin-bottom: 0.75rem; font-family: var(--font-ui); line-height: 1.6; }
-.upload-code {
-  font-family: 'Cairo', monospace;
-  font-size: 0.8rem;
-  background: var(--paper-deep);
-  padding: 0.85rem 1rem;
-  border-radius: var(--radius-md);
-  border: 2px solid var(--ink);
-  direction: ltr;
-  text-align: left;
-  margin-bottom: 1rem;
-  white-space: pre-wrap;
-  font-weight: 700;
-  line-height: 1.6;
-  word-break: break-all;
-}
-.upload-notice {
-  font-size: 0.9rem;
-  color: var(--theme-dark);
-  margin-bottom: 1.5rem;
-  font-family: var(--font-ui);
-  font-weight: 600;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  background: color-mix(in srgb, var(--theme-color) 10%, var(--mix-base));
-  padding: 0.65rem 0.85rem;
-  border-radius: var(--radius-md);
-  border: 2px solid color-mix(in srgb, var(--theme-color) 50%, var(--mix-base));
-  line-height: 1.5;
-}
-.upload-notice svg { width: 1.1rem; height: 1.1rem; flex-shrink: 0; margin-top: 2px; stroke: var(--theme-dark); }
-.upload-actions { display: flex; gap: 0.75rem; }
-.upload-actions button { font-size: 0.92rem; padding: 0.55rem 1.1rem; letter-spacing: 0.5px; flex: 1; }
-
-.drop-area {
-  border: var(--stroke) dashed var(--theme-dark);
-  border-radius: var(--radius-lg);
-  padding: 2.25rem 1.5rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all var(--dur) var(--spring);
-  background-color: color-mix(in srgb, var(--theme-color) 4%, var(--paper));
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  position: relative;
-}
-.drop-area:hover, .drop-area.drag-active, .drop-area:focus-visible {
-  background-color: color-mix(in srgb, var(--theme-color) 12%, var(--mix-base));
-  transform: scale(1.02) rotate(-0.35deg);
-  border-style: solid;
-  box-shadow: var(--ink-shadow-sm) var(--theme-shadow);
-}
-.drop-area:hover.reveal::after, .drop-area:focus-visible.reveal::after { opacity: 1; }
-.drop-icon svg { width: 3.25rem; height: 3.25rem; fill: var(--theme-color); margin: 0 auto 0.75rem; transition: transform var(--dur) var(--spring); }
-.drop-area:hover .drop-icon svg { transform: scale(1.2) rotate(6deg) translateY(-3px); }
-.drop-text { font-family: var(--font-ui); font-size: 1.12rem; font-weight: 700; margin-bottom: 0.15rem; color: var(--ink); }
-.drop-sub { font-family: var(--font-ui); font-size: 0.9rem; color: var(--muted); margin-bottom: 1rem; }
-
-.file-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.8rem 1.1rem;
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-md);
-  margin-top: 1rem;
-  background-color: var(--surface-solid);
-  box-shadow: var(--ink-shadow-sm);
-  transition: transform var(--dur) var(--spring), box-shadow var(--dur) var(--spring);
-}
-.file-item:hover { transform: translateX(-4px) translateY(-2px); box-shadow: var(--ink-shadow); }
-.file-info { flex-grow: 1; margin-inline-end: 1rem; font-family: var(--font-ui); }
-.file-name { font-weight: 700; font-size: 1rem; }
-.file-details { font-size: 0.85rem; color: var(--muted); margin-top: 0.1rem; }
-.delete-btn { color: var(--bad); background: none; border: none; font-size: 1.6rem; line-height: 1; cursor: pointer; transition: transform 0.2s var(--spring); padding: 0 0.5rem; }
-.delete-btn:hover { transform: scale(1.3) rotate(12deg); }
-
-.progress-bar-bg {
-  width: 100%;
-  height: 1.25rem;
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-md);
-  background: var(--disabled-bg);
-  overflow: hidden;
-  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
-  margin-top: 1.5rem;
-}
-.progress-bar {
-  width: 0%;
-  height: 100%;
-  background: linear-gradient(90deg, var(--theme-color), var(--theme-dark));
-  transition: width 0.3s var(--swift);
-  position: relative;
-}
-.progress-bar::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(90deg, transparent 0, transparent 10px, rgba(255,255,255,0.16) 10px, rgba(255,255,255,0.16) 20px);
-  animation: shimmer 1s linear infinite;
-}
-@keyframes shimmer { from{background-position:0 0} to{background-position:20px 0} }
-.progress-text { text-align: center; margin-top: 0.5rem; font-family: var(--font-ui); font-size: 1rem; color: var(--ink); }
-
-button#upload-btn {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.3rem;
-  padding: 0.9rem 2rem;
-  color: white;
-  border: var(--stroke) solid var(--theme-dark);
-  border-radius: var(--radius-md);
-  width: 100%;
-  margin-top: 1.5rem;
-  background: linear-gradient(135deg, var(--theme-color), var(--theme-dark));
-  box-shadow: var(--ink-shadow-sm) var(--theme-shadow);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
-  cursor: pointer;
-  will-change: transform;
-  transition: all var(--dur) var(--spring);
-}
-button#upload-btn:hover:not(:disabled) { transform: translateY(-3px) scale(1.01); filter: brightness(1.05); }
-button#upload-btn:active:not(:disabled) { transform: translate(4px,4px); box-shadow: none; }
-button#upload-btn:disabled { background: linear-gradient(135deg, var(--btn-disabled-1), var(--btn-disabled-2)); border-color: var(--btn-disabled-border); box-shadow: var(--ink-shadow-sm) var(--btn-disabled-shadow); text-shadow: 1px 1px 0 var(--btn-disabled-text); cursor: not-allowed; opacity: 0.7; }
-
-#results-container { display: flex; flex-direction: column; gap: 0.85rem; margin-top: 1.5rem; }
-.result-item {
-  padding: 0.9rem 1.25rem;
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-md);
-  box-shadow: var(--ink-shadow-sm);
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  font-family: var(--font-ui);
-  background-color: var(--surface-solid);
-  transition: transform var(--dur) var(--swift);
-}
-.result-item:hover { transform: translateY(-2px); }
-.result-success { border-color: var(--good); border-inline-end-width: 6px; }
-.result-success svg { fill: var(--good); width: 2rem; height: 2rem; flex-shrink: 0; }
-.result-error { border-color: var(--bad); border-inline-end-width: 6px; }
-.result-error svg { fill: var(--bad); width: 2rem; height: 2rem; flex-shrink: 0; }
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--overlay-scrim);
-  backdrop-filter: blur(10px) saturate(1.3);
-  -webkit-backdrop-filter: blur(10px) saturate(1.3);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 3000;
-  padding: 1rem;
-}
-.modal-content {
-  background: var(--surface-solid);
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-lg);
-  padding: 2rem;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 8px 8px 0 rgba(var(--shadow-rgb),0.85), 0 30px 60px -20px rgba(0,0,0,0.35);
-  text-align: right;
-  animation: modal-pop 0.35s var(--spring) both;
-}
-@keyframes modal-pop { from{opacity:0;transform:scale(0.88) translateY(12px)} to{opacity:1;transform:scale(1) translateY(0)} }
-.modal-heading { font-family: var(--font-heading); font-size: 1.45rem; margin-bottom: 0.5rem; color: var(--theme-dark); font-weight: 700; }
-.modal-desc { color: var(--muted); margin-bottom: 1.5rem; word-break: break-all; font-family: var(--font-ui); font-size: 0.95rem; }
-.modal-sheet-list { max-height: 200px; overflow-y: auto; margin-bottom: 1rem; border: var(--stroke) solid var(--disabled-border); border-radius: var(--radius-md); padding: 0.5rem 1rem; background: var(--paper); }
-.modal-sheet-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; font-family: var(--font-heading); font-size: 1.08rem; cursor: pointer; }
-.modal-sheet-item input[type="checkbox"] { width: 1.2rem; height: 1.2rem; cursor: pointer; accent-color: var(--theme-color); }
-.modal-footer { display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: flex-end; }
-
-#notification-area {
-  position: fixed;
-  top: 1.5rem;
-  inset-inline-start: 1.5rem;
-  z-index: 4000;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  width: clamp(280px, 90vw, 400px);
-  pointer-events: none;
-}
-.notification {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  pointer-events: auto;
-  font-family: var(--font-ui);
-  font-size: 1rem;
-  line-height: 1.4;
-  color: #fff;
-  padding: 0.95rem 1.2rem;
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-md);
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
-  opacity: 0;
-  position: relative;
-  overflow: hidden;
-  will-change: transform, opacity;
-  box-shadow: var(--ink-shadow-sm);
-  word-break: break-word;
-  backdrop-filter: blur(6px);
-}
-.notification.success { background-color: color-mix(in srgb, var(--good) 92%, black); box-shadow: 4px 4px 0 var(--good-dark); }
-.notification.error { background-color: color-mix(in srgb, var(--bad) 92%, black); box-shadow: 4px 4px 0 var(--bad-dark); }
-.notification.info { background-color: var(--theme-color); box-shadow: 4px 4px 0 var(--theme-shadow); }
-.notification-icon { width: 1.4rem; height: 1.4rem; flex-shrink: 0; }
-.notification-icon svg { width: 100%; height: 100%; fill: currentColor; }
-.notification-progress { position: absolute; bottom: 0; inset-inline-start: 0; height: 3px; background-color: rgba(255,255,255,0.5); border-radius: 0 2px 2px 0; }
-
-.theme-switch {
-  position: fixed;
-  top: 1.5rem;
-  inset-inline-end: 1.5rem;
-  z-index: 4500;
-  display: flex;
-  gap: 0.3rem;
-  padding: 0.3rem;
-  background-color: var(--surface-solid);
-  border: var(--stroke) solid var(--ink);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--ink-shadow-sm);
-  transition: box-shadow var(--dur) var(--swift), background-color 0.3s var(--swift), border-color 0.3s var(--swift);
-}
-.theme-switch-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.35rem;
-  height: 2.35rem;
-  border-radius: 50%;
-  border: none;
-  background-color: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: color 0.2s var(--swift), background-color 0.2s var(--swift), transform 0.2s var(--spring), box-shadow 0.2s var(--spring);
-}
-.theme-switch-btn svg { width: 1.25rem; height: 1.25rem; pointer-events: none; }
-.theme-switch-btn:hover:not(.active) { color: var(--theme-dark); background-color: color-mix(in srgb, var(--theme-color) 12%, transparent); transform: translateY(-1px); }
-.theme-switch-btn:active { transform: scale(0.9); }
-.theme-switch-btn.active {
-  color: #fff;
-  background: linear-gradient(135deg, var(--theme-color), var(--theme-dark));
-  box-shadow: 2px 2px 0 var(--theme-shadow);
-}
-
-@media(max-width:768px) {
-  html { font-size: 15px; }
-  :root { --stroke: 2px; --ink-shadow: 3px 3px 0 rgba(var(--shadow-rgb),0.5); --ink-shadow-sm: 2px 2px 0 rgba(var(--shadow-rgb),0.45); --ink-shadow-lift: 4px 4px 0 rgba(var(--shadow-rgb),0.5); }
-  body { padding: 1rem; }
-  .main-container { padding: 1.5rem; }
-  h1.comic-header { font-size: 2.1rem; }
-  button.comic-button { font-size: 1.05rem; }
-  div.card h3 { font-size: 1.18rem; }
-  #total { font-size: 2.9rem; }
-  button#submitButton { font-size: 1.35rem; }
-}
-@media(max-width:480px) {
-  html { font-size: 14px; }
-  body { padding: 0.5rem; }
-  .main-container { padding: 1rem; }
-  h1.comic-header { font-size: 1.75rem; transform: rotate(-1deg); }
-  .grid-container.sm\:grid-cols-3,
-  .grid-container.sm\:grid-cols-2,
-  .grid-container.md\:grid-cols-4 { grid-template-columns: 1fr; }
-  div.card h3 { font-size: 1.08rem; }
-  #total { font-size: 2.4rem; }
-  #notification-area { inset-inline: 0.5rem; top: 0.5rem; width: auto; }
-  .upload-actions { flex-direction: column; }
-  .theme-switch { top: auto; bottom: 0.85rem; inset-inline-end: 0.85rem; padding: 0.25rem; }
-  .theme-switch-btn { width: 2.15rem; height: 2.15rem; }
-  .theme-switch-btn svg { width: 1.1rem; height: 1.1rem; }
-}
-@media(prefers-reduced-motion:reduce) {
-  *, ::before, ::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
-  .success-burst.is-active { animation: none; }
-  .modal-content { animation: none; }
-}
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;600;700;800&family=Cairo:wght@400;500;600;700;800&family=Changa:wght@500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div class="ambient-glow" aria-hidden="true"><span class="glow glow-a"></span><span class="glow glow-b"></span></div>
+<div class="ambient" aria-hidden="true"><span class="glow glow-a"></span><span class="glow glow-b"></span></div>
 
-<div class="theme-switch" id="theme-switch" role="radiogroup" aria-label="مظهر الواجهة">
-  <button type="button" class="theme-switch-btn" id="theme-btn-light" data-mode="light" role="radio" aria-checked="false" aria-label="فاتح" title="فاتح" tabindex="-1">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-  </button>
-  <button type="button" class="theme-switch-btn" id="theme-btn-system" data-mode="system" role="radio" aria-checked="false" aria-label="تلقائي (حسب الجهاز)" title="تلقائي (حسب الجهاز)" tabindex="-1">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-  </button>
-  <button type="button" class="theme-switch-btn" id="theme-btn-dark" data-mode="dark" role="radio" aria-checked="false" aria-label="داكن" title="داكن" tabindex="-1">
-    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-  </button>
-</div>
+<main class="app-shell" id="app-shell">
 
-<div class="main-container">
+  <header class="topbar">
+    <section class="status-bar-wrap" aria-label="حالة النموذج">
+      <div class="status-bar" id="status-bar" aria-live="polite">
+        <button type="button" class="status-chip" id="chip-class" data-target="step-class">لم تُحدد الفئة</button>
+        <button type="button" class="status-chip" id="chip-fields" data-target="step-fields">بيانات الصيدلية ناقصة</button>
+        <button type="button" class="status-chip" id="chip-cards" data-target="step-groups">0 من 18 مجموعة</button>
+        <span class="status-chip" id="chip-ready">غير جاهز بعد</span>
+        <button class="icon-btn" id="status-dismiss" type="button" title="إخفاء شريط الحالة" aria-label="إخفاء شريط الحالة">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <button class="status-reopen" id="status-reopen" type="button" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        عرض شريط الحالة
+      </button>
+    </section>
 
-  <div class="status-bar-wrap">
-    <div class="status-bar" id="status-bar" aria-live="polite" aria-atomic="false">
-      <span class="status-chip chip-neutral" id="chip-class">لم تُحدد الفئة</span>
-      <span class="status-chip chip-neutral" id="chip-fields">لم تُحدد بيانات الصيدلية</span>
-      <span class="status-chip chip-neutral" id="chip-cards">0 من 18 مجموعة</span>
-      <span class="status-chip chip-neutral" id="chip-total">الإجمالي 0</span>
-      <span class="status-chip chip-neutral" id="chip-ready">غير جاهز بعد</span>
-      <button class="status-dismiss" id="status-dismiss" type="button" title="إخفاء شريط الحالة" aria-label="إخفاء شريط الحالة">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    <div class="theme-switch" id="theme-switch" role="radiogroup" aria-label="مظهر الواجهة">
+      <button type="button" class="theme-switch-btn" data-mode="light" role="radio" aria-checked="false" aria-label="فاتح" title="فاتح" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="1.5" x2="12" y2="3.5"/><line x1="12" y1="20.5" x2="12" y2="22.5"/><line x1="4.6" y1="4.6" x2="6" y2="6"/><line x1="18" y1="18" x2="19.4" y2="19.4"/><line x1="1.5" y1="12" x2="3.5" y2="12"/><line x1="20.5" y1="12" x2="22.5" y2="12"/><line x1="4.6" y1="19.4" x2="6" y2="18"/><line x1="18" y1="6" x2="19.4" y2="4.6"/></svg>
+      </button>
+      <button type="button" class="theme-switch-btn" data-mode="system" role="radio" aria-checked="false" aria-label="تلقائي (حسب الجهاز)" title="تلقائي (حسب الجهاز)" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3.5" width="20" height="13.5" rx="2.5"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </button>
+      <button type="button" class="theme-switch-btn" data-mode="dark" role="radio" aria-checked="false" aria-label="داكن" title="داكن" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
     </div>
-    <button class="status-reopen" id="status-reopen" type="button" hidden>
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-      عرض شريط الحالة
+  </header>
+
+  <div class="masthead" id="masthead">
+    <span class="rx-badge" aria-hidden="true">Rx</span>
+    <span class="masthead-pill" aria-hidden="true"></span>
+    <div class="masthead-banner">
+      <h1 class="masthead-title" id="mainHeader">بيان المجموعات الدوائية</h1>
+      <p class="masthead-sub" id="masthead-sub">املأ البيانات خطوة بخطوة</p>
+    </div>
+  </div>
+
+  <section class="form-step" id="step-class" aria-labelledby="step-class-title">
+    <div class="step-head">
+      <h2 class="caption-box" id="step-class-title"><span class="caption-step">1</span>اختر الفئة</h2>
+    </div>
+    <div class="class-grid" role="radiogroup" aria-labelledby="step-class-title" id="class-group">
+      <button id="studentsBtn" class="class-btn" data-class="students" data-label="الطلبة" type="button" role="radio" aria-checked="false" tabindex="0">
+        <span class="class-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9 12 4 2 9l10 5 10-5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M22 9v6"/></svg></span>
+        <span>الطلبة</span>
+        <span class="class-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+      </button>
+      <button id="workforceBtn" class="class-btn" data-class="workforce" data-label="القوى العاملة" type="button" role="radio" aria-checked="false" tabindex="-1">
+        <span class="class-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 13h18"/></svg></span>
+        <span>القوى العاملة</span>
+        <span class="class-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+      </button>
+      <button id="infantsBtn" class="class-btn" data-class="infants" data-label="المواليد" type="button" role="radio" aria-checked="false" tabindex="-1">
+        <span class="class-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01"/><path d="M9.5 14.5a3.5 3.5 0 0 0 5 0"/><path d="M12 3c-1.5 1.5-1 3 .5 3.5"/></svg></span>
+        <span>المواليد</span>
+        <span class="class-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+      </button>
+    </div>
+  </section>
+
+  <section class="form-step" id="step-fields" aria-labelledby="step-fields-title">
+    <div class="step-head">
+      <h2 class="caption-box" id="step-fields-title"><span class="caption-step">2</span>بيانات الصيدلية</h2>
+    </div>
+    <div class="fields-grid">
+      <label class="field" id="field-year">
+        <span class="field-label">السنة المالية</span>
+        <span class="select-wrapper">
+          <select id="year">
+            <option value="">اختر السنة</option>
+            <option value="2025">2024-2025</option>
+            <option value="2026">2025-2026</option>
+            <option value="2027">2026-2027</option>
+            <option value="2028">2027-2028</option>
+            <option value="2029">2028-2029</option>
+            <option value="2030">2029-2030</option>
+            <option value="2031">2030-2031</option>
+            <option value="2032">2031-2032</option>
+            <option value="2033">2032-2033</option>
+            <option value="2034">2033-2034</option>
+            <option value="2035">2034-2035</option>
+          </select>
+        </span>
+      </label>
+      <label class="field" id="field-month">
+        <span class="field-label">الشهر</span>
+        <span class="select-wrapper">
+          <select id="month">
+            <option value="">اختر الشهر</option>
+            <option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option>
+            <option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option>
+            <option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option>
+            <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+          </select>
+        </span>
+      </label>
+      <label class="field" id="field-region">
+        <span class="field-label">المنطقة</span>
+        <span class="select-wrapper">
+          <select id="region">
+            <option value="">اختر المنطقة</option>
+            <option value="first">الاولي</option>
+            <option value="second">الثانية</option>
+            <option value="third">الثالثة</option>
+          </select>
+        </span>
+      </label>
+      <label class="field" id="field-pharmacy">
+        <span class="field-label">الصيدلية</span>
+        <span class="select-wrapper">
+          <select id="pharmacy" disabled>
+            <option value="">اختر الفئة والمنطقة أولًا</option>
+          </select>
+        </span>
+      </label>
+    </div>
+  </section>
+
+  <section class="form-step" id="step-groups" aria-labelledby="step-groups-title">
+    <div class="step-head">
+      <h2 class="caption-box" id="step-groups-title"><span class="caption-step">3</span>المجموعات الدوائية <span class="caption-count" id="groups-count">0/18</span></h2>
+      <p class="step-hint"><kbd>Enter</kbd> للانتقال للحقل التالي · يمكنك لصق عمود كامل من Excel</p>
+    </div>
+    <div id="cards-container" class="groups-grid"></div>
+  </section>
+
+  <section class="form-step" id="step-totals" aria-labelledby="step-totals-title">
+    <div class="step-head">
+      <h2 class="caption-box" id="step-totals-title"><span class="caption-step">4</span>الإجماليات</h2>
+    </div>
+    <div class="totals-grid">
+      <label class="card total-field reveal">
+        <span class="total-field-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z" transform="translate(0 1)"/><line x1="14" y1="6" x2="14" y2="18" stroke-dasharray="2 2"/></svg>
+          اجمالي التذاكر
+          <span class="total-field-note">اختياري</span>
+        </span>
+        <input type="text" class="num-input total-input" id="totalTickets" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="0">
+      </label>
+      <label class="card total-field reveal">
+        <span class="total-field-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><polyline points="9 12 11 14 15 10"/></svg>
+          اجمالي الخارجي
+          <span class="total-field-note">اختياري</span>
+        </span>
+        <input type="text" class="num-input total-input" id="totalExternal" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="0">
+      </label>
+    </div>
+
+    <div class="card total-card" id="total-card">
+      <p class="total-label">المجموع الكلي</p>
+      <p id="total" dir="ltr" aria-live="polite">0.000</p>
+      <p class="total-meta" id="total-meta">لم تُدخل أي مجموعة بعد</p>
+      <span class="total-progress" aria-hidden="true"><span class="total-progress-fill" id="total-progress-fill"></span></span>
+    </div>
+  </section>
+
+  <div class="action-dock" id="action-dock">
+    <div class="dock-summary">
+      <span class="dock-label">المجموع <span class="save-state" id="save-state">محفوظ تلقائيًا</span></span>
+      <span class="dock-total" id="dock-total">0.000</span>
+    </div>
+    <button type="button" class="dock-btn dock-reset" id="resetButton" title="إعادة تعيين النموذج" aria-label="إعادة تعيين النموذج">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 3 3 9 9 9"/></svg>
+      <span class="dock-reset-label">إعادة تعيين</span>
+    </button>
+    <button type="button" id="submitButton" aria-disabled="true" aria-describedby="chip-ready">
+      <span class="success-burst" aria-hidden="true"></span>
+      <span class="submit-inner" id="submitInner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <span id="submitButtonLabel">إرسال البيانات</span>
+        <span class="submit-kbd">Ctrl ↵</span>
+      </span>
     </button>
   </div>
 
-  <h1 id="mainHeader" class="comic-header">بيان المجموعات الدوائية</h1>
-
-  <div>
-    <div class="caption-box">اختر الفئة</div>
-    <div class="grid-container grid-cols-1 sm:grid-cols-3 gap-4" role="radiogroup" aria-label="اختر الفئة">
-      <button id="studentsBtn" class="comic-button btn-inactive" type="button" role="radio" aria-checked="false" tabindex="0">الطلبة</button>
-      <button id="workforceBtn" class="comic-button btn-inactive" type="button" role="radio" aria-checked="false" tabindex="-1">القوى العاملة</button>
-      <button id="infantsBtn" class="comic-button btn-inactive" type="button" role="radio" aria-checked="false" tabindex="-1">المواليد</button>
-    </div>
-  </div>
-
-  <div>
-    <div class="caption-box">بيانات الصيدلية</div>
-    <div class="grid-container grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="select-wrapper">
-        <select id="year" aria-label="السنة">
-          <option value="">السنة</option>
-          <option value="2025">2024-2025</option>
-          <option value="2026">2025-2026</option>
-          <option value="2027">2026-2027</option>
-          <option value="2028">2027-2028</option>
-          <option value="2029">2028-2029</option>
-          <option value="2030">2029-2030</option>
-          <option value="2031">2030-2031</option>
-          <option value="2032">2031-2032</option>
-          <option value="2033">2032-2033</option>
-          <option value="2034">2033-2034</option>
-          <option value="2035">2034-2035</option>
-        </select>
-      </div>
-      <div class="select-wrapper">
-        <select id="month" aria-label="الشهر">
-          <option value="">الشهر</option>
-          <option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option>
-          <option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option>
-          <option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option>
-          <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
-        </select>
-      </div>
-      <div class="select-wrapper">
-        <select id="region" aria-label="المنطقة">
-          <option value="">المنطقة</option>
-          <option value="first">الاولي</option>
-          <option value="second">الثانية</option>
-          <option value="third">الثالثة</option>
-        </select>
-      </div>
-      <div class="select-wrapper">
-        <select id="pharmacy" aria-label="الصيدلية" disabled>
-          <option value="">الصيدلية</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <div>
-    <div class="caption-box">المجموعات الدوائية</div>
-    <div id="cards-container" class="panel-grid"></div>
-  </div>
-
-  <div>
-    <div class="caption-box">الإجماليات</div>
-    <div class="grid-container grid-cols-1 sm:grid-cols-2 gap-4">
-      <div class="card">
-        <h3>اجمالي التذاكر</h3>
-        <input type="number" id="totalTickets" min="0" max="1000000" step="1" dir="ltr" placeholder="0">
-      </div>
-      <div class="card">
-        <h3>اجمالي الخارجي</h3>
-        <input type="number" id="totalExternal" min="0" max="1000000" step="1" dir="ltr" placeholder="0">
-      </div>
-    </div>
-
-    <div class="card" id="total-card">
-      <h3>المجموع الكلي</h3>
-      <p id="total" dir="ltr">0.000</p>
-    </div>
-  </div>
-
-  <button id="submitButton" disabled>
-    <span class="success-burst" aria-hidden="true"></span>
-    <span id="submitButtonLabel">إرسال البيانات</span>
-  </button>
-
   <hr class="comic-divider">
 
-  <button class="upload-toggle" id="upload-toggle" type="button" aria-expanded="false" aria-controls="upload-panel">
-    <span class="toggle-label">
-      <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"></path></svg>
-      رفع البيانات
-    </span>
-    <svg class="toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="6 9 12 15 18 9"></polyline>
-    </svg>
-  </button>
+  <section class="upload-section" aria-label="رفع البيانات">
+    <button class="upload-toggle" id="upload-toggle" type="button" aria-expanded="false" aria-controls="upload-panel">
+      <span class="toggle-label">
+        <span class="toggle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.6A4.5 4.5 0 0 0 17.5 8h-1.3A7 7 0 1 0 4 14.9"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/></svg></span>
+        <span>رفع البيانات <small>Excel · CSV · JSON</small></span>
+      </span>
+      <svg class="toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
 
-  <div class="upload-panel" id="upload-panel">
-    <div class="upload-card-inner">
-      <div class="upload-wrapper">
-        <div class="upload-info">
-          <h3 class="upload-heading">رفع ملفات البيانات</h3>
-          <p class="upload-desc">الملفات المقبولة: Excel, CSV, JSON. يجب أن تحتوي على العناوين الآتية:</p>
-          <div class="upload-code">date, year, class, month, region, pharmacy, totalPrescription, insuranceCoveredPrescription, المسكنات, مضادات حيوية, كلي, نفسية و عصبية, قلب, سكر حقن, سكر فم, نسا, كبد, جهاز هضمي, جهاز تنفسي, امراض جلدية, عيون و رمد, انف و اذن, مضادات تقلصات, اورام, فيتامينات, مختلفة</div>
-          <div class="upload-notice">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-            <span>بيانات الملفات المرفوعة تُرسل مباشرةً إلى قاعدة البيانات ولن تؤثر على النموذج أعلاه. يتم الإرسال دون تأكيد استلام من الخادم، وتُحفظ نسخة احتياطية من الصفوف المُرسلة على جهازك تلقائيًا بعد انتهاء الرفع.</span>
-          </div>
-          <div class="upload-actions">
-            <button id="download-csv-btn" class="comic-button" type="button">تنزيل CSV</button>
-            <button id="download-json-btn" class="comic-button" type="button">تنزيل JSON</button>
-          </div>
-        </div>
-        <div class="upload-zone">
-          <div id="drop-area" class="drop-area reveal" role="button" tabindex="0" aria-label="اسحب الملفات هنا أو اضغط لاختيارها من جهازك">
-            <div class="drop-icon">
-              <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"></path></svg>
+    <div class="upload-panel" id="upload-panel" inert>
+      <div class="upload-panel-clip">
+        <div class="card upload-card">
+          <div class="upload-wrapper">
+            <div class="upload-info">
+              <h3 class="upload-heading">رفع ملفات البيانات</h3>
+              <p class="upload-desc">الملفات المقبولة: Excel, CSV, JSON. يجب أن تحتوي على العناوين الآتية:</p>
+              <div class="header-chips" id="header-chips"></div>
+              <div class="upload-notice">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>بيانات الملفات المرفوعة تُرسل مباشرةً إلى قاعدة البيانات ولن تؤثر على النموذج أعلاه. يتم الإرسال دون تأكيد استلام من الخادم، وتُحفظ نسخة احتياطية من الصفوف المُرسلة على جهازك تلقائيًا بعد انتهاء الرفع.</span>
+              </div>
+              <div class="upload-actions">
+                <button id="download-csv-btn" class="dock-btn" type="button">تنزيل قالب CSV</button>
+                <button id="download-json-btn" class="dock-btn" type="button">تنزيل قالب JSON</button>
+              </div>
             </div>
-            <p class="drop-text">اسحب الملفات هنا</p>
-            <p class="drop-sub">أو اختر من جهازك</p>
-            <button type="button" class="comic-button btn-compact" id="browse-btn" tabindex="-1">تصفح الملفات</button>
-            <input id="file-input" type="file" hidden multiple accept=".json,.csv,.xlsx,.xls">
+            <div class="upload-zone">
+              <div id="drop-area" class="drop-area" role="button" tabindex="0" aria-label="اسحب الملفات هنا أو اضغط لاختيارها من جهازك">
+                <div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><polyline points="9.5 14 12 11.5 14.5 14"/><line x1="12" y1="11.5" x2="12" y2="17.5"/></svg></div>
+                <p class="drop-text">اسحب الملفات هنا</p>
+                <p class="drop-sub">أو اختر من جهازك</p>
+                <button type="button" class="dock-btn" id="browse-btn" tabindex="-1">تصفح الملفات</button>
+                <input id="file-input" type="file" hidden multiple accept=".json,.csv,.xlsx,.xls">
+              </div>
+            </div>
           </div>
+
+          <div id="file-list" class="file-list"></div>
+
+          <div id="progress-container" class="progress-wrap" hidden>
+            <div class="progress-track" id="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم الرفع"><div id="progress-bar" class="progress-bar"></div></div>
+            <p id="progress-text" class="progress-text" aria-live="polite"></p>
+          </div>
+
+          <div class="upload-run">
+            <button id="upload-btn" type="button" disabled>رفع الملفات</button>
+            <button id="upload-stop-btn" class="dock-btn dock-reset" type="button" hidden>إيقاف</button>
+          </div>
+
+          <div id="results-container" class="results" hidden></div>
         </div>
       </div>
-
-      <div id="file-list"></div>
-
-      <div id="progress-container" hidden>
-        <div class="progress-bar-bg" id="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="تقدم الرفع"><div id="progress-bar" class="progress-bar"></div></div>
-        <p id="progress-text" class="progress-text"></p>
-      </div>
-
-      <button id="upload-btn" type="button" disabled>رفع الملفات</button>
-
-      <div id="results-container" hidden></div>
     </div>
+  </section>
+
+</main>
+
+<dialog id="sheet-dialog" class="comic-dialog" aria-labelledby="sheet-dialog-title">
+  <div class="dialog-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg></div>
+  <h3 class="dialog-heading" id="sheet-dialog-title">اختر أوراق العمل</h3>
+  <p id="sheet-dialog-file" class="dialog-desc"></p>
+  <div class="sheet-tools">
+    <span id="sheet-dialog-count"></span>
+    <button type="button" class="link-btn" id="sheet-toggle-all">إلغاء تحديد الكل</button>
   </div>
-
-</div>
-
-<div id="sheet-selector-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-heading-text" aria-describedby="modal-filename">
-  <div class="modal-content">
-    <h3 class="modal-heading" id="modal-heading-text">اختر أوراق العمل</h3>
-    <p id="modal-filename" class="modal-desc"></p>
-    <ul id="modal-sheet-list" class="modal-sheet-list"></ul>
-    <div class="modal-footer">
-      <button id="modal-cancel-btn" class="comic-button btn-compact" type="button">إلغاء</button>
-      <button id="modal-confirm-btn" class="comic-button btn-active btn-compact" type="button">تأكيد</button>
-    </div>
+  <ul id="sheet-list" class="sheet-list"></ul>
+  <div class="dialog-footer">
+    <button id="sheet-confirm-btn" class="dock-btn btn-primary" type="button">تأكيد</button>
+    <button id="sheet-cancel-btn" class="dock-btn" type="button">إلغاء</button>
   </div>
-</div>
+</dialog>
 
-<div id="notification-area"></div>
+<dialog id="confirm-dialog" class="comic-dialog" aria-labelledby="confirm-dialog-title">
+  <div class="dialog-icon is-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+  <h3 class="dialog-heading" id="confirm-dialog-title"></h3>
+  <p id="confirm-dialog-desc" class="dialog-desc"></p>
+  <div class="dialog-footer">
+    <button id="confirm-ok-btn" class="dock-btn btn-primary" type="button"></button>
+    <button id="confirm-cancel-btn" class="dock-btn" type="button">إلغاء</button>
+  </div>
+</dialog>
 
-</body>
+<div id="notification-area" class="toast-area" aria-live="polite"></div>
+
 <script>
 (function(){
-  if(window.parent === window) return;
+  if (window.parent === window) return;
   function ready(){
     window.parent.postMessage({ t:'lx:ready', title:document.title }, '*');
     var last = document.title;
     var titleEl = document.querySelector('title');
-    if(!titleEl) return;
+    if (!titleEl) return;
     new MutationObserver(function(){
-      if(document.title !== last){
-        last = document.title;
-        window.parent.postMessage({ t:'lx:title', title:last }, '*');
-      }
+      if (document.title !== last) { last = document.title; window.parent.postMessage({ t:'lx:title', title:last }, '*'); }
     }).observe(titleEl, { childList:true });
   }
-  if(document.readyState === 'complete') ready();
-  else window.addEventListener('load', ready);
+  if (document.readyState === 'complete') ready(); else window.addEventListener('load', ready);
 })();
 </script>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const escapeHTML = str => String(str).replace(/[&<>'"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]));
-
-  const docEl = document.documentElement;
-  const mainContainer = document.querySelector('.main-container');
-  const cardsContainer = document.getElementById('cards-container');
-  const totalEl = document.getElementById('total');
-  const studentsBtn = document.getElementById('studentsBtn');
-  const workforceBtn = document.getElementById('workforceBtn');
-  const infantsBtn = document.getElementById('infantsBtn');
-  const yearSel = document.getElementById('year');
-  const monthSel = document.getElementById('month');
-  const regionSel = document.getElementById('region');
-  const pharmacySel = document.getElementById('pharmacy');
-  const submitBtn = document.getElementById('submitButton');
-  const submitButtonLabel = document.getElementById('submitButtonLabel');
-  const statusBar = document.getElementById('status-bar');
-  const statusDismiss = document.getElementById('status-dismiss');
-  const statusReopen = document.getElementById('status-reopen');
-  const chipClass = document.getElementById('chip-class');
-  const chipFields = document.getElementById('chip-fields');
-  const chipCards = document.getElementById('chip-cards');
-  const chipTotal = document.getElementById('chip-total');
-  const chipReady = document.getElementById('chip-ready');
-  const totalTicketsInput = document.getElementById('totalTickets');
-  const totalExternalInput = document.getElementById('totalExternal');
-  const notifArea = document.getElementById('notification-area');
-  const uploadToggle = document.getElementById('upload-toggle');
-  const uploadPanel = document.getElementById('upload-panel');
-  const dropArea = document.getElementById('drop-area');
-  const browseBtn = document.getElementById('browse-btn');
-  const fileInput = document.getElementById('file-input');
-  const fileListDOM = document.getElementById('file-list');
-  const uploadBtn = document.getElementById('upload-btn');
-  const resultsContainer = document.getElementById('results-container');
-  const progressContainer = document.getElementById('progress-container');
-  const progressTrack = document.getElementById('progress-track');
-  const progressBar = document.getElementById('progress-bar');
-  const progressText = document.getElementById('progress-text');
-  const sheetModal = document.getElementById('sheet-selector-modal');
-  const modalFilename = document.getElementById('modal-filename');
-  const modalSheetList = document.getElementById('modal-sheet-list');
-  const modalConfirmBtn = document.getElementById('modal-confirm-btn');
-  const modalCancelBtn = document.getElementById('modal-cancel-btn');
-  const downloadCsvBtn = document.getElementById('download-csv-btn');
-  const downloadJsonBtn = document.getElementById('download-json-btn');
-  const themeSwitch = document.getElementById('theme-switch');
-  const themeBtns = [document.getElementById('theme-btn-light'), document.getElementById('theme-btn-system'), document.getElementById('theme-btn-dark')];
-
-  const THEME_KEY = 'pharmacyAppTheme';
-  const themeColorMeta = document.getElementById('theme-color-meta');
-  const PAPER_BY_THEME = { light: '#fbf4e6', dark: '#16171f' };
-  const darkMql = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
-
-  function resolveTheme(mode) {
-    if (mode === 'system') return (darkMql && darkMql.matches) ? 'dark' : 'light';
-    return mode;
-  }
-  function updateThemeSwitchUI(mode) {
-    themeBtns.forEach(btn => {
-      const isActive = btn.dataset.mode === mode;
-      btn.classList.toggle('active', isActive);
-      btn.setAttribute('aria-checked', isActive ? 'true' : 'false');
-      btn.tabIndex = isActive ? 0 : -1;
-    });
-  }
-  function applyTheme(mode, persist) {
-    const resolved = resolveTheme(mode);
-    docEl.setAttribute('data-theme', resolved);
-    docEl.setAttribute('data-theme-pref', mode);
-    if (themeColorMeta) themeColorMeta.setAttribute('content', PAPER_BY_THEME[resolved] || PAPER_BY_THEME.light);
-    updateThemeSwitchUI(mode);
-    if (persist) { try { localStorage.setItem(THEME_KEY, mode); } catch(e) {} }
-  }
-  themeBtns.forEach((btn, i) => {
-    btn.addEventListener('click', () => applyTheme(btn.dataset.mode, true));
-    btn.addEventListener('keydown', e => {
-      let next = null;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = themeBtns[(i + 1) % themeBtns.length];
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = themeBtns[(i - 1 + themeBtns.length) % themeBtns.length];
-      else if (e.key === 'Home') next = themeBtns[0];
-      else if (e.key === 'End') next = themeBtns[themeBtns.length - 1];
-      if (next) { e.preventDefault(); next.focus(); applyTheme(next.dataset.mode, true); }
-    });
-  });
-  if (darkMql) {
-    const onSystemChange = () => { if (docEl.getAttribute('data-theme-pref') === 'system') applyTheme('system', false); };
-    if (darkMql.addEventListener) darkMql.addEventListener('change', onSystemChange);
-    else if (darkMql.addListener) darkMql.addListener(onSystemChange);
-  }
-  applyTheme(docEl.getAttribute('data-theme-pref') || 'system', false);
-
-  let cardValues = Array(18).fill(0);
-  let activeButton = null;
-  let isSubmitting = false;
-  let filesToUpload = [];
-
-  const SCRIPT_URL = 'https://firecloud.rubberylock7.workers.dev/submit/pharmacy-sheet';
-  const HEADERS = ['date','year','class','month','region','pharmacy','totalPrescription','insuranceCoveredPrescription','المسكنات','مضادات حيوية','كلي','نفسية و عصبية','قلب','سكر حقن','سكر فم','نسا','كبد','جهاز هضمي','جهاز تنفسي','امراض جلدية','عيون و رمد','انف و اذن','مضادات تقلصات','اورام','فيتامينات','مختلفة'];
-
-  const SVG = {
-    success: `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>`,
-    error: `<svg viewBox="0 0 24 24"><path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2z"></path></svg>`,
-    info: `<svg viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path></svg>`
-  };
-
-  const cardNames = ['المسكنات','مضادات حيوية','كلي','نفسية و عصبية','قلب','سكر حقن','سكر فم','نسا','كبد','جهاز هضمي','جهاز تنفسي','امراض جلدية','عيون و رمد','انف و اذن','مضادات تقلصات','اورام','فيتامينات','مختلفة'];
-
-  const pharmacyOptions = {
-    students: {
-      first: ["كفر الدوار طلاب","البيضا طلاب","النوبارية طلاب","ابو المطامير طلاب","رشيد طلاب","ادكو طلاب"],
-      second: ["دمنهور طلاب","حوش عيسي طلاب","المحمودية طلاب","الرحمانية طلاب","ابو حمص طلاب","اورام طلاب"],
-      third: ["ايتاي طلاب","كوم حمادة طلاب","بدر طلاب","شبراخيت طلاب","الدلنجات طلاب"]
-    },
-    workforce: {
-      first: ["كفر الدوار سكر","كفر الدوار الشاملة 1","كفر الدوار الشاملة 2","كفر الدوار مسائي","النوبارية","البيضا","ابو المطامير","رشيد","ادكو"],
-      second: ["دمنهور الشاملة 1","دمنهور الشاملة 2","دمنهور مسائي","دمنهور سكر","دمنهور اورام","الشرطة","حوش عيسي","المحمودية مسائي","المحمودية","الرحمانية","ابو حمص"],
-      third: ["ايتاي الشاملة 1","ايتاي الشاملة 2","ايتاي مسائي","كوم حمادة","كوم حمادة مسائي","بدر","شبراخيت مسائي","شبراخيت","الدلنجات مسائي","الدلنجات","وادي النطرون","قليشان"]
-    },
-    infants: {
-      first: ["كفر الدوار مواليد","البيضا مواليد","النوبارية مواليد","ابو المطامير مواليد","رشيد مواليد","ادكو مواليد"],
-      second: ["دمنهور مواليد","حوش عيسي مواليد","المحمودية مواليد","الرحمانية مواليد","ابو حمص مواليد","اورام مواليد"],
-      third: ["ايتاي مواليد","كوم حمادة مواليد","بدر مواليد","شبراخيت مواليد","الدلنجات مواليد"]
-    }
-  };
-
-  cardNames.forEach((name, i) => {
-    const card = document.createElement('div');
-    card.className = 'card reveal';
-    card.innerHTML = `<h3>${name}</h3><input type="text" class="drug-input" data-index="${i}" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]+" dir="ltr">`;
-    cardsContainer.appendChild(card);
-  });
-
-  let revealPending = false, revealEl = null, revealMx = 50, revealMy = 50;
-  mainContainer.addEventListener('pointermove', e => {
-    const el = e.target.closest('.reveal');
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    revealEl = el;
-    revealMx = ((e.clientX - rect.left) / rect.width) * 100;
-    revealMy = ((e.clientY - rect.top) / rect.height) * 100;
-    if (revealPending) return;
-    revealPending = true;
-    requestAnimationFrame(() => {
-      if (revealEl) {
-        revealEl.style.setProperty('--mx', revealMx + '%');
-        revealEl.style.setProperty('--my', revealMy + '%');
-      }
-      revealPending = false;
-    });
-  }, { passive: true });
-
-  uploadToggle.addEventListener('click', () => {
-    const open = uploadPanel.classList.toggle('open');
-    uploadToggle.classList.toggle('open', open);
-    uploadToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-
-  function showNotification(message, type = 'info', duration = 5000) {
-    const n = document.createElement('div');
-    n.className = `notification ${type}`;
-    n.innerHTML = `<div class="notification-icon">${SVG[type] || SVG.info}</div><div>${escapeHTML(message)}</div><div class="notification-progress"></div>`;
-    notifArea.appendChild(n);
-    const prog = n.querySelector('.notification-progress');
-    gsap.fromTo(n, {opacity:0,x:50,scale:0.9}, {opacity:1,x:0,scale:1,duration:0.3,ease:'back.out(1.7)'});
-    gsap.fromTo(prog, {width:'100%'}, {width:'0%',duration:duration/1000,ease:'none'});
-    setTimeout(() => gsap.to(n, {opacity:0,x:50,scale:0.9,duration:0.3,ease:'power2.in',onComplete:()=>n.remove()}), duration);
-  }
-
-  function handleDrugInput(e) {
-    if (!e.target.classList.contains('drug-input')) return;
-    const input = e.target;
-    const index = parseInt(input.dataset.index);
-    let value = input.value;
-    const cursor = input.selectionStart;
-    if (value === '') { cardValues[index] = 0; }
-    else {
-      value = value.replace(/,/g,'.').replace(/[^\d.]/g,'');
-      const parts = value.split('.');
-      if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
-      let num = parseFloat(value);
-      if (isNaN(num) || num < 0) { cardValues[index] = 0; }
-      else if (num > 1000000000) { value = '1000000000'; cardValues[index] = 1000000000; }
-      else { cardValues[index] = num; }
-    }
-    if (input.value !== value) input.value = value;
-    updateTotal(); updateCardStyle(input); saveToLocalStorage();
-    try { input.setSelectionRange(cursor, cursor); } catch(err) {}
-  }
-  cardsContainer.addEventListener('input', handleDrugInput);
-
-  function handleDrugBlur(e) {
-    if (!e.target.classList.contains('drug-input')) return;
-    const input = e.target;
-    const index = parseInt(input.dataset.index);
-    let value = input.value.trim().replace(/,/g,'.').replace(/[^\d.]/g,'');
-    const parts = value.split('.');
-    if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
-    let num = parseFloat(value);
-    if (value === '' || isNaN(num) || num <= 0) {
-      input.value = ''; cardValues[index] = 0;
-    } else {
-      num = Math.min(num, 1000000000);
-      num = Math.round(num * 1000) / 1000;
-      cardValues[index] = num;
-      input.value = num % 1 === 0 ? num.toString() : num.toFixed(3).replace(/\.?0+$/, '');
-    }
-    updateTotal(); updateCardStyle(input); saveToLocalStorage();
-  }
-  cardsContainer.addEventListener('blur', handleDrugBlur, true);
-
-  function updateTotal() {
-    const total = cardValues.reduce((a, v) => a + (v || 0), 0);
-    const old = parseFloat(totalEl.textContent.replace(/,/g,'')) || 0;
-    if (Math.abs(total - old) > 0.0001 || totalEl.textContent === '0') {
-      gsap.to(totalEl, {
-        textContent: total, duration: 0.5, ease: 'power3.out', snap: {textContent: 0.001},
-        onUpdate() { const v = parseFloat(this.targets()[0].textContent); if (!isNaN(v)) totalEl.textContent = v.toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3}); },
-        onComplete() { totalEl.textContent = total.toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3}); }
-      });
-    }
-    updateSubmitBtnState();
-  }
-
-  function updateCardStyle(input) {
-    const card = input.closest('.card');
-    if (!card) return;
-    const v = input.value.trim();
-    const num = input.type === 'number' ? parseInt(v, 10) : parseFloat(v.replace(/,/g,'.'));
-    card.classList.toggle('card-active', v !== '' && !isNaN(num) && num >= 0);
-  }
-
-  const allThemeBtns = [studentsBtn, workforceBtn, infantsBtn];
-  allThemeBtns.forEach((btn, i) => {
-    btn.addEventListener('click', () => toggleThemeBtn(btn));
-    btn.addEventListener('keydown', e => {
-      let next = null;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = allThemeBtns[(i + 1) % allThemeBtns.length];
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = allThemeBtns[(i - 1 + allThemeBtns.length) % allThemeBtns.length];
-      else if (e.key === 'Home') next = allThemeBtns[0];
-      else if (e.key === 'End') next = allThemeBtns[allThemeBtns.length - 1];
-      if (next) { e.preventDefault(); next.focus(); toggleThemeBtn(next); }
-    });
-  });
-
-  function toggleThemeBtn(clicked) {
-    allThemeBtns.forEach(btn => {
-      const isClicked = btn === clicked;
-      btn.classList.toggle('btn-active', isClicked);
-      btn.classList.toggle('btn-inactive', !isClicked);
-      btn.setAttribute('aria-checked', isClicked ? 'true' : 'false');
-      btn.tabIndex = isClicked ? 0 : -1;
-    });
-    if (activeButton === clicked) return;
-    activeButton = clicked;
-    let cls = '';
-    if (clicked === studentsBtn) cls = 'theme-students';
-    else if (clicked === workforceBtn) cls = 'theme-workforce';
-    else if (clicked === infantsBtn) cls = 'theme-infants';
-    docEl.classList.remove('theme-students', 'theme-workforce', 'theme-infants');
-    if (cls) docEl.classList.add(cls);
-    pharmacySel.value = '';
-    updatePharmacyDropdown();
-    updateSelectStyles();
-    saveToLocalStorage();
-    updateSubmitBtnState();
-  }
-
-  function updateSelectStyles() {
-    [yearSel, monthSel, regionSel, pharmacySel].forEach(s => s.classList.toggle('select-valid', !s.disabled && s.value !== ''));
-  }
-
-  function updatePharmacyDropdown() {
-    const prev = pharmacySel.value;
-    pharmacySel.innerHTML = '<option value="">الصيدلية</option>';
-    let catKey = '';
-    if (activeButton === studentsBtn) catKey = 'students';
-    else if (activeButton === workforceBtn) catKey = 'workforce';
-    else if (activeButton === infantsBtn) catKey = 'infants';
-    if (regionSel.value && catKey) {
-      const opts = pharmacyOptions[catKey]?.[regionSel.value] || [];
-      opts.forEach((text, i) => pharmacySel.appendChild(new Option(text, i + 1)));
-      pharmacySel.value = prev;
-      if (pharmacySel.selectedIndex <= 0) pharmacySel.value = '';
-    }
-    pharmacySel.disabled = !(regionSel.value && catKey && pharmacySel.options.length > 1);
-    updateSelectStyles();
-  }
-
-  [yearSel, regionSel, monthSel, pharmacySel].forEach(s => s.addEventListener('change', () => {
-    if (s === regionSel) updatePharmacyDropdown();
-    saveToLocalStorage(); updateSubmitBtnState(); updateSelectStyles();
-  }));
-
-  function saveToLocalStorage() {
-    try {
-      localStorage.setItem('pharmacyAppData', JSON.stringify({
-        cardValues: cardValues.map(v => isNaN(v) ? 0 : v),
-        activeButton: activeButton ? activeButton.id : null,
-        year: yearSel.value, month: monthSel.value, region: regionSel.value,
-        pharmacy: pharmacySel.value,
-        totalTickets: totalTicketsInput.value,
-        totalExternal: totalExternalInput.value
-      }));
-    } catch(e) {}
-  }
-
-  function loadFromLocalStorage() {
-    try {
-      const raw = localStorage.getItem('pharmacyAppData');
-      if (!raw) { resetAllFields(false); return; }
-      const d = JSON.parse(raw);
-      cardValues = (d.cardValues || []).map(v => { const n = parseFloat(v); return isNaN(n)||n<0?0:Math.min(n,1000000000); });
-      if (d.activeButton) { const btn = document.getElementById(d.activeButton); if (btn) toggleThemeBtn(btn); }
-      yearSel.value = d.year || ''; monthSel.value = d.month || ''; regionSel.value = d.region || '';
-      updatePharmacyDropdown();
-      pharmacySel.value = d.pharmacy || '';
-      totalTicketsInput.value = d.totalTickets || '';
-      totalExternalInput.value = d.totalExternal || '';
-      [totalTicketsInput, totalExternalInput].forEach(updateCardStyle);
-      cardValues.forEach((v, i) => {
-        const input = document.querySelector(`input.drug-input[data-index="${i}"]`);
-        if (input) { input.value = v > 0 ? (v%1===0?v.toString():parseFloat(v.toFixed(3)).toString()) : ''; updateCardStyle(input); }
-      });
-      updateTotal();
-    } catch(e) { resetAllFields(true); }
-    updateSelectStyles(); updateSubmitBtnState();
-  }
-
-  function triggerSuccessBurst() {
-    const burst = submitBtn.querySelector('.success-burst');
-    if (!burst) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    burst.classList.remove('is-active');
-    void burst.offsetWidth;
-    burst.classList.add('is-active');
-  }
-
-  submitBtn.addEventListener('click', async () => {
-    if (isSubmitting) return;
-    if (!validateOptionalInputs()) { showNotification('الرجاء تصحيح قيمة اجمالي التذاكر أو اجمالي الخارجي.', 'error'); return; }
-    if (!validateSubmission()) { showNotification('برجاء اكمال البيانات المطلوبة بشكل صحيح والتأكد من المجموع.', 'error'); gsap.fromTo(submitBtn,{x:-5},{x:5,duration:0.05,repeat:5,yoyo:true,clearProps:'x'}); return; }
-    try {
-      isSubmitting = true;
-      submitBtn.disabled = true;
-      submitButtonLabel.textContent = 'جاري الإرسال...';
-      renderStatusChips(false);
-      gsap.to(submitBtn, {opacity:0.8,duration:0.3});
-      await sendDataToGoogleSheets();
-      submitButtonLabel.textContent = 'تم الإرسال';
-      triggerSuccessBurst();
-      showNotification('تم إرسال البيانات، وحُفظت نسخة احتياطية منها على جهازك للمراجعة.', 'success');
-      await new Promise(r => setTimeout(r, 1500));
-      resetAllFields(true);
-    } catch(err) {
-      submitButtonLabel.textContent = 'فشل الإرسال';
-      gsap.to(submitBtn, {backgroundColor:'#c23b2e',borderColor:'#8f2a20',duration:0.3});
-      showNotification(`حدث خطأ أثناء الإرسال: ${err.message || 'يرجى المحاولة مرة أخرى.'}`, 'error', 6000);
-      await new Promise(r => setTimeout(r, 2000));
-    } finally {
-      isSubmitting = false;
-      submitButtonLabel.textContent = 'إرسال البيانات';
-      gsap.to(submitBtn, {clearProps:'backgroundColor,borderColor,opacity',duration:0.3});
-      updateSubmitBtnState();
-    }
-  });
-
-  function validateSubmission() {
-    const total = cardValues.reduce((a, v) => a + (v || 0), 0);
-    return total > 0 && yearSel.value && monthSel.value && regionSel.value && pharmacySel.value && activeButton && validateOptionalInputs();
-  }
-
-  async function sendDataToGoogleSheets() {
-    const data = {
-      date: new Date().toISOString(),
-      year: yearSel.value,
-      class: activeButton ? activeButton.textContent.trim() : '',
-      month: monthSel.options[monthSel.selectedIndex]?.text || '',
-      region: regionSel.options[regionSel.selectedIndex]?.text || '',
-      pharmacy: pharmacySel.options[pharmacySel.selectedIndex]?.text || '',
-      totalPrescription: +totalTicketsInput.value.trim() || 0,
-      insuranceCoveredPrescription: +totalExternalInput.value.trim() || 0,
-      ...cardNames.reduce((acc, name, i) => ({...acc, [name]: +cardValues[i] || 0}), {}),
-      calculatedTotal: cardValues.reduce((s, v) => s + (v || 0), 0)
-    };
-    try {
-      await fetch(`${SCRIPT_URL}?data=${encodeURIComponent(JSON.stringify(data))}`, {method:'GET',mode:'no-cors'});
-      const safe = (data.pharmacy||'data').replace(/[^a-z0-9]/gi,'_').toLowerCase();
-      const ts = new Date().toISOString().replace(/[:.]/g,'-');
-      const base = `${safe}_${ts}`;
-      const dl = (content, name, type) => {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([content],{type}));
-        a.download = name; a.click(); URL.revokeObjectURL(a.href); a.remove();
-      };
-      dl(JSON.stringify(data, null, 2), `${base}.json`, 'application/json');
-      const keys = Object.keys(data);
-      const row = keys.map(k => { const v = data[k]; return typeof v==='string'&&v.includes(',') ? `"${v}"` : v; }).join(',');
-      dl("\uFEFF" + keys.join(',') + '\n' + row, `${base}.csv`, 'text/csv;charset=utf-8;');
-    } catch(e) { throw new Error('فشل إرسال البيانات أو إنشاء ملفات النسخ الاحتياطي.'); }
-  }
-
-  function resetAllFields(clearStorage = true) {
-    cardValues.fill(0);
-    document.querySelectorAll('input.drug-input, input[type="number"]').forEach(input => {
-      input.value = ''; updateCardStyle(input); input.closest('.card')?.classList.remove('card-invalid');
-    });
-    [yearSel, monthSel, regionSel].forEach(s => s.selectedIndex = 0);
-    pharmacySel.innerHTML = '<option value="">الصيدلية</option>';
-    pharmacySel.disabled = true;
-    if (activeButton) {
-      activeButton.classList.remove('btn-active'); activeButton.classList.add('btn-inactive');
-      activeButton.setAttribute('aria-checked', 'false');
-    }
-    allThemeBtns.forEach((btn, i) => { btn.tabIndex = i === 0 ? 0 : -1; });
-    activeButton = null;
-    docEl.classList.remove('theme-students', 'theme-workforce', 'theme-infants');
-    updateTotal(); updateSelectStyles();
-    if (clearStorage) try { localStorage.removeItem('pharmacyAppData'); } catch(e) {}
-    updateSubmitBtnState();
-  }
-
-  function updateSubmitBtnState() {
-    const valid = validateSubmission();
-    submitBtn.disabled = isSubmitting || !valid;
-    submitBtn.classList.toggle('btn-active', valid);
-    submitBtn.classList.toggle('btn-inactive', !valid);
-    renderStatusChips(valid);
-  }
-
-  function isOptionalInputsValidPure() {
-    return [totalTicketsInput, totalExternalInput].every(input => {
-      const v = input.value.trim();
-      return v === '' || (/^\d+$/.test(v) && +v <= 1000000 && +v >= 0);
-    });
-  }
-
-  function renderStatusChips(isValid) {
-    if (!chipClass) return;
-
-    if (activeButton) {
-      chipClass.textContent = activeButton.textContent.trim();
-      chipClass.className = 'status-chip chip-good';
-    } else {
-      chipClass.textContent = 'لم تُحدد الفئة';
-      chipClass.className = 'status-chip chip-warning';
-    }
-
-    const missing = [];
-    if (!yearSel.value) missing.push('السنة');
-    if (!monthSel.value) missing.push('الشهر');
-    if (!regionSel.value) missing.push('المنطقة');
-    if (!pharmacySel.value) missing.push('الصيدلية');
-    if (missing.length === 0) {
-      chipFields.textContent = 'بيانات الصيدلية مكتملة';
-      chipFields.className = 'status-chip chip-good';
-    } else {
-      chipFields.textContent = `ناقص: ${missing.join('، ')}`;
-      chipFields.className = 'status-chip chip-warning';
-    }
-
-    const filled = cardValues.filter(v => v > 0).length;
-    chipCards.textContent = `${filled} من ${cardValues.length} مجموعة`;
-    chipCards.className = `status-chip ${filled === cardValues.length ? 'chip-good' : filled > 0 ? 'chip-progress' : 'chip-neutral'}`;
-
-    const total = cardValues.reduce((a, v) => a + (v || 0), 0);
-    const totalText = total.toLocaleString('en-US', {minimumFractionDigits: total % 1 === 0 ? 0 : 3, maximumFractionDigits: 3});
-    chipTotal.textContent = `الإجمالي ${totalText}`;
-    chipTotal.className = `status-chip ${total > 0 ? 'chip-progress' : 'chip-neutral'}`;
-
-    if (isSubmitting) {
-      chipReady.textContent = 'جاري الإرسال...';
-      chipReady.className = 'status-chip chip-progress';
-    } else if (!isOptionalInputsValidPure()) {
-      chipReady.textContent = 'تحقق من الأرقام المدخلة';
-      chipReady.className = 'status-chip chip-warning';
-    } else if (isValid) {
-      chipReady.textContent = 'جاهز للإرسال ✓';
-      chipReady.className = 'status-chip chip-ready';
-    } else {
-      chipReady.textContent = 'غير جاهز بعد';
-      chipReady.className = 'status-chip chip-neutral';
-    }
-  }
-
-  function validateOptionalInputs() {
-    let ok = true;
-    [totalTicketsInput, totalExternalInput].forEach(input => {
-      const card = input.closest('.card');
-      const v = input.value.trim();
-      const bad = v !== '' && (!/^\d+$/.test(v) || +v > 1000000 || +v < 0);
-      card.classList.toggle('card-invalid', bad);
-      if (bad) ok = false;
-      updateCardStyle(input);
-    });
-    return ok;
-  }
-
-  [totalTicketsInput, totalExternalInput].forEach(input => {
-    input.addEventListener('input', e => { let v = e.target.value.replace(/[^0-9]/g,''); if (+v > 1000000) v = '1000000'; e.target.value = v; updateCardStyle(e.target); });
-    input.addEventListener('blur', () => { validateOptionalInputs(); updateSubmitBtnState(); saveToLocalStorage(); });
-  });
-
-  function setStatusBarHidden(hidden) {
-    statusBar.hidden = hidden;
-    statusReopen.hidden = !hidden;
-    try { localStorage.setItem('pharmacyAppStatusHidden', hidden ? '1' : '0'); } catch(e) {}
-  }
-  statusDismiss.addEventListener('click', () => setStatusBarHidden(true));
-  statusReopen.addEventListener('click', () => setStatusBarHidden(false));
-  try { setStatusBarHidden(localStorage.getItem('pharmacyAppStatusHidden') === '1'); } catch(e) { setStatusBarHidden(false); }
-
-  loadFromLocalStorage();
-
-  downloadCsvBtn.addEventListener('click', () => downloadTemplate(HEADERS.join(','), 'template.csv', 'text/csv;charset=utf-8;'));
-  downloadJsonBtn.addEventListener('click', () => {
-    const obj = {}; HEADERS.forEach(h => { obj[h] = ''; });
-    downloadTemplate(JSON.stringify([obj], null, 2), 'template.json', 'application/json');
-  });
-  function downloadTemplate(content, name, type) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob(["\uFEFF" + content],{type}));
-    a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  }
-
-  const noDefault = e => { e.preventDefault(); e.stopPropagation(); };
-  ['dragenter','dragover','dragleave','drop'].forEach(ev => dropArea.addEventListener(ev, noDefault));
-  ['dragenter','dragover'].forEach(ev => dropArea.addEventListener(ev, () => dropArea.classList.add('drag-active')));
-  ['dragleave','drop'].forEach(ev => dropArea.addEventListener(ev, () => dropArea.classList.remove('drag-active')));
-  dropArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-  fileInput.addEventListener('change', e => handleFiles(e.target.files));
-  uploadBtn.addEventListener('click', handleUpload);
-
-  function openFilePicker() { fileInput.click(); }
-  dropArea.addEventListener('click', openFilePicker);
-  dropArea.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFilePicker(); }
-  });
-  browseBtn.addEventListener('click', e => { e.stopPropagation(); openFilePicker(); });
-
-  async function handleFiles(newFiles) {
-    for (const file of newFiles) {
-      if (filesToUpload.some(f => f.file.name === file.name)) continue;
-      const ext = file.name.split('.').pop().toLowerCase();
-      if (['xlsx','xls'].includes(ext)) await promptForSheetSelection(file);
-      else filesToUpload.push({file, selectedSheets: null});
-    }
-    fileInput.value = '';
-    updateFileListUI();
-  }
-
-  let modalReturnFocus = null;
-  let modalActiveCancel = null;
-
-  function getModalFocusable() {
-    return Array.from(sheetModal.querySelectorAll('button, input, [href], select, textarea, [tabindex]:not([tabindex="-1"])'))
-      .filter(el => !el.disabled && el.getClientRects().length > 0);
-  }
-  function trapModalKey(e) {
-    if (e.key === 'Escape') { e.preventDefault(); if (modalActiveCancel) modalActiveCancel(); return; }
-    if (e.key !== 'Tab') return;
-    const f = getModalFocusable();
-    if (!f.length) return;
-    const first = f[0], last = f[f.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  }
-  function openSheetModal() {
-    modalReturnFocus = document.activeElement;
-    sheetModal.style.display = 'flex';
-    document.addEventListener('keydown', trapModalKey);
-    const f = getModalFocusable();
-    if (f.length) f[0].focus();
-  }
-  function closeSheetModal() {
-    sheetModal.style.display = 'none';
-    document.removeEventListener('keydown', trapModalKey);
-    modalActiveCancel = null;
-    if (modalReturnFocus && typeof modalReturnFocus.focus === 'function') modalReturnFocus.focus();
-  }
-
-  function promptForSheetSelection(file) {
-    return new Promise(resolve => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const wb = XLSX.read(e.target.result, {type:'array'});
-        const sheets = wb.SheetNames;
-        if (sheets.length <= 1) { filesToUpload.push({file, selectedSheets: sheets}); updateFileListUI(); resolve(); return; }
-        modalFilename.textContent = file.name;
-        modalSheetList.innerHTML = '';
-        sheets.forEach(name => {
-          const li = document.createElement('li');
-          li.className = 'modal-sheet-item';
-          const safe = escapeHTML(name);
-          li.innerHTML = `<input type="checkbox" value="${safe}" checked><span>${safe}</span>`;
-          modalSheetList.appendChild(li);
-        });
-        const confirm = () => {
-          const sel = Array.from(modalSheetList.querySelectorAll('input:checked')).map(cb => cb.value);
-          if (sel.length > 0) filesToUpload.push({file, selectedSheets: sel});
-          cleanup();
-        };
-        const cancel = () => cleanup();
-        const cleanup = () => {
-          closeSheetModal();
-          modalConfirmBtn.removeEventListener('click', confirm);
-          modalCancelBtn.removeEventListener('click', cancel);
-          updateFileListUI(); resolve();
-        };
-        modalActiveCancel = cancel;
-        modalConfirmBtn.addEventListener('click', confirm);
-        modalCancelBtn.addEventListener('click', cancel);
-        openSheetModal();
-      };
-      reader.readAsArrayBuffer(file);
-    });
-  }
-
-  function updateFileListUI() {
-    fileListDOM.innerHTML = '';
-    filesToUpload.forEach((fw, idx) => {
-      const item = document.createElement('div');
-      item.className = 'file-item';
-      const details = fw.selectedSheets ? `<div class="file-details">${fw.selectedSheets.length} ورقة عمل محددة</div>` : '';
-      item.innerHTML = `<div class="file-info"><div class="file-name">${escapeHTML(fw.file.name)}</div>${details}</div><button class="delete-btn" data-index="${idx}" type="button" aria-label="إزالة ${escapeHTML(fw.file.name)}">&times;</button>`;
-      item.querySelector('.delete-btn').onclick = e => {
-        filesToUpload.splice(parseInt(e.currentTarget.dataset.index), 1);
-        updateFileListUI();
-      };
-      fileListDOM.appendChild(item);
-    });
-    const has = filesToUpload.length > 0;
-    uploadBtn.disabled = !has;
-    uploadBtn.classList.toggle('btn-inactive', !has);
-    uploadBtn.classList.toggle('btn-active', has);
-  }
-
-  function downloadBulkBackup(rows) {
-    try {
-      const ts = new Date().toISOString().replace(/[:.]/g,'-');
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([JSON.stringify(rows, null, 2)], {type:'application/json'}));
-      a.download = `bulk_upload_backup_${ts}.json`;
-      a.click(); URL.revokeObjectURL(a.href); a.remove();
-    } catch(e) {}
-  }
-
-  async function handleUpload() {
-    if (!filesToUpload.length) return;
-    uploadBtn.disabled = true;
-    uploadBtn.classList.remove('btn-active');
-    resultsContainer.innerHTML = '';
-    resultsContainer.hidden = true;
-    progressContainer.hidden = false;
-
-    let allRows = [], fileErrors = [];
-
-    for (const fw of filesToUpload) {
-      try {
-        const data = await processFile(fw);
-        if (data && data.length > 0) allRows.push(...data.map(row => ({...row, _sourceFile: fw.file.name})));
-        else fileErrors.push({fileName: fw.file.name, error: 'لا توجد بيانات صالحة في الملف'});
-      } catch(err) {
-        fileErrors.push({fileName: fw.file.name, error: err.message});
-      }
-    }
-
-    fileErrors.forEach(e => addResultItem(e.fileName, false, `فشل معالجة الملف: ${escapeHTML(e.error)}`));
-
-    if (allRows.length === 0) {
-      uploadBtn.disabled = false;
-      if (filesToUpload.length > 0) uploadBtn.classList.add('btn-active');
-      progressContainer.hidden = true;
-      if (!fileErrors.length) addResultItem('الرفع', false, 'لم يتم العثور على بيانات صالحة.');
-      resultsContainer.hidden = false;
-      return;
-    }
-
-    let success = 0, errors = 0;
-
-    for (let i = 0; i < allRows.length; i++) {
-      const pct = Math.round(((i + 1) / allRows.length) * 100);
-      uploadBtn.textContent = 'جاري الإرسال...';
-      progressText.textContent = `يتم إرسال الصف ${i + 1} من ${allRows.length}`;
-      progressBar.style.width = pct + '%';
-      progressTrack.setAttribute('aria-valuenow', String(pct));
-      try {
-        await fetch(`${SCRIPT_URL}?data=${encodeURIComponent(JSON.stringify(allRows[i]))}`, {method:'GET',mode:'no-cors'});
-        success++;
-      } catch(e) { errors++; }
-      if (i < allRows.length - 1) await new Promise(r => setTimeout(r, 800));
-    }
-
-    uploadBtn.textContent = 'تم إرسال الملفات';
-    progressText.textContent = 'اكتمل الإرسال';
-    resultsContainer.hidden = false;
-    if (success > 0) {
-      addResultItem('ملخص الإرسال', true, `تم إرسال <strong>${success}</strong> صفوف. لم يتم تأكيد الاستلام من الخادم، وتُحفظ نسخة احتياطية منها على جهازك.`);
-      downloadBulkBackup(allRows);
-    }
-    if (errors > 0) addResultItem('أخطاء الإرسال', false, `تعذّر إرسال <strong>${errors}</strong> صفوف.`);
-
-    setTimeout(() => {
-      uploadBtn.textContent = 'رفع الملفات';
-      progressContainer.hidden = true;
-      progressBar.style.width = '0%';
-      progressTrack.setAttribute('aria-valuenow', '0');
-      filesToUpload = [];
-      updateFileListUI();
-    }, 4000);
-  }
-
-  async function processFile(fw) {
-    const ext = fw.file.name.split('.').pop().toLowerCase();
-    if (ext === 'json') { const d = JSON.parse(await fw.file.text()); return validateRows(Array.isArray(d)?d:[d], fw.file.name); }
-    if (['csv','xlsx','xls'].includes(ext)) {
-      const wb = XLSX.read(await fw.file.arrayBuffer());
-      let rows = [];
-      (fw.selectedSheets || wb.SheetNames).forEach(name => {
-        if (wb.Sheets[name]) rows.push(...XLSX.utils.sheet_to_json(wb.Sheets[name],{raw:false,dateNF:'YYYY-MM-DD'}));
-      });
-      return validateRows(rows, fw.file.name);
-    }
-    throw new Error('نوع الملف غير مدعوم.');
-  }
-
-  function validateRows(rows, fileName) {
-    return rows.map((row, i) => {
-      const missing = HEADERS.filter(h => !(h in row));
-      if (missing.length) throw new Error(`الصف ${i + 2} في الملف ${fileName} ينقصه: ${missing.join(', ')}`);
-      return row;
-    });
-  }
-
-  function addResultItem(title, success, msgHTML) {
-    const item = document.createElement('div');
-    item.className = `result-item ${success ? 'result-success' : 'result-error'}`;
-    const icon = success
-      ? `<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"></path></svg>`
-      : `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>`;
-    item.innerHTML = `${icon}<div><div style="font-weight:700;font-size:1.05rem;">${escapeHTML(title)}</div><div style="color:var(--muted);font-size:0.9rem;">${msgHTML}</div></div>`;
-    resultsContainer.appendChild(item);
-  }
-});
-</script>
+<script src="js/app.js" defer></script>
+</body>
 </html>
