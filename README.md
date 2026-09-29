@@ -28,5 +28,4 @@ A small static Arabic (RTL) form app for pharmacies to submit monthly drug-group
 
 ## Not implemented / next steps
 - Confirmation that the server received the data (needs a CORS-enabled endpoint that returns a response)
-- `favicon.ico` is referenced but not included in the project
-- Optional: offline retry queue for failed sends
+- offline retry queue for failed sends
