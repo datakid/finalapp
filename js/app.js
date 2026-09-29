@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     groupsCount.textContent = `${filled}/${cardNames.length}`;
     totalProgressFill.style.width = `${(filled / cardNames.length) * 100}%`;
-    totalMeta.textContent = filled ? `${filled} من ${cardNames.length} مجموعة · متوسط ${fmtShort(total / filled)}` : 'لم تُدخل أي مجموعة بعد';
+    totalMeta.textContent = filled ? `متوسط ${fmtShort(total / filled)}` : '';
 
     const missing = missingList();
     const fieldsMissing = missing.filter(m => m.step === 'step-fields').map(m => m.label);
@@ -471,7 +471,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthName = monthSel.value ? monthSel.options[monthSel.selectedIndex].text : '';
     const yearName = yearSel.value ? yearSel.options[yearSel.selectedIndex].text : '';
     const parts = [activeBtn && activeBtn.dataset.label, name, [monthName, yearName].filter(Boolean).join(' ')].filter(Boolean);
-    mastheadSub.textContent = parts.length ? parts.join(' · ') : 'املأ البيانات خطوة بخطوة';
+    mastheadSub.textContent = parts.join(' · ');
 
     if (!isSubmitting) submitBtn.setAttribute('aria-disabled', String(!ready));
     resetBtn.disabled = isSubmitting || isFormEmpty();
@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     if (isSent(pharmacySel.value)) {
-      const again = await confirmDialog({ title: 'أُرسلت هذه الصيدلية من قبل', desc: `تم إرسال بيانات «${pharmacyName()}» لنفس الفئة والشهر مسبقًا من هذا الجهاز. هل تريد الإرسال مرة أخرى؟`, ok: 'إرسال مجددًا' });
+      const again = await confirmDialog({ title: 'أُرسلت مسبقًا', desc: `«${pharmacyName()}» أُرسلت لهذا الشهر من هذا الجهاز.`, ok: 'إرسال مجددًا' });
       if (!again) return;
     }
     isSubmitting = true;
@@ -557,12 +557,12 @@ document.addEventListener('DOMContentLoaded', () => {
       setSubmitVisual('sent');
       const burst = submitBtn.querySelector('.success-burst');
       if (!reducedMotion()) { burst.classList.remove('is-active'); void burst.offsetWidth; burst.classList.add('is-active'); }
-      showToast(`تم إرسال بيانات «${sentName}» وحُفظت نسخة احتياطية على جهازك.`, 'success');
+      showToast(`أُرسلت «${sentName}» مع نسخة احتياطية.`, 'success');
       await wait(1300);
       clearForNext();
     } catch (err) {
       setSubmitVisual('failed');
-      showToast('تعذّر الإرسال، تحقق من الاتصال وحاول مرة أخرى. بياناتك ما زالت محفوظة.', 'error', { duration: 6500 });
+      showToast('تعذّر الإرسال. بياناتك محفوظة.', 'error', { duration: 6500 });
       await wait(1800);
     } finally {
       isSubmitting = false;
@@ -581,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lastTotal = 0;
     totalEl.textContent = fmt3(0);
     refresh(); save();
-    showToast('الفئة والفترة والمنطقة محفوظة — اختر الصيدلية التالية.', 'info', { duration: 4000 });
+    showToast('اختر الصيدلية التالية.', 'info', { duration: 4000 });
     $('step-fields').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
     setTimeout(() => pharmacySel.focus({ preventScroll: true }), 400);
   }
@@ -831,7 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
     uploadStopBtn.hidden = true;
 
     if (sent.length) {
-      addResult('ملخص الإرسال', true, `تم إرسال ${sent.length} ${sent.length === 1 ? 'صف' : 'صفوف'}. لم يتم تأكيد الاستلام من الخادم، وحُفظت نسخة احتياطية على جهازك.`);
+      addResult('ملخص الإرسال', true, `أُرسل ${sent.length} ${sent.length === 1 ? 'صف' : 'صفوف'} دون تأكيد استلام. حُفظت نسخة احتياطية.`);
       download(JSON.stringify(sent, null, 2), `bulk_upload_backup_${new Date().toISOString().replace(/[:.]/g, '-')}.json`, 'application/json');
     }
     if (errors) addResult('أخطاء الإرسال', false, `تعذّر إرسال ${errors} ${errors === 1 ? 'صف' : 'صفوف'}.`);

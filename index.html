@@ -69,7 +69,7 @@
     <span class="masthead-pill" aria-hidden="true"></span>
     <div class="masthead-banner">
       <h1 class="masthead-title" id="mainHeader">بيان المجموعات الدوائية</h1>
-      <p class="masthead-sub" id="masthead-sub">املأ البيانات خطوة بخطوة</p>
+      <p class="masthead-sub" id="masthead-sub"></p>
     </div>
   </div>
 
@@ -157,7 +157,7 @@
   <section class="form-step" id="step-groups" aria-labelledby="step-groups-title">
     <div class="step-head">
       <h2 class="caption-box" id="step-groups-title"><span class="caption-step">3</span>المجموعات الدوائية <span class="caption-count" id="groups-count">0/18</span></h2>
-      <p class="step-hint"><kbd>Enter</kbd> للانتقال للحقل التالي · يمكنك لصق عمود كامل من Excel</p>
+      <p class="step-hint"><span><kbd>Enter</kbd>التالي</span><span><kbd>Ctrl V</kbd>لصق عمود</span></p>
     </div>
     <div id="cards-container" class="groups-grid"></div>
   </section>
@@ -188,7 +188,7 @@
     <div class="card total-card" id="total-card">
       <p class="total-label">المجموع الكلي</p>
       <p id="total" dir="ltr" aria-live="polite">0.000</p>
-      <p class="total-meta" id="total-meta">لم تُدخل أي مجموعة بعد</p>
+      <p class="total-meta" id="total-meta"></p>
       <span class="total-progress" aria-hidden="true"><span class="total-progress-fill" id="total-progress-fill"></span></span>
     </div>
   </section>
@@ -218,7 +218,7 @@
     <button class="upload-toggle" id="upload-toggle" type="button" aria-expanded="false" aria-controls="upload-panel">
       <span class="toggle-label">
         <span class="toggle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.6A4.5 4.5 0 0 0 17.5 8h-1.3A7 7 0 1 0 4 14.9"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/></svg></span>
-        <span>رفع البيانات <small>Excel · CSV · JSON</small></span>
+        <span>رفع البيانات</span>
       </span>
       <svg class="toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
@@ -228,12 +228,11 @@
         <div class="card upload-card">
           <div class="upload-wrapper">
             <div class="upload-info">
-              <h3 class="upload-heading">رفع ملفات البيانات</h3>
-              <p class="upload-desc">الملفات المقبولة: Excel, CSV, JSON. يجب أن تحتوي على العناوين الآتية:</p>
+              <h3 class="upload-heading">الأعمدة المطلوبة</h3>
               <div class="header-chips" id="header-chips"></div>
               <div class="upload-notice">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                <span>بيانات الملفات المرفوعة تُرسل مباشرةً إلى قاعدة البيانات ولن تؤثر على النموذج أعلاه. يتم الإرسال دون تأكيد استلام من الخادم، وتُحفظ نسخة احتياطية من الصفوف المُرسلة على جهازك تلقائيًا بعد انتهاء الرفع.</span>
+                <span>إرسال مباشر دون تأكيد استلام. تُحفظ نسخة احتياطية.</span>
               </div>
               <div class="upload-actions">
                 <button id="download-csv-btn" class="dock-btn" type="button">تنزيل قالب CSV</button>
@@ -244,8 +243,8 @@
               <div id="drop-area" class="drop-area" role="button" tabindex="0" aria-label="اسحب الملفات هنا أو اضغط لاختيارها من جهازك">
                 <div class="drop-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><polyline points="14 3 14 8 19 8"/><polyline points="9.5 14 12 11.5 14.5 14"/><line x1="12" y1="11.5" x2="12" y2="17.5"/></svg></div>
                 <p class="drop-text">اسحب الملفات هنا</p>
-                <p class="drop-sub">أو اختر من جهازك</p>
-                <button type="button" class="dock-btn" id="browse-btn" tabindex="-1">تصفح الملفات</button>
+                <p class="drop-sub">Excel · CSV · JSON</p>
+                <button type="button" class="dock-btn" id="browse-btn" tabindex="-1">تصفح</button>
                 <input id="file-input" type="file" hidden multiple accept=".json,.csv,.xlsx,.xls">
               </div>
             </div>
