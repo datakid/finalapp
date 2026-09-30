@@ -24,6 +24,7 @@ This version keeps the original comic "ink outline" look: hard offset shadows, t
   - `↑ / ↓ / Enter / Shift+Enter` move between the visible fields. `Esc` goes back to the search box.
   - Click anywhere on a row to focus its field
   - The **progress ring** in the dock shows how many groups are filled. Tap it to jump to the next empty group.
+- Number fields are wider and taller. Values show thousands separators when you leave a field (for example `987,654,321.125`) and go back to plain digits while you edit. The text shrinks to fit so large numbers are never cut off. The same applies to the grand total and the dock total.
 - After a send, focus goes to the next pharmacy that hasn't been sent yet
 - Kept from before: status chips that jump to missing items, auto-save, Reset with Undo, Ctrl/⌘+Enter to submit, pasting from Excel, Arabic-Indic digits, the "already sent" confirmation, bulk upload with sheet picker, and loading SheetJS only when needed
 

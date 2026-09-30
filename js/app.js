@@ -123,6 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
     return Math.min(Math.round(n * 1000) / 1000, MAX_GROUP);
   }
   const displayDecimal = n => n > 0 ? String(Math.round(n * 1000) / 1000) : '';
+  const groupedDecimal = n => n > 0 ? n.toLocaleString('en-US', { maximumFractionDigits: 3 }) : '';
+  const fitChars = (el, text) => el.style.setProperty('--chars', Math.max(6, String(text).length));
   const foldArabic = s => String(s)
     .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
     .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
@@ -225,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     card.dataset.index = i;
     card.dataset.search = `${foldArabic(name)} ${i + 1}`;
     const id = `drug-${i}`;
-    card.innerHTML = `<div class="group-head"><span class="group-index">${String(i + 1).padStart(2, '0')}</span><label class="group-name" for="${id}">${escapeHTML(name)}</label><button type="button" class="group-clear" data-index="${i}" aria-label="مسح ${escapeHTML(name)}" tabindex="-1">${ICONS.close}</button></div><div class="group-field"><input type="text" class="num-input drug-input" id="${id}" data-index="${i}" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="0.000" enterkeyhint="next"><span class="group-share">—</span></div><div class="group-meter" aria-hidden="true"><span class="group-meter-track"><span class="group-meter-fill"></span></span></div>`;
+    card.innerHTML = `<div class="group-head"><span class="group-index">${String(i + 1).padStart(2, '0')}</span><label class="group-name" for="${id}">${escapeHTML(name)}</label><span class="group-share">—</span><button type="button" class="group-clear" data-index="${i}" aria-label="مسح ${escapeHTML(name)}" tabindex="-1">${ICONS.close}</button></div><div class="group-field"><input type="text" class="num-input drug-input" id="${id}" data-index="${i}" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="0.000" enterkeyhint="next"></div><div class="group-meter" aria-hidden="true"><span class="group-meter-track"><span class="group-meter-fill"></span></span></div>`;
     cardsContainer.appendChild(card);
   });
   const groupCards = Array.from(cardsContainer.querySelectorAll('.group-card'));
@@ -274,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     totalTicketsInput.value = cleanInt(s.totalTickets);
     totalExternalInput.value = cleanInt(s.totalExternal);
     cardValues = cardNames.map((_, i) => parseDecimal(String((s.cardValues || [])[i] ?? '')));
-    drugInputs.forEach((inp, i) => { inp.value = displayDecimal(cardValues[i]); });
+    drugInputs.forEach((inp, i) => { inp.value = document.activeElement === inp ? displayDecimal(cardValues[i]) : groupedDecimal(cardValues[i]); });
     refresh();
   }
 
@@ -452,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isNaN(n) || n <= 0) n = 0;
     if (n > MAX_GROUP) n = MAX_GROUP;
     cardValues[i] = Math.round(n * 1000) / 1000;
-    const shown = format ? displayDecimal(cardValues[i]) : (n === MAX_GROUP ? String(MAX_GROUP) : clean);
+    const shown = format ? (document.activeElement === inp ? displayDecimal(cardValues[i]) : groupedDecimal(cardValues[i])) : (n === MAX_GROUP ? String(MAX_GROUP) : clean);
     if (inp.value !== shown) inp.value = shown;
   }
 
@@ -471,7 +473,14 @@ document.addEventListener('DOMContentLoaded', () => {
     refresh(); save();
     setTimeout(applyGroupFilter, 0);
   });
-  cardsContainer.addEventListener('focusin', e => { if (e.target.classList.contains('drug-input')) e.target.select(); });
+  cardsContainer.addEventListener('focusin', e => {
+    if (!e.target.classList.contains('drug-input')) return;
+    const inp = e.target;
+    const raw = displayDecimal(cardValues[+inp.dataset.index]);
+    if (inp.value !== raw) inp.value = raw;
+    fitChars(inp, inp.value);
+    inp.select();
+  });
   cardsContainer.addEventListener('click', e => {
     const btn = e.target.closest('.group-clear');
     if (btn) {
@@ -650,6 +659,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const from = lastTotal;
     lastTotal = to;
     dockTotal.textContent = fmt3(to);
+    fitChars(dockTotal, fmt3(to));
+    fitChars(totalEl, fmt3(to));
     if (Math.abs(to - from) < 0.0005) { totalEl.textContent = fmt3(to); return; }
     if (reducedMotion()) { totalEl.textContent = fmt3(to); return; }
     totalCard.classList.remove('is-bumped'); void totalCard.offsetWidth; totalCard.classList.add('is-bumped');
@@ -676,6 +687,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const card = groupCards[i];
       const v = cardValues[i];
       card.classList.toggle('card-active', v > 0);
+      fitChars(inp, inp.value || inp.placeholder);
       card.querySelector('.group-meter-fill').style.width = max > 0 ? `${(v / max) * 100}%` : '0';
       card.querySelector('.group-share').textContent = total > 0 && v > 0 ? `${((v / total) * 100).toFixed(1)}%` : '—';
     });
