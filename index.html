@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/jpeg" href="images/logo.jpg">
+<link rel="apple-touch-icon" href="images/logo.jpg">
 <title>المجموعات الدوائية</title>
 <meta id="theme-color-meta" name="theme-color" content="#f6efe1">
 <script>
@@ -35,6 +36,7 @@
 <main class="app-shell" id="app-shell">
 
   <header class="topbar">
+    <span class="brand-mark" aria-hidden="true"><img src="images/logo.jpg" alt="" width="40" height="40"></span>
     <section class="status-bar-wrap" aria-label="حالة النموذج">
       <div class="status-bar" id="status-bar" aria-live="polite">
         <button type="button" class="status-chip" id="chip-class" data-target="step-class">لم تُحدد الفئة</button>
@@ -52,6 +54,7 @@
     </section>
 
     <div class="theme-switch" id="theme-switch" role="radiogroup" aria-label="مظهر الواجهة">
+      <span class="theme-thumb" aria-hidden="true"></span>
       <button type="button" class="theme-switch-btn" data-mode="light" role="radio" aria-checked="false" aria-label="فاتح" title="فاتح" tabindex="-1">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="1.5" x2="12" y2="3.5"/><line x1="12" y1="20.5" x2="12" y2="22.5"/><line x1="4.6" y1="4.6" x2="6" y2="6"/><line x1="18" y1="18" x2="19.4" y2="19.4"/><line x1="1.5" y1="12" x2="3.5" y2="12"/><line x1="20.5" y1="12" x2="22.5" y2="12"/><line x1="4.6" y1="19.4" x2="6" y2="18"/><line x1="18" y1="6" x2="19.4" y2="4.6"/></svg>
       </button>
@@ -80,17 +83,17 @@
     <div class="class-grid" role="radiogroup" aria-labelledby="step-class-title" id="class-group">
       <button id="studentsBtn" class="class-btn" data-class="students" data-label="الطلبة" type="button" role="radio" aria-checked="false" tabindex="0">
         <span class="class-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9 12 4 2 9l10 5 10-5z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M22 9v6"/></svg></span>
-        <span>الطلبة</span>
+        <span class="class-text">الطلبة</span>
         <span class="class-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
       </button>
       <button id="workforceBtn" class="class-btn" data-class="workforce" data-label="القوى العاملة" type="button" role="radio" aria-checked="false" tabindex="-1">
         <span class="class-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 13h18"/></svg></span>
-        <span>القوى العاملة</span>
+        <span class="class-text">القوى العاملة</span>
         <span class="class-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
       </button>
       <button id="infantsBtn" class="class-btn" data-class="infants" data-label="المواليد" type="button" role="radio" aria-checked="false" tabindex="-1">
         <span class="class-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01"/><path d="M9.5 14.5a3.5 3.5 0 0 0 5 0"/><path d="M12 3c-1.5 1.5-1 3 .5 3.5"/></svg></span>
-        <span>المواليد</span>
+        <span class="class-text">المواليد</span>
         <span class="class-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
       </button>
     </div>
@@ -100,11 +103,21 @@
     <div class="step-head">
       <h2 class="caption-box" id="step-fields-title"><span class="caption-step">2</span>بيانات الصيدلية</h2>
     </div>
-    <div class="fields-grid">
-      <label class="field" id="field-year">
-        <span class="field-label">السنة المالية</span>
-        <span class="select-wrapper">
-          <select id="year">
+
+    <div class="card fields-panel">
+      <div class="fields-row">
+        <div class="field" id="field-year">
+          <span class="field-label" id="label-year">السنة المالية</span>
+          <div class="year-stepper" role="group" aria-labelledby="label-year">
+            <button type="button" class="stepper-btn" id="year-prev" aria-label="السنة السابقة">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+            </button>
+            <button type="button" class="stepper-value" id="year-current" aria-live="polite">اختر السنة</button>
+            <button type="button" class="stepper-btn" id="year-next" aria-label="السنة التالية">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"/></svg>
+            </button>
+          </div>
+          <select id="year" hidden tabindex="-1" aria-hidden="true">
             <option value="">اختر السنة</option>
             <option value="2025">2024-2025</option>
             <option value="2026">2025-2026</option>
@@ -118,82 +131,118 @@
             <option value="2034">2033-2034</option>
             <option value="2035">2034-2035</option>
           </select>
-        </span>
-      </label>
-      <label class="field" id="field-month">
-        <span class="field-label">الشهر</span>
-        <span class="select-wrapper">
-          <select id="month">
-            <option value="">اختر الشهر</option>
-            <option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option>
-            <option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option>
-            <option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option>
-            <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
-          </select>
-        </span>
-      </label>
-      <label class="field" id="field-region">
-        <span class="field-label">المنطقة</span>
-        <span class="select-wrapper">
-          <select id="region">
+        </div>
+
+        <div class="field" id="field-region">
+          <span class="field-label" id="label-region">المنطقة</span>
+          <div class="choice-group choice-seg" id="region-choices" role="radiogroup" aria-labelledby="label-region"></div>
+          <select id="region" hidden tabindex="-1" aria-hidden="true">
             <option value="">اختر المنطقة</option>
             <option value="first">الاولي</option>
             <option value="second">الثانية</option>
             <option value="third">الثالثة</option>
           </select>
-        </span>
-      </label>
-      <label class="field" id="field-pharmacy">
-        <span class="field-label">الصيدلية</span>
-        <span class="select-wrapper">
-          <select id="pharmacy" disabled>
-            <option value="">اختر الفئة والمنطقة أولًا</option>
-          </select>
-        </span>
-      </label>
+        </div>
+      </div>
+
+      <div class="field" id="field-month">
+        <span class="field-label" id="label-month">الشهر <span class="field-hint">النقطة = الشهر السابق</span></span>
+        <div class="choice-group choice-months" id="month-choices" role="radiogroup" aria-labelledby="label-month"></div>
+        <select id="month" hidden tabindex="-1" aria-hidden="true">
+          <option value="">اختر الشهر</option>
+          <option value="1">يناير</option><option value="2">فبراير</option><option value="3">مارس</option>
+          <option value="4">أبريل</option><option value="5">مايو</option><option value="6">يونيو</option>
+          <option value="7">يوليو</option><option value="8">أغسطس</option><option value="9">سبتمبر</option>
+          <option value="10">أكتوبر</option><option value="11">نوفمبر</option><option value="12">ديسمبر</option>
+        </select>
+      </div>
+
+      <div class="field" id="field-pharmacy">
+        <span class="field-label" id="label-pharmacy">الصيدلية <span class="field-hint" id="pharmacy-hint"></span></span>
+        <div class="choice-group choice-pharmacies" id="pharmacy-choices" role="radiogroup" aria-labelledby="label-pharmacy"></div>
+        <select id="pharmacy" hidden tabindex="-1" aria-hidden="true" disabled>
+          <option value="">اختر الفئة والمنطقة أولًا</option>
+        </select>
+      </div>
     </div>
   </section>
 
   <section class="form-step" id="step-groups" aria-labelledby="step-groups-title">
     <div class="step-head">
       <h2 class="caption-box" id="step-groups-title"><span class="caption-step">3</span>المجموعات الدوائية <span class="caption-count" id="groups-count">0/18</span></h2>
-      <p class="step-hint"><span><kbd>Enter</kbd>التالي</span><span><kbd>Ctrl V</kbd>لصق عمود</span></p>
+      <p class="step-hint"><span><kbd>/</kbd>بحث</span><span><kbd>↑ ↓</kbd>تنقّل</span><span><kbd>Ctrl V</kbd>لصق عمود</span></p>
     </div>
-    <div id="cards-container" class="groups-grid"></div>
+
+    <div class="groups-toolbar" id="groups-toolbar">
+      <label class="search-box" for="group-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="20.5" y1="20.5" x2="16" y2="16"/></svg>
+        <input type="search" id="group-search" placeholder="اكتب اسم المجموعة أو رقمها ثم Enter" autocomplete="off" enterkeyhint="go" aria-label="بحث في المجموعات">
+        <button type="button" class="search-clear" id="search-clear" aria-label="مسح البحث" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </label>
+
+      <div class="seg" id="group-filter" role="radiogroup" aria-label="تصفية المجموعات">
+        <button type="button" class="seg-btn" data-filter="all" role="radio" aria-checked="true">الكل <span class="seg-count" id="count-all">18</span></button>
+        <button type="button" class="seg-btn" data-filter="filled" role="radio" aria-checked="false" tabindex="-1">مُدخلة <span class="seg-count" id="count-filled">0</span></button>
+        <button type="button" class="seg-btn" data-filter="empty" role="radio" aria-checked="false" tabindex="-1">فارغة <span class="seg-count" id="count-empty">18</span></button>
+      </div>
+
+      <div class="seg seg-icons" id="view-switch" role="radiogroup" aria-label="طريقة العرض">
+        <button type="button" class="seg-btn" data-view="list" role="radio" aria-checked="true" title="قائمة مدمجة" aria-label="قائمة مدمجة">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        </button>
+        <button type="button" class="seg-btn" data-view="grid" role="radio" aria-checked="false" tabindex="-1" title="بطاقات" aria-label="بطاقات">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="cards-container" class="groups-grid is-list"></div>
+    <div class="groups-empty" id="groups-empty" hidden>
+      <span>لا توجد مجموعة مطابقة</span>
+      <button type="button" class="link-btn" id="groups-empty-reset">عرض الكل</button>
+    </div>
   </section>
 
   <section class="form-step" id="step-totals" aria-labelledby="step-totals-title">
     <div class="step-head">
       <h2 class="caption-box" id="step-totals-title"><span class="caption-step">4</span>الإجماليات</h2>
     </div>
-    <div class="totals-grid">
-      <label class="card total-field reveal">
-        <span class="total-field-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z" transform="translate(0 1)"/><line x1="14" y1="6" x2="14" y2="18" stroke-dasharray="2 2"/></svg>
-          اجمالي التذاكر
-          <span class="total-field-note">اختياري</span>
-        </span>
-        <input type="text" class="num-input total-input" id="totalTickets" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="0">
-      </label>
-      <label class="card total-field reveal">
-        <span class="total-field-head">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><polyline points="9 12 11 14 15 10"/></svg>
-          اجمالي الخارجي
-          <span class="total-field-note">اختياري</span>
-        </span>
-        <input type="text" class="num-input total-input" id="totalExternal" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="0">
-      </label>
-    </div>
+    <div class="totals-layout">
+      <div class="totals-grid">
+        <label class="card total-field reveal">
+          <span class="total-field-head">
+            <span class="total-field-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z" transform="translate(0 1)"/><line x1="14" y1="6" x2="14" y2="18" stroke-dasharray="2 2"/></svg></span>
+            اجمالي التذاكر
+            <span class="total-field-note">اختياري</span>
+          </span>
+          <input type="text" class="num-input total-input" id="totalTickets" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="0">
+        </label>
+        <label class="card total-field reveal">
+          <span class="total-field-head">
+            <span class="total-field-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6z"/><polyline points="9 12 11 14 15 10"/></svg></span>
+            اجمالي الخارجي
+            <span class="total-field-note">اختياري</span>
+          </span>
+          <input type="text" class="num-input total-input" id="totalExternal" inputmode="numeric" autocomplete="off" dir="ltr" placeholder="0">
+        </label>
+      </div>
 
-    <div class="card total-card" id="total-card">
-      <p class="total-label">المجموع الكلي</p>
-      <p id="total" dir="ltr" aria-live="polite">0.000</p>
-      <p class="total-meta" id="total-meta"></p>
-      <span class="total-progress" aria-hidden="true"><span class="total-progress-fill" id="total-progress-fill"></span></span>
+      <div class="card total-card" id="total-card">
+        <p class="total-label">المجموع الكلي</p>
+        <p id="total" dir="ltr" aria-live="polite">0.000</p>
+        <p class="total-meta" id="total-meta"></p>
+        <span class="total-progress" aria-hidden="true"><span class="total-progress-fill" id="total-progress-fill"></span></span>
+      </div>
     </div>
   </section>
 
   <div class="action-dock" id="action-dock">
+    <button type="button" class="dock-ring" id="dock-groups" title="انتقل إلى أول مجموعة فارغة" aria-label="انتقل إلى أول مجموعة فارغة">
+      <svg class="ring" viewBox="0 0 40 40" aria-hidden="true"><circle class="ring-track" cx="20" cy="20" r="16"/><circle class="ring-fill" id="ring-fill" cx="20" cy="20" r="16"/></svg>
+      <span class="ring-count" id="dock-groups-count">0</span>
+    </button>
     <div class="dock-summary">
       <span class="dock-label">المجموع <span class="save-state" id="save-state">محفوظ تلقائيًا</span></span>
       <span class="dock-total" id="dock-total">0.000</span>
@@ -218,7 +267,7 @@
     <button class="upload-toggle" id="upload-toggle" type="button" aria-expanded="false" aria-controls="upload-panel">
       <span class="toggle-label">
         <span class="toggle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.6A4.5 4.5 0 0 0 17.5 8h-1.3A7 7 0 1 0 4 14.9"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/></svg></span>
-        <span>رفع البيانات</span>
+        <span class="toggle-text">رفع البيانات <small>Excel · CSV · JSON</small></span>
       </span>
       <svg class="toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>

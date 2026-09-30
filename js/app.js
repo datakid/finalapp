@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalMeta = $('total-meta');
   const totalProgressFill = $('total-progress-fill');
   const dockTotal = $('dock-total');
+  const dockGroups = $('dock-groups');
+  const dockGroupsCount = $('dock-groups-count');
+  const ringFill = $('ring-fill');
   const saveState = $('save-state');
   const groupsCount = $('groups-count');
   const mastheadSub = $('masthead-sub');
@@ -25,9 +28,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const regionSel = $('region');
   const pharmacySel = $('pharmacy');
   const selects = [yearSel, monthSel, regionSel, pharmacySel];
+  const yearPrev = $('year-prev');
+  const yearNext = $('year-next');
+  const yearCurrent = $('year-current');
+  const monthChoices = $('month-choices');
+  const regionChoices = $('region-choices');
+  const pharmacyChoices = $('pharmacy-choices');
+  const pharmacyHint = $('pharmacy-hint');
+  const groupSearch = $('group-search');
+  const searchClear = $('search-clear');
+  const groupsEmpty = $('groups-empty');
+  const filterBtns = Array.from(document.querySelectorAll('#group-filter .seg-btn'));
+  const viewBtns = Array.from(document.querySelectorAll('#view-switch .seg-btn'));
   const submitBtn = $('submitButton');
   const submitInner = $('submitInner');
-  const submitLabel = $('submitButtonLabel');
   const resetBtn = $('resetButton');
   const statusBar = $('status-bar');
   const statusDismiss = $('status-dismiss');
@@ -50,8 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const THEME_KEY = 'pharmacyAppTheme';
   const STATUS_KEY = 'pharmacyAppStatusHidden';
   const SENT_KEY = 'pharmacyAppSent';
+  const VIEW_KEY = 'pharmacyAppView';
   const MAX_GROUP = 1000000000;
   const MAX_OPTIONAL = 1000000;
+  const RING_LEN = 2 * Math.PI * 16;
 
   const cardNames = ['المسكنات', 'مضادات حيوية', 'كلي', 'نفسية و عصبية', 'قلب', 'سكر حقن', 'سكر فم', 'نسا', 'كبد', 'جهاز هضمي', 'جهاز تنفسي', 'امراض جلدية', 'عيون و رمد', 'انف و اذن', 'مضادات تقلصات', 'اورام', 'فيتامينات', 'مختلفة'];
   const HEADERS = ['date', 'year', 'class', 'month', 'region', 'pharmacy', 'totalPrescription', 'insuranceCoveredPrescription', ...cardNames];
@@ -107,11 +123,17 @@ document.addEventListener('DOMContentLoaded', () => {
     return Math.min(Math.round(n * 1000) / 1000, MAX_GROUP);
   }
   const displayDecimal = n => n > 0 ? String(Math.round(n * 1000) / 1000) : '';
+  const foldArabic = s => String(s)
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
+    .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
+    .replace(/\s+/g, ' ').trim().toLowerCase();
 
   let cardValues = Array(cardNames.length).fill(0);
   let activeClass = null;
   let isSubmitting = false;
   let lastTotal = 0;
+  let groupFilter = 'all';
+  let groupQuery = '';
 
   const darkMql = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   const resolveTheme = mode => mode === 'system' ? (darkMql && darkMql.matches ? 'dark' : 'light') : mode;
@@ -120,11 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
     docEl.setAttribute('data-theme', resolved);
     docEl.setAttribute('data-theme-pref', mode);
     themeColorMeta.setAttribute('content', resolved === 'dark' ? '#14151c' : '#f6efe1');
-    themeBtns.forEach(btn => {
+    themeBtns.forEach((btn, i) => {
       const on = btn.dataset.mode === mode;
       btn.classList.toggle('active', on);
       btn.setAttribute('aria-checked', String(on));
       btn.tabIndex = on ? 0 : -1;
+      if (on) $('theme-switch').style.setProperty('--pos', i);
     });
     if (persist) { try { localStorage.setItem(THEME_KEY, mode); } catch (e) {} }
   }
@@ -158,10 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const close = () => {
       if (closed) return;
       closed = true;
-      const out = t.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateX(-30px) scale(0.95)' }], { duration: reducedMotion() ? 1 : 220, easing: 'ease-in', fill: 'forwards' });
+      const out = t.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-10px) scale(0.96)' }], { duration: reducedMotion() ? 1 : 220, easing: 'ease-in', fill: 'forwards' });
       out.onfinish = () => t.remove();
     };
-    t.animate([{ opacity: 0, transform: 'translateX(-40px) scale(0.92)' }, { opacity: 1, transform: 'none' }], { duration: reducedMotion() ? 1 : 340, easing: 'cubic-bezier(0.34,1.56,0.64,1)' });
+    t.animate([{ opacity: 0, transform: 'translateY(-16px) scale(0.94)' }, { opacity: 1, transform: 'none' }], { duration: reducedMotion() ? 1 : 360, easing: 'cubic-bezier(0.34,1.56,0.64,1)' });
     const bar = t.querySelector('.toast-progress').animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration, easing: 'linear', fill: 'forwards' });
     bar.onfinish = close;
     t.addEventListener('mouseenter', () => bar.pause());
@@ -199,12 +222,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const card = document.createElement('div');
     card.className = 'card group-card reveal';
     card.style.setProperty('--i', i);
+    card.dataset.index = i;
+    card.dataset.search = `${foldArabic(name)} ${i + 1}`;
     const id = `drug-${i}`;
-    card.innerHTML = `<div class="group-head"><span class="group-index">${String(i + 1).padStart(2, '0')}</span><label class="group-name" for="${id}">${escapeHTML(name)}</label><button type="button" class="group-clear" data-index="${i}" aria-label="مسح ${escapeHTML(name)}" tabindex="-1">${ICONS.close}</button></div><input type="text" class="num-input drug-input" id="${id}" data-index="${i}" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="0.000" enterkeyhint="next"><div class="group-meter" aria-hidden="true"><span class="group-meter-track"><span class="group-meter-fill"></span></span><span class="group-share">—</span></div>`;
+    card.innerHTML = `<div class="group-head"><span class="group-index">${String(i + 1).padStart(2, '0')}</span><label class="group-name" for="${id}">${escapeHTML(name)}</label><button type="button" class="group-clear" data-index="${i}" aria-label="مسح ${escapeHTML(name)}" tabindex="-1">${ICONS.close}</button></div><div class="group-field"><input type="text" class="num-input drug-input" id="${id}" data-index="${i}" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="0.000" enterkeyhint="next"><span class="group-share">—</span></div><div class="group-meter" aria-hidden="true"><span class="group-meter-track"><span class="group-meter-fill"></span></span></div>`;
     cardsContainer.appendChild(card);
   });
+  const groupCards = Array.from(cardsContainer.querySelectorAll('.group-card'));
   const drugInputs = Array.from(cardsContainer.querySelectorAll('.drug-input'));
-  const focusOrder = [...drugInputs, totalTicketsInput, totalExternalInput];
+  const visibleDrugInputs = () => drugInputs.filter(inp => !inp.closest('.group-card').hidden);
+  const focusOrder = () => [...visibleDrugInputs(), totalTicketsInput, totalExternalInput];
 
   appShell.addEventListener('pointermove', e => {
     const el = e.target.closest('.reveal');
@@ -286,19 +313,21 @@ document.addEventListener('DOMContentLoaded', () => {
     log[k] = Array.from(new Set([...(log[k] || []), entry]));
     store.set(SENT_KEY, log);
   }
-  const pharmacyName = () => {
-    const list = (activeClass && regionSel.value && pharmacyOptions[activeClass][regionSel.value]) || [];
-    return list[(parseInt(pharmacySel.value, 10) || 0) - 1] || '';
-  };
+  const currentList = () => (activeClass && regionSel.value && pharmacyOptions[activeClass][regionSel.value]) || [];
+  const pharmacyName = () => currentList()[(parseInt(pharmacySel.value, 10) || 0) - 1] || '';
 
   function updatePharmacyDropdown(preferred = pharmacySel.value) {
-    const list = (activeClass && regionSel.value && pharmacyOptions[activeClass][regionSel.value]) || [];
+    const list = currentList();
     const placeholder = !activeClass ? 'اختر الفئة أولًا' : !regionSel.value ? 'اختر المنطقة أولًا' : 'اختر الصيدلية';
     pharmacySel.innerHTML = '';
     pharmacySel.appendChild(new Option(placeholder, ''));
     list.forEach((name, i) => {
       const val = String(i + 1);
-      pharmacySel.appendChild(new Option(isSent(val) ? `${name}  ✓ أُرسلت` : name, val));
+      const sent = isSent(val);
+      const opt = new Option(sent ? `${name}  ✓ أُرسلت` : name, val);
+      opt.dataset.name = name;
+      if (sent) opt.dataset.sent = '1';
+      pharmacySel.appendChild(opt);
     });
     pharmacySel.disabled = list.length === 0;
     pharmacySel.value = list.length && preferred && +preferred <= list.length ? String(preferred) : '';
@@ -309,6 +338,112 @@ document.addEventListener('DOMContentLoaded', () => {
     if (s === yearSel || s === monthSel) updatePharmacyDropdown();
     refresh(); save();
   }));
+
+  function setSelect(sel, value) {
+    if (sel.value === value) return;
+    sel.value = value;
+    sel.dispatchEvent(new Event('change'));
+  }
+
+  const now = new Date();
+  const currentFiscal = String(now.getMonth() + 1 >= 7 ? now.getFullYear() + 1 : now.getFullYear());
+  const suggestedMonth = String(((now.getMonth() + 11) % 12) + 1);
+  const yearValues = Array.from(yearSel.options).map(o => o.value).filter(Boolean);
+  const hasYear = v => yearValues.includes(v);
+
+  function stepYear(dir) {
+    const idx = yearValues.indexOf(yearSel.value);
+    if (idx === -1) { setSelect(yearSel, hasYear(currentFiscal) ? currentFiscal : yearValues[0]); return; }
+    const next = yearValues[Math.max(0, Math.min(yearValues.length - 1, idx + dir))];
+    setSelect(yearSel, next);
+  }
+  yearPrev.addEventListener('click', () => stepYear(-1));
+  yearNext.addEventListener('click', () => stepYear(1));
+  yearCurrent.addEventListener('click', () => {
+    if (!yearSel.value) stepYear(0);
+    else if (hasYear(currentFiscal) && yearSel.value !== currentFiscal) { setSelect(yearSel, currentFiscal); showToast('تم الرجوع إلى السنة المالية الحالية', 'info', { duration: 2200 }); }
+  });
+  [yearPrev, yearCurrent, yearNext].forEach(b => b.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); stepYear(1); }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); stepYear(-1); }
+  }));
+
+  function renderYear() {
+    const opt = yearSel.options[yearSel.selectedIndex];
+    const has = !!yearSel.value;
+    yearCurrent.innerHTML = has ? `<span class="stepper-num">${escapeHTML(opt.text)}</span>${yearSel.value === currentFiscal ? '<span class="stepper-tag">الحالية</span>' : ''}` : `<span class="stepper-empty">اختر السنة</span>`;
+    yearCurrent.title = has && yearSel.value !== currentFiscal ? 'اضغط للرجوع إلى السنة الحالية' : '';
+    const idx = yearValues.indexOf(yearSel.value);
+    yearPrev.disabled = has && idx <= 0;
+    yearNext.disabled = has && idx >= yearValues.length - 1;
+    yearCurrent.closest('.year-stepper').classList.toggle('is-set', has);
+  }
+
+  const choiceSig = new WeakMap();
+  function renderChoices(container, sel, { empty = '', decorate } = {}) {
+    const opts = Array.from(sel.options).filter(o => o.value);
+    const sig = opts.map(o => `${o.value}:${o.dataset.name || o.text}:${o.dataset.sent || ''}`).join('|') + `#${sel.disabled}`;
+    if (choiceSig.get(container) !== sig) {
+      choiceSig.set(container, sig);
+      if (!opts.length || sel.disabled) {
+        container.innerHTML = `<p class="choice-empty">${escapeHTML(empty || sel.options[0]?.text || '')}</p>`;
+      } else {
+        container.innerHTML = opts.map(o => {
+          const label = o.dataset.name || o.text;
+          const extra = decorate ? decorate(o) : '';
+          return `<button type="button" class="choice${o.dataset.sent ? ' is-sent' : ''}${extra}" role="radio" data-value="${escapeHTML(o.value)}" aria-checked="false" tabindex="-1"><span class="choice-text">${escapeHTML(label)}</span>${o.dataset.sent ? `<span class="choice-sent" title="أُرسلت">${ICONS.check}</span>` : ''}</button>`;
+        }).join('');
+      }
+    }
+    const btns = Array.from(container.querySelectorAll('.choice'));
+    btns.forEach(b => {
+      const on = b.dataset.value === sel.value;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-checked', String(on));
+    });
+    const tabbable = btns.find(b => b.classList.contains('is-on')) || btns[0];
+    btns.forEach(b => { b.tabIndex = b === tabbable ? 0 : -1; });
+    container.closest('.field').classList.toggle('is-filled', !!sel.value && !sel.disabled);
+  }
+  function bindChoices(container, sel) {
+    container.addEventListener('click', e => {
+      const b = e.target.closest('.choice');
+      if (!b) return;
+      setSelect(sel, b.dataset.value);
+      const again = container.querySelector(`.choice[data-value="${CSS.escape(b.dataset.value)}"]`);
+      if (again && document.activeElement !== again) again.focus({ preventScroll: true });
+    });
+    container.addEventListener('keydown', e => {
+      const b = e.target.closest('.choice');
+      if (!b) return;
+      const btns = Array.from(container.querySelectorAll('.choice'));
+      const i = btns.indexOf(b);
+      const map = { ArrowLeft: 1, ArrowDown: 1, ArrowRight: -1, ArrowUp: -1 };
+      let next = null;
+      if (e.key in map) next = btns[(i + map[e.key] + btns.length) % btns.length];
+      else if (e.key === 'Home') next = btns[0];
+      else if (e.key === 'End') next = btns[btns.length - 1];
+      if (!next) return;
+      e.preventDefault();
+      setSelect(sel, next.dataset.value);
+      const again = container.querySelector(`.choice[data-value="${CSS.escape(next.dataset.value)}"]`);
+      if (again) again.focus();
+    });
+  }
+  bindChoices(monthChoices, monthSel);
+  bindChoices(regionChoices, regionSel);
+  bindChoices(pharmacyChoices, pharmacySel);
+
+  function renderPickers() {
+    renderYear();
+    renderChoices(monthChoices, monthSel, { decorate: o => o.value === suggestedMonth ? ' is-suggested' : '' });
+    renderChoices(regionChoices, regionSel);
+    renderChoices(pharmacyChoices, pharmacySel, { empty: !activeClass ? 'اختر الفئة أولًا لعرض الصيدليات' : 'اختر المنطقة لعرض الصيدليات' });
+    const list = currentList();
+    const sentCount = list.filter((_, i) => isSent(String(i + 1))).length;
+    pharmacyHint.textContent = list.length && periodKey() ? `${sentCount} من ${list.length} أُرسلت هذا الشهر` : list.length ? `${list.length} صيدلية` : '';
+    pharmacyHint.classList.toggle('is-complete', list.length > 0 && sentCount === list.length);
+  }
 
   function setCardValue(i, raw, { format = false } = {}) {
     const inp = drugInputs[i];
@@ -334,17 +469,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!e.target.classList.contains('drug-input')) return;
     setCardValue(+e.target.dataset.index, e.target.value, { format: true });
     refresh(); save();
+    setTimeout(applyGroupFilter, 0);
   });
   cardsContainer.addEventListener('focusin', e => { if (e.target.classList.contains('drug-input')) e.target.select(); });
   cardsContainer.addEventListener('click', e => {
     const btn = e.target.closest('.group-clear');
-    if (!btn) return;
-    const i = +btn.dataset.index;
-    const prev = cardValues[i];
-    setCardValue(i, '', { format: true });
-    refresh(); save();
-    drugInputs[i].focus();
-    showToast(`تم مسح «${cardNames[i]}»`, 'info', { duration: 4000, action: { label: 'تراجع', onClick: () => { setCardValue(i, String(prev), { format: true }); refresh(); save(); } } });
+    if (btn) {
+      const i = +btn.dataset.index;
+      const prev = cardValues[i];
+      setCardValue(i, '', { format: true });
+      refresh(); save();
+      drugInputs[i].focus();
+      showToast(`تم مسح «${cardNames[i]}»`, 'info', { duration: 4000, action: { label: 'تراجع', onClick: () => { setCardValue(i, String(prev), { format: true }); refresh(); save(); } } });
+      return;
+    }
+    const card = e.target.closest('.group-card');
+    if (card && !e.target.closest('input, label, button')) drugInputs[+card.dataset.index].focus();
   });
   cardsContainer.addEventListener('paste', e => {
     if (!e.target.classList.contains('drug-input')) return;
@@ -367,6 +507,95 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast(`تم لصق ${filled} قيمة بدءًا من «${cardNames[start]}»`, 'success', { duration: 3000 });
   });
 
+  function matchesGroup(card) {
+    const v = cardValues[+card.dataset.index];
+    if (groupFilter === 'filled' && !(v > 0)) return false;
+    if (groupFilter === 'empty' && v > 0) return false;
+    if (!groupQuery) return true;
+    const q = foldArabic(normalizeDigits(groupQuery).replace(/^0+(?=\d)/, ''));
+    if (/^\d+$/.test(q)) return String(+card.dataset.index + 1) === q || String(+card.dataset.index + 1).startsWith(q);
+    return card.dataset.search.includes(q);
+  }
+  function applyGroupFilter() {
+    const active = document.activeElement;
+    let shown = 0;
+    groupCards.forEach(card => {
+      const keep = card.contains(active) && active.classList.contains('drug-input');
+      const show = matchesGroup(card) || keep;
+      if (card.hidden === show) card.hidden = !show;
+      if (show) shown++;
+    });
+    groupsEmpty.hidden = shown > 0;
+    cardsContainer.classList.toggle('is-filtered', !!groupQuery || groupFilter !== 'all');
+  }
+  function setGroupFilter(f) {
+    groupFilter = f;
+    filterBtns.forEach(b => {
+      const on = b.dataset.filter === f;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-checked', String(on));
+      b.tabIndex = on ? 0 : -1;
+    });
+    applyGroupFilter();
+  }
+  filterBtns.forEach(b => b.addEventListener('click', () => setGroupFilter(b.dataset.filter)));
+  rovingKeys(filterBtns, b => setGroupFilter(b.dataset.filter));
+
+  function setView(v, persist) {
+    const view = v === 'grid' ? 'grid' : 'list';
+    cardsContainer.classList.toggle('is-list', view === 'list');
+    cardsContainer.classList.toggle('is-grid', view === 'grid');
+    viewBtns.forEach(b => {
+      const on = b.dataset.view === view;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-checked', String(on));
+      b.tabIndex = on ? 0 : -1;
+    });
+    if (persist) store.set(VIEW_KEY, view);
+  }
+  viewBtns.forEach(b => b.addEventListener('click', () => setView(b.dataset.view, true)));
+  rovingKeys(viewBtns, b => setView(b.dataset.view, true));
+  setView(store.get(VIEW_KEY, 'list'), false);
+
+  groupSearch.addEventListener('input', () => {
+    groupQuery = groupSearch.value.trim();
+    searchClear.hidden = !groupQuery;
+    applyGroupFilter();
+  });
+  groupSearch.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const first = visibleDrugInputs()[0];
+      if (first) { first.focus(); first.closest('.group-card').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'nearest' }); }
+    } else if (e.key === 'Escape') {
+      if (groupSearch.value) { e.preventDefault(); clearSearch(); }
+    } else if (e.key === 'ArrowDown') {
+      const first = visibleDrugInputs()[0];
+      if (first) { e.preventDefault(); first.focus(); }
+    }
+  });
+  function clearSearch() {
+    groupSearch.value = '';
+    groupQuery = '';
+    searchClear.hidden = true;
+    applyGroupFilter();
+  }
+  searchClear.addEventListener('click', () => { clearSearch(); groupSearch.focus(); });
+  $('groups-empty-reset').addEventListener('click', () => { clearSearch(); setGroupFilter('all'); });
+
+  function jumpToGroup(i) {
+    const card = groupCards[i];
+    if (card.hidden) { clearSearch(); setGroupFilter('all'); }
+    card.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+    card.classList.remove('needs-attention'); void card.offsetWidth; card.classList.add('needs-attention');
+    setTimeout(() => drugInputs[i].focus({ preventScroll: true }), reducedMotion() ? 0 : 320);
+  }
+  dockGroups.addEventListener('click', () => {
+    const empty = cardValues.findIndex(v => !(v > 0));
+    if (empty === -1) { $('step-totals').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' }); setTimeout(() => totalTicketsInput.focus({ preventScroll: true }), 300); return; }
+    jumpToGroup(empty);
+  });
+
   optionalInputs.forEach(inp => {
     inp.addEventListener('input', () => {
       let v = normalizeDigits(inp.value).replace(/\D/g, '').replace(/^0+(?=\d)/, '');
@@ -377,25 +606,40 @@ document.addEventListener('DOMContentLoaded', () => {
     inp.addEventListener('focus', () => inp.select());
   });
 
+  const isTyping = el => el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); submitBtn.click(); return; }
-    const idx = focusOrder.indexOf(e.target);
-    if (idx === -1) return;
-    if (e.key === 'Enter') {
+    if (e.key === '/' && !isTyping(e.target) && !document.querySelector('dialog[open]')) {
       e.preventDefault();
-      const next = focusOrder[idx + (e.shiftKey ? -1 : 1)];
-      if (next) next.focus(); else submitBtn.focus();
+      groupSearch.focus();
+      groupSearch.select();
+      return;
     }
+    const order = focusOrder();
+    const idx = order.indexOf(e.target);
+    if (idx === -1) return;
+    let dir = 0;
+    if (e.key === 'Enter') dir = e.shiftKey ? -1 : 1;
+    else if (e.key === 'ArrowDown') dir = 1;
+    else if (e.key === 'ArrowUp') dir = -1;
+    else if (e.key === 'Escape' && e.target.classList.contains('drug-input')) { e.preventDefault(); groupSearch.focus(); groupSearch.select(); return; }
+    if (!dir) return;
+    e.preventDefault();
+    const next = order[idx + dir];
+    if (next) next.focus();
+    else if (dir > 0) submitBtn.focus();
+    else if (e.key === 'ArrowUp' && e.target === order[0]) groupSearch.focus();
   });
 
   function validOptional(inp) { const v = inp.value.trim(); return v === '' || (/^\d+$/.test(v) && +v <= MAX_OPTIONAL); }
+  const firstChoice = c => c.querySelector('.choice[tabindex="0"]') || c.querySelector('.choice') || c;
   function missingList() {
     const m = [];
     if (!activeClass) m.push({ label: 'الفئة', el: classBtns[0], step: 'step-class' });
-    if (!yearSel.value) m.push({ label: 'السنة', el: yearSel, step: 'step-fields' });
-    if (!monthSel.value) m.push({ label: 'الشهر', el: monthSel, step: 'step-fields' });
-    if (!regionSel.value) m.push({ label: 'المنطقة', el: regionSel, step: 'step-fields' });
-    if (!pharmacySel.value) m.push({ label: 'الصيدلية', el: pharmacySel, step: 'step-fields' });
+    if (!yearSel.value) m.push({ label: 'السنة', el: yearCurrent, step: 'step-fields' });
+    if (!monthSel.value) m.push({ label: 'الشهر', el: firstChoice(monthChoices), step: 'step-fields' });
+    if (!regionSel.value) m.push({ label: 'المنطقة', el: firstChoice(regionChoices), step: 'step-fields' });
+    if (!pharmacySel.value) m.push({ label: 'الصيدلية', el: firstChoice(pharmacyChoices), step: 'step-fields' });
     if (!cardValues.some(v => v > 0)) m.push({ label: 'مجموعة دوائية واحدة على الأقل', el: drugInputs[0], step: 'step-groups' });
     optionalInputs.forEach(inp => { if (!validOptional(inp)) m.push({ label: 'قيمة إجمالي صحيحة', el: inp, step: 'step-totals' }); });
     return m;
@@ -410,8 +654,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (reducedMotion()) { totalEl.textContent = fmt3(to); return; }
     totalCard.classList.remove('is-bumped'); void totalCard.offsetWidth; totalCard.classList.add('is-bumped');
     const start = performance.now(), dur = 480;
-    const step = now => {
-      const p = Math.min(1, (now - start) / dur);
+    const step = t => {
+      const p = Math.min(1, (t - start) / dur);
       const eased = 1 - Math.pow(1 - p, 3);
       if (lastTotal !== to) return;
       totalEl.textContent = fmt3(from + (to - from) * eased);
@@ -429,7 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
     animateTotal(total);
 
     drugInputs.forEach((inp, i) => {
-      const card = inp.closest('.card');
+      const card = groupCards[i];
       const v = cardValues[i];
       card.classList.toggle('card-active', v > 0);
       card.querySelector('.group-meter-fill').style.width = max > 0 ? `${(v / max) * 100}%` : '0';
@@ -440,14 +684,20 @@ document.addEventListener('DOMContentLoaded', () => {
       card.classList.toggle('card-active', inp.value !== '' && validOptional(inp));
       card.classList.toggle('card-invalid', !validOptional(inp));
     });
-    selects.forEach(s => {
-      s.classList.toggle('select-valid', !s.disabled && s.value !== '');
-      s.closest('.field').classList.toggle('is-filled', !s.disabled && s.value !== '');
-    });
+
+    renderPickers();
 
     groupsCount.textContent = `${filled}/${cardNames.length}`;
+    $('count-all').textContent = cardNames.length;
+    $('count-filled').textContent = filled;
+    $('count-empty').textContent = cardNames.length - filled;
     totalProgressFill.style.width = `${(filled / cardNames.length) * 100}%`;
-    totalMeta.textContent = filled ? `متوسط ${fmtShort(total / filled)}` : '';
+    totalMeta.textContent = filled ? `${filled} مجموعة · متوسط ${fmtShort(total / filled)}` : '';
+    dockGroupsCount.textContent = filled;
+    ringFill.style.strokeDasharray = `${RING_LEN}`;
+    ringFill.style.strokeDashoffset = `${RING_LEN * (1 - filled / cardNames.length)}`;
+    dockGroups.classList.toggle('is-complete', filled === cardNames.length);
+    dockGroups.title = filled === cardNames.length ? 'كل المجموعات مُدخلة' : 'انتقل إلى أول مجموعة فارغة';
 
     const missing = missingList();
     const fieldsMissing = missing.filter(m => m.step === 'step-fields').map(m => m.label);
@@ -475,14 +725,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!isSubmitting) submitBtn.setAttribute('aria-disabled', String(!ready));
     resetBtn.disabled = isSubmitting || isFormEmpty();
+    applyGroupFilter();
   }
 
   function guideTo(item) {
     const step = $(item.step);
+    if (item.step === 'step-groups') { clearSearch(); setGroupFilter('all'); }
     step.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
     const target = item.el.closest('.field, .card, .class-grid') || step;
     target.classList.remove('needs-attention'); void target.offsetWidth; target.classList.add('needs-attention');
-    setTimeout(() => { if (!item.el.disabled) item.el.focus({ preventScroll: true }); }, reducedMotion() ? 0 : 350);
+    setTimeout(() => { if (!item.el.disabled && item.el.focus) item.el.focus({ preventScroll: true }); }, reducedMotion() ? 0 : 350);
   }
   [chipClass, chipFields, chipCards].forEach(chip => chip.addEventListener('click', () => {
     const m = missingList().find(x => x.step === chip.dataset.target);
@@ -580,10 +832,13 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePharmacyDropdown('');
     lastTotal = 0;
     totalEl.textContent = fmt3(0);
+    clearSearch();
+    setGroupFilter('all');
     refresh(); save();
     showToast('اختر الصيدلية التالية.', 'info', { duration: 4000 });
-    $('step-fields').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
-    setTimeout(() => pharmacySel.focus({ preventScroll: true }), 400);
+    $('field-pharmacy').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+    const nextUnsent = pharmacyChoices.querySelector('.choice:not(.is-sent)') || firstChoice(pharmacyChoices);
+    setTimeout(() => { if (nextUnsent.focus) nextUnsent.focus({ preventScroll: true }); }, 400);
   }
 
   function resetAll() {
@@ -593,6 +848,8 @@ document.addEventListener('DOMContentLoaded', () => {
     cardValues.fill(0);
     drugInputs.forEach(i => { i.value = ''; });
     optionalInputs.forEach(i => { i.value = ''; });
+    clearSearch();
+    setGroupFilter('all');
     refresh();
     store.remove(DATA_KEY);
   }
