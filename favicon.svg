@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .tile{fill:#f5f1e9}.ink{stroke:#26282e}.leaf{fill:#3f5a7a}.rib{stroke:#f5f1e9}.dot{fill:#c08a5b}
+    @media (prefers-color-scheme: dark){.tile{fill:#1d1e23}.ink{stroke:#ebe5d8}.leaf{fill:#93abc9}.rib{stroke:#1d1e23}.dot{fill:#d6a072}}
+  </style>
+  <rect class="tile" x="1" y="1" width="62" height="62" rx="17"/>
+  <path class="ink" fill="none" stroke-width="3" stroke-linecap="round" d="M45.6 17.4C39.6 12 26.8 12.2 19.3 19.6 11.5 27.4 12.6 40.6 21.2 46.9c8.5 6.2 21.8 4.7 27.8-4.2 5-7.5 3.1-17.6-4-23.4"/>
+  <path class="leaf" d="M21.6 41.6c1.7-9.3 9-16.3 18.8-17.3-1.2 9.8-8.6 16.6-18.8 17.3z"/>
+  <path class="rib" fill="none" stroke-width="1.4" stroke-linecap="round" d="M23.4 39.7 34.2 29"/>
+  <circle class="dot" cx="47.6" cy="12.6" r="2.6"/>
+</svg>
