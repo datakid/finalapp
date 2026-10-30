@@ -62,6 +62,12 @@
       </span>
     </div>
 
+    <div class="topbar-tools">
+    <button type="button" class="cmd-trigger" id="cmd-trigger" aria-haspopup="dialog" aria-controls="palette" aria-label="ابحث أو عدّل أي شيء">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 4.5 4.5"/></svg>
+      <span class="cmd-trigger-text">ابحث أو عدّل أي شيء…</span>
+      <kbd class="cmd-trigger-kbd" id="cmd-trigger-kbd">Ctrl K</kbd>
+    </button>
     <div class="theme-switch" id="theme-switch" role="radiogroup" aria-label="مظهر الواجهة">
       <span class="theme-thumb" aria-hidden="true"></span>
       <button type="button" class="theme-switch-btn" data-mode="light" role="radio" aria-checked="false" aria-label="فاتح" title="فاتح" tabindex="-1">
@@ -73,6 +79,7 @@
       <button type="button" class="theme-switch-btn" data-mode="dark" role="radio" aria-checked="false" aria-label="داكن" title="داكن" tabindex="-1">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
       </button>
+    </div>
     </div>
   </header>
 
@@ -159,20 +166,22 @@
   <section class="form-step" id="step-fields" aria-labelledby="step-fields-title">
     <div class="step-head">
       <h2 class="caption-box" id="step-fields-title"><span class="caption-step">2</span><span class="caption-text">بيانات الصيدلية</span><svg class="step-tick" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M4 13c2 1 4 3 6 6 3-7 7-12 11-15"/></svg></h2>
-      <p class="step-note step-hint"><span><kbd>←→</kbd>اختيار</span><span>اكتب الحرف أو الرقم</span><span><kbd>Enter</kbd>التالي</span></p>
+      <p class="step-note step-hint"><span>اكتب للاختيار</span><span><kbd>Enter</kbd>التالي</span><span><kbd class="js-cmdk">Ctrl K</kbd>بحث سريع</span></p>
     </div>
 
     <div class="card fields-panel">
       <div class="fields-row">
         <div class="field" id="field-year">
-          <span class="field-label" id="label-year">السنة المالية <span class="field-hint" id="year-hint"></span></span>
-          <div class="year-rail" id="year-rail">
+          <span class="field-label" id="label-year"><label for="year-input">السنة المالية</label> <span class="field-hint" id="year-hint"></span></span>
+          <div class="year-type" id="year-type">
             <button type="button" class="rail-nudge" id="year-prev" aria-label="سنة أقدم" tabindex="-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6.5 15 12l-5.5 5.5"/></svg>
-            </button>
-            <div class="year-track" id="year-choices" role="radiogroup" aria-labelledby="label-year"></div>
-            <button type="button" class="rail-nudge" id="year-next" aria-label="سنة أحدث" tabindex="-1">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5 9 12l5.5 5.5"/></svg>
+            </button>
+            <div class="yt-box" id="yt-box">
+              <span class="yt-sizer" id="yt-sizer" data-value="2025"><input type="text" id="year-input" class="yt-input" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" dir="ltr" maxlength="9" enterkeyhint="next" aria-describedby="year-hint year-tail"></span><span class="yt-ghost" id="yt-ghost" aria-hidden="true"></span><span class="yt-tail" id="year-tail" data-state="none"><span class="yt-dash" aria-hidden="true">–</span><span class="yt-end" id="yt-end"></span></span>
+            </div>
+            <button type="button" class="rail-nudge" id="year-next" aria-label="سنة أحدث" tabindex="-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6.5 15 12l-5.5 5.5"/></svg>
             </button>
           </div>
           <select id="year" hidden tabindex="-1" aria-hidden="true"><option value="">اختر السنة</option></select>
@@ -215,7 +224,7 @@
   <section class="form-step" id="step-groups" aria-labelledby="step-groups-title">
     <div class="step-head">
       <h2 class="caption-box" id="step-groups-title"><span class="caption-step">3</span><span class="caption-text">المجموعات الدوائية</span><span class="caption-count" id="groups-count">0/18</span><svg class="step-tick" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M4 13c2 1 4 3 6 6 3-7 7-12 11-15"/></svg></h2>
-      <p class="step-note step-hint"><span><kbd>/</kbd>سطر الإدخال</span><span><kbd>↵</kbd>حفظ والتالي</span><span><kbd>↑ ↓</kbd>تنقّل</span><span><kbd>Ctrl Z</kbd>تراجع</span></p>
+      <p class="step-note step-hint"><span><kbd>/</kbd>سطر الإدخال</span><span><kbd>↵</kbd>حفظ والتالي</span><span><kbd class="js-cmdk">Ctrl K</kbd>اكتب «قلب 4500» من أي مكان</span></p>
     </div>
 
     <div class="quick-entry" id="quick-entry">
@@ -421,6 +430,23 @@
   <div class="dialog-footer">
     <button id="confirm-ok-btn" class="dock-btn btn-primary" type="button"></button>
     <button id="confirm-cancel-btn" class="dock-btn" type="button">إلغاء</button>
+  </div>
+</dialog>
+
+<dialog id="palette" class="palette" aria-label="لوحة البحث والأوامر">
+  <div class="pal-head">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 4.5 4.5"/></svg>
+    <input type="text" id="pal-input" class="pal-input" dir="auto" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="ابحث… أو اكتب «قلب 4500» ، «2024» ، «مارس»" role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list">
+    <button type="button" class="pal-close" id="pal-close" aria-label="إغلاق"><kbd>Esc</kbd></button>
+  </div>
+  <div class="pal-body" id="pal-body">
+    <span class="pal-hl" id="pal-hl" aria-hidden="true"></span>
+    <ul id="pal-list" class="pal-list" role="listbox" aria-label="النتائج"></ul>
+    <p class="pal-empty" id="pal-empty" hidden></p>
+  </div>
+  <div class="pal-foot">
+    <p class="pal-flash" id="pal-flash" aria-live="polite"></p>
+    <p class="pal-keys" id="pal-keys"></p>
   </div>
 </dialog>
 

@@ -30,7 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const selects = [yearSel, monthSel, regionSel, pharmacySel];
   const yearPrev = $('year-prev');
   const yearNext = $('year-next');
-  const yearChoices = $('year-choices');
+  const yearInput = $('year-input');
+  const yearGhost = $('yt-ghost');
+  const yearTail = $('year-tail');
+  const yearEnd = $('yt-end');
+  const yearType = $('year-type');
   const yearHint = $('year-hint');
   const qeName = $('qe-name');
   const qeIndex = $('qe-index');
@@ -308,6 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function restore(s) {
     setClass(s.activeClass, { keepPharmacy: true });
+    ensureYearOption(String(s.year || ''));
     yearSel.value = s.year || '';
     monthSel.value = s.month || '';
     regionSel.value = s.region || '';
@@ -391,88 +396,133 @@ document.addEventListener('DOMContentLoaded', () => {
   const currentFiscal = String(now.getMonth() + 1 >= 7 ? now.getFullYear() + 1 : now.getFullYear());
   const suggestedMonth = String(((now.getMonth() + 11) % 12) + 1);
   // Fiscal years are stored by their END year ("2026" = 2025-2026), exactly as before.
-  const YEAR_MIN = Math.min(2025, +currentFiscal - 3);
-  const YEAR_MAX = Math.max(2035, +currentFiscal + 5);
-  for (let y = YEAR_MIN; y <= YEAR_MAX; y++) yearSel.appendChild(new Option(`${y - 1}-${y}`, String(y)));
-  const yearValues = Array.from(yearSel.options).map(o => o.value).filter(Boolean);
-  const hasYear = v => yearValues.includes(v);
-  const YEAR_WIN = 3;
-  let yearWinStart = null;
-  const clampWin = s => Math.max(0, Math.min(yearValues.length - YEAR_WIN, s));
-  function centerYearWindow() {
-    const idx = yearValues.indexOf(yearSel.value || currentFiscal);
-    yearWinStart = clampWin((idx === -1 ? 0 : idx) - 1);
+  /* ───────────── Typed fiscal year ─────────────
+     Type the START year (2024) → the line finishes the season for you: "2024 – 2025".
+     "24" expands to 2024, a ghost completes partial input, ↑ ↓ step, Enter moves on.
+     Stored value is unchanged: the END year ("2025").                                  */
+  const Y_LO = 2001, Y_HI = 2099; // valid END years
+  const validEnd = v => /^\d{4}$/.test(v) && +v >= Y_LO && +v <= Y_HI;
+  const validStart = s => /^\d{4}$/.test(s) && validEnd(String(+s + 1));
+  const hasYear = validEnd;
+  function ensureYearOption(v) {
+    if (!validEnd(v) || Array.from(yearSel.options).some(o => o.value === v)) return;
+    const after = Array.from(yearSel.options).find(o => o.value && +o.value > +v);
+    yearSel.insertBefore(new Option(`${+v - 1}-${v}`, v), after || null);
   }
-  function ensureYearVisible() {
-    const idx = yearValues.indexOf(yearSel.value);
-    if (idx === -1) return;
-    if (yearWinStart === null || idx < yearWinStart || idx >= yearWinStart + YEAR_WIN) centerYearWindow();
-  }
-  function pickYear(v, { focus = false } = {}) {
-    if (!hasYear(v)) return;
-    setSelect(yearSel, v);
-    ensureYearVisible();
-    renderYear();
-    if (focus) { const b = yearChoices.querySelector(`.year-chip[data-value="${v}"]`); if (b) b.focus({ preventScroll: true }); }
-  }
-  function slideYears(dir) {
-    if (yearWinStart === null) centerYearWindow();
-    const next = clampWin(yearWinStart + dir);
-    if (next === yearWinStart) return;
-    yearWinStart = next;
-    yearChoices.dataset.slide = dir > 0 ? 'fwd' : 'back';
-    renderYear(true);
-  }
-  // RTL: the right-hand arrow goes back in time, the left-hand one forward.
-  yearPrev.addEventListener('click', () => slideYears(-1));
-  yearNext.addEventListener('click', () => slideYears(1));
-  yearChoices.addEventListener('click', e => {
-    const b = e.target.closest('.year-chip');
-    if (b) pickYear(b.dataset.value, { focus: true });
-  });
-  let yearTyped = '', yearTypedTimer = null;
-  yearChoices.addEventListener('keydown', e => {
-    const idx = yearValues.indexOf(yearSel.value || currentFiscal);
-    const map = { ArrowLeft: 1, ArrowDown: 1, ArrowRight: -1, ArrowUp: -1 };
-    if (e.key in map) { e.preventDefault(); pickYear(yearValues[Math.max(0, Math.min(yearValues.length - 1, idx + map[e.key]))], { focus: true }); return; }
-    if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); pickYear(e.key === 'Home' ? currentFiscal : yearValues[yearValues.length - 1], { focus: true }); return; }
-    const d = normalizeDigits(e.key);
-    if (/^\d$/.test(d)) {
-      e.preventDefault();
-      clearTimeout(yearTypedTimer);
-      yearTyped = (yearTyped + d).slice(-4);
-      yearTypedTimer = setTimeout(() => { yearTyped = ''; }, 1100);
-      // "26" or "2026" -> the fiscal year ending 2026 (2025-2026)
-      const hit = yearValues.find(v => yearTyped.length >= 2 && v.endsWith(yearTyped));
-      if (hit) pickYear(hit, { focus: true });
-    }
-  });
+  for (let y = +currentFiscal - 3; y <= +currentFiscal + 5; y++) ensureYearOption(String(y));
 
-  function renderYear(animate) {
-    if (yearWinStart === null) centerYearWindow();
-    const win = yearValues.slice(yearWinStart, yearWinStart + YEAR_WIN);
-    const sel = yearSel.value;
-    const tabValue = win.includes(sel) ? sel : (win.includes(currentFiscal) ? currentFiscal : win[0]);
-    const sig = win.join(',') + '|' + sel;
-    if (yearChoices.dataset.sig !== sig) {
-      yearChoices.dataset.sig = sig;
-      yearChoices.innerHTML = win.map(v => {
-        const on = v === sel;
-        const cur = v === currentFiscal;
-        return `<button type="button" class="year-chip${on ? ' is-on' : ''}${cur ? ' is-current' : ''}" role="radio" aria-checked="${on}" data-value="${v}" tabindex="${v === tabValue ? 0 : -1}" aria-label="${+v - 1}-${v}${cur ? ' (الحالية)' : ''}"><span class="yc-a">${+v - 1}</span><span class="yc-sep">–</span><span class="yc-b">${v}</span></button>`;
-      }).join('');
-      if (animate && !reducedMotion()) {
-        yearChoices.classList.remove('is-sliding'); void yearChoices.offsetWidth; yearChoices.classList.add('is-sliding');
+  const suggestStart = String(+currentFiscal - 1);
+  const yDigits = raw => normalizeDigits(raw).replace(/\D/g, '');
+  const yearFocused = () => document.activeElement === yearInput;
+  function sizeYear() { yearInput.style.width = `${yearInput.value.length + 0.12}ch`; }
+  function setTail(start, state) {
+    const ok = validStart(start);
+    if (ok) {
+      const end = String(+start + 1);
+      if (yearEnd.textContent !== end) {
+        const wasOn = yearTail.dataset.state !== 'none';
+        yearEnd.textContent = end;
+        if (wasOn && !reducedMotion()) yearEnd.animate([{ opacity: 0, transform: 'translateY(.4em)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.22,.8,.24,1)' });
       }
     }
-    yearPrev.disabled = yearWinStart <= 0;
-    yearNext.disabled = yearWinStart >= yearValues.length - YEAR_WIN;
-    $('field-year').classList.toggle('is-filled', !!sel);
-    yearHint.innerHTML = !sel ? 'اكتب <b dir="ltr">26</b> لـ 2025-2026'
-      : sel === currentFiscal ? 'السنة الحالية'
-      : `<button type="button" class="link-btn" id="year-today">العودة إلى ${+currentFiscal - 1}-${currentFiscal}</button>`;
+    yearTail.dataset.state = ok ? state : 'none';
+  }
+  function yearPreview() {
+    const d = yDigits(yearInput.value);
+    const ghost = (yearFocused() || !d) && d.length < 4 && suggestStart.startsWith(d) ? suggestStart.slice(d.length) : '';
+    yearGhost.textContent = ghost;
+    if (d.length >= 4) setTail(d.slice(0, 4), 'on');
+    else if (ghost) setTail(d + ghost, 'ghost');
+    else setTail('', 'none');
+    yearType.classList.toggle('is-invalid', d.length >= 4 && !validStart(d.slice(0, 4)));
+  }
+  function commitYearStart(start) {
+    if (!validStart(start)) return false;
+    const v = String(+start + 1);
+    ensureYearOption(v);
+    setSelect(yearSel, v);
+    return true;
+  }
+  function resolveYear(raw) {
+    const d = yDigits(raw);
+    if (d.length >= 4) return d.slice(0, 4);
+    if (d && suggestStart.startsWith(d)) return suggestStart;
+    if (d.length === 2) return '20' + d;
+    return null;
+  }
+  function stepYear(dir) {
+    const v = String(Math.max(Y_LO, Math.min(Y_HI, +(yearSel.value || currentFiscal) + dir)));
+    ensureYearOption(v);
+    setSelect(yearSel, v);
+    yearInput.value = String(+v - 1);
+    sizeYear(); yearPreview(); renderYear();
+    if (yearFocused()) try { yearInput.setSelectionRange(4, 4); } catch (e) {}
+  }
+  function shakeYear() {
+    if (reducedMotion()) return;
+    yearType.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }], { duration: 240 });
+  }
+  function finalizeYear() {
+    const d = yDigits(yearInput.value);
+    if (d && d !== String(+yearSel.value - 1)) {
+      const start = resolveYear(d);
+      if (!commitYearStart(start)) shakeYear();
+    }
+    yearInput.value = yearSel.value ? String(+yearSel.value - 1) : '';
+    sizeYear(); yearPreview(); renderYear();
+  }
+  yearInput.addEventListener('input', e => {
+    let d = yDigits(yearInput.value);
+    // "24" → 2024 instantly (unless it is the beginning of the suggested year, e.g. "20")
+    if (d.length === 2 && !suggestStart.startsWith(d) && (e.inputType || '').startsWith('insert')) d = '20' + d;
+    d = d.slice(0, 4);
+    if (yearInput.value !== d) yearInput.value = d;
+    sizeYear();
+    if (d.length === 4) commitYearStart(d);
+    yearPreview(); renderYearHint();
+  });
+  yearInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); finalizeYear(); advanceFrom(yearInput); }
+    else if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); stepYear(1); }
+    else if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); stepYear(-1); }
+    else if (e.key === 'ArrowRight' && yearGhost.textContent && yearInput.selectionStart === yearInput.value.length) {
+      e.preventDefault(); yearInput.value = suggestStart; sizeYear(); commitYearStart(suggestStart); yearPreview(); renderYearHint();
+    } else if (e.key === 'Escape' && yDigits(yearInput.value) !== String(+yearSel.value - 1)) {
+      e.preventDefault(); e.stopPropagation(); yearInput.value = yearSel.value ? String(+yearSel.value - 1) : ''; sizeYear(); yearPreview(); renderYearHint();
+    }
+  });
+  yearInput.addEventListener('focus', () => { $('field-year').classList.add('is-typing'); yearPreview(); renderYearHint(); requestAnimationFrame(() => yearInput.select()); });
+  yearInput.addEventListener('blur', () => { $('field-year').classList.remove('is-typing'); finalizeYear(); });
+  $('yt-box').addEventListener('pointerdown', e => { if (e.target !== yearInput) { e.preventDefault(); yearInput.focus(); } });
+  yearPrev.addEventListener('click', () => stepYear(-1));
+  yearNext.addEventListener('click', () => stepYear(1));
+
+  function renderYearHint() {
+    const sel = yearSel.value;
+    const d = yDigits(yearInput.value);
+    let html;
+    if (yearFocused() && d.length >= 4 && !validStart(d.slice(0, 4))) html = '<span class="is-bad">سنة غير صالحة</span>';
+    else if (yearFocused()) html = 'اكتب سنة البداية · <kbd>↑</kbd> <kbd>↓</kbd> للتغيير';
+    else if (!sel) html = 'اكتب سنة البداية مثل <b dir="ltr">2024</b>';
+    else if (sel === currentFiscal) html = 'السنة الحالية';
+    else html = `<button type="button" class="link-btn" id="year-today">العودة إلى <span dir="ltr">${+currentFiscal - 1} – ${currentFiscal}</span></button>`;
+    if (yearHint.dataset.html === html) return;
+    yearHint.dataset.html = html;
+    yearHint.innerHTML = html;
     const today = $('year-today');
-    if (today) today.onclick = () => pickYear(currentFiscal, { focus: true });
+    if (today) today.onclick = () => { commitYearStart(suggestStart); renderYear(); };
+  }
+  function renderYear() {
+    const sel = yearSel.value;
+    if (!yearFocused()) {
+      const s = sel ? String(+sel - 1) : '';
+      if (yearInput.value !== s) yearInput.value = s;
+      sizeYear(); yearPreview();
+    }
+    yearPrev.disabled = !!sel && +sel <= Y_LO;
+    yearNext.disabled = !!sel && +sel >= Y_HI;
+    $('field-year').classList.toggle('is-filled', !!sel);
+    renderYearHint();
   }
 
   const choiceSig = new WeakMap();
@@ -551,13 +601,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Enter on any picker confirms it and walks forward: class → year → month → region → pharmacy → quick entry.
   function advanceFrom(container) {
-    const flow = [$('class-group'), yearChoices, monthChoices, regionChoices, pharmacyChoices];
+    const flow = [$('class-group'), yearInput, monthChoices, regionChoices, pharmacyChoices];
     const filled = [() => !!activeClass, () => !!yearSel.value, () => !!monthSel.value, () => !!regionSel.value, () => !!pharmacySel.value];
     const at = flow.indexOf(container);
     for (let k = at + 1; k < flow.length; k++) {
       if (filled[k]() && k !== flow.length - 1) continue;
       const c = flow[k];
-      const btn = c.querySelector('[tabindex="0"]') || c.querySelector('button');
+      const btn = c === yearInput ? c : (c.querySelector('[tabindex="0"]') || c.querySelector('button'));
       if (btn) {
         btn.focus({ preventScroll: true });
         btn.closest('.field, .class-grid')?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
@@ -572,13 +622,6 @@ document.addEventListener('DOMContentLoaded', () => {
     $('quick-entry').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
     groupSearch.focus({ preventScroll: true });
   }
-  yearChoices.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && e.target.closest('.year-chip')) {
-      e.preventDefault();
-      if (yearSel.value !== e.target.dataset.value) pickYear(e.target.dataset.value);
-      advanceFrom(yearChoices);
-    }
-  });
   classBtns.forEach(btn => btn.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
@@ -872,14 +915,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (p.kind === 'bad' || p.kind === 'nomatch') { renderPreview(); rejectEntry(); return; }
     if (p.kind === 'skip') { setTarget(nextAfter(target), { scroll: true }); return; }
     if (p.kind === 'goto') { clearSearch(); setTarget(p.index, { scroll: true }); return; }
-    const prev = cardValues[p.index];
-    pushHistory(p.index, prev, p.value);
-    writeCard(p.index, String(p.value), { format: true });
     clearSearch();
-    refresh(); save();
-    flashCard(p.index);
-    showLast(p.index, prev, p.value);
+    applyGroup(p.index, p.value);
     setTarget(nextAfter(p.index), { scroll: true });
+  }
+  // Shared by the quick-entry line and the command palette.
+  function applyGroup(i, value) {
+    const prev = cardValues[i];
+    pushHistory(i, prev, value);
+    writeCard(i, String(value), { format: true });
+    refresh(); save();
+    flashCard(i);
+    showLast(i, prev, value);
+    return prev;
   }
 
   groupSearch.addEventListener('input', () => {
@@ -993,7 +1041,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function missingList() {
     const m = [];
     if (!activeClass) m.push({ label: 'الفئة', el: classBtns[0], step: 'step-class' });
-    if (!yearSel.value) m.push({ label: 'السنة', el: yearChoices.querySelector('.year-chip[tabindex="0"]') || yearChoices, step: 'step-fields' });
+    if (!yearSel.value) m.push({ label: 'السنة', el: yearInput, step: 'step-fields' });
     if (!monthSel.value) m.push({ label: 'الشهر', el: firstChoice(monthChoices), step: 'step-fields' });
     if (!regionSel.value) m.push({ label: 'المنطقة', el: firstChoice(regionChoices), step: 'step-fields' });
     if (!pharmacySel.value) m.push({ label: 'الصيدلية', el: firstChoice(pharmacyChoices), step: 'step-fields' });
@@ -1213,7 +1261,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setClass(null);
     selects.forEach(s => { s.value = ''; });
     if (hasYear(currentFiscal)) yearSel.value = currentFiscal;
-    centerYearWindow();
     updatePharmacyDropdown('');
     cardValues.fill(0);
     drugInputs.forEach(i => { i.value = ''; });
@@ -1253,7 +1300,6 @@ document.addEventListener('DOMContentLoaded', () => {
   (function initEntry() {
     // Fresh sheet: preselect the current fiscal year (one less decision); saved year always wins.
     if (!yearSel.value && hasYear(currentFiscal)) { yearSel.value = currentFiscal; save(); }
-    centerYearWindow();
     const firstEmpty = cardValues.findIndex(v => !(v > 0));
     setTarget(firstEmpty === -1 ? 0 : firstEmpty);
     refresh();
@@ -1483,4 +1529,347 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   renderFileList();
+
+  /* ───────────── Command palette (Ctrl/⌘ K) ─────────────
+     One box to find and edit anything:
+       قلب 4500      → set a group         4500 → set the current target group
+       5=4500        → set group #5        2024 → fiscal year 2024 – 2025
+       مارس / دمنهور → pick month / any pharmacy (class + region follow automatically)
+       تذاكر 1200    → totals              فاتح / بطاقات / إرسال → commands
+     Enter applies and keeps the palette open for the next edit; Esc closes. */
+  const pal = $('palette');
+  const palInput = $('pal-input');
+  const palList = $('pal-list');
+  const palBody = $('pal-body');
+  const palHl = $('pal-hl');
+  const palEmpty = $('pal-empty');
+  const palFlash = $('pal-flash');
+  const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent || '');
+  const modK = isMac ? '⌘ K' : 'Ctrl K';
+  document.querySelectorAll('.js-cmdk, #cmd-trigger-kbd').forEach(k => { k.textContent = modK; });
+  $('pal-keys').innerHTML = '<span><kbd>↑↓</kbd>تنقّل</span><span><kbd>↵</kbd>تطبيق</span><span><kbd>Tab</kbd>إكمال</span><span><kbd>Esc</kbd>إغلاق</span>';
+
+  const svg = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const PICON = {
+    class: svg('<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-4 3.8-6 7-6s6 2 7 6"/>'),
+    year: svg('<rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 10h16M8.5 3.5v3M15.5 3.5v3"/>'),
+    month: svg('<rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 10h16M9 14h.01M12 14h.01M15 14h.01"/>'),
+    region: svg('<path d="M12 20s6-5.4 6-10.2A6 6 0 0 0 6 9.8C6 14.6 12 20 12 20z"/><circle cx="12" cy="10" r="2"/>'),
+    pharmacy: svg('<rect x="3.5" y="9" width="17" height="7" rx="3.5" transform="rotate(-35 12 12.5)"/><path d="m10 8.8 4.2 6"/>'),
+    total: svg('<path d="M17 5H7l6 7-6 7h10"/>'),
+    action: svg('<path d="M13 3.5 6 13h5.5l-1 7.5L18 11h-5.5z"/>'),
+    hint: svg('<path d="M5 12h12M13 7l5 5-5 5"/>'),
+    error: svg('<circle cx="12" cy="12" r="8.5"/><path d="M12 8v4.5M12 16h.01"/>')
+  };
+  const KIND = { group: 'مجموعة', class: 'فئة', year: 'سنة', month: 'شهر', region: 'منطقة', pharmacy: 'صيدلية', total: 'إجمالي', action: 'أمر', hint: 'التالي' };
+  const P = { items: [], active: -1, returnFocus: null, closing: false };
+
+  const regionLabel = v => regionSel.querySelector(`option[value="${v}"]`)?.text || '';
+  const classLabel = k => classBtnFor(k)?.dataset.label || '';
+  const pad2 = n => String(n).padStart(2, '0');
+
+  // Fuzzy scoring: every query word must hit the title (or keywords, slightly penalised).
+  function wordScore(w, s) {
+    if (s.startsWith(w)) return 0;
+    if ((' ' + s).includes(' ' + w)) return 1;
+    if (s.includes(w)) return 2;
+    if (w.length > 2) { let k = 0; for (const ch of s) if (ch === w[k]) k++; if (k === w.length) return 4; }
+    return Infinity;
+  }
+  function textScore(q, title, kw = '') {
+    const t = foldArabic(title), k = foldArabic(kw), f = foldArabic(q);
+    if (!f) return 0;
+    if (t === f) return -2;
+    if (t.startsWith(f)) return -1;
+    let total = 0;
+    for (const w of f.split(' ')) {
+      const s = Math.min(wordScore(w, t), wordScore(w, k) + 0.6);
+      if (s === Infinity) return null;
+      total += s;
+    }
+    return total;
+  }
+
+  function prefill(text) { palInput.value = text; palRender(); palInput.focus(); try { palInput.setSelectionRange(text.length, text.length); } catch (e) {} }
+  function done(html) {
+    palFlash.innerHTML = html;
+    if (!reducedMotion()) palFlash.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.22,.8,.24,1)' });
+    palInput.value = '';
+    palRender();
+  }
+  const ok = s => `<span class="pf-ok">${ICONS.check}</span>${s}`;
+
+  /* item factories */
+  function groupItem(i, browse) {
+    const v = cardValues[i];
+    return { kind: 'group', badge: pad2(i + 1), title: cardNames[i], kw: `مجموعه ${i + 1}`, on: i === target && browse,
+      sub: browse && i === target ? 'الهدف الحالي' : '', val: v > 0 ? groupNum(v) : '—', dim: !(v > 0),
+      complete: cardNames[i] + ' ', run: () => prefill(cardNames[i] + ' ') };
+  }
+  function setGroupItem(i, expr, score, isTarget) {
+    const v = evalExpr(expr, cardValues[i]);
+    if (!v) return null;
+    if (v.error) return { kind: 'error', title: cardNames[i], sub: v.error, score, disabled: true };
+    const prev = cardValues[i];
+    const sub = (v.relative ? `${groupNum(prev)} ${expr.trim()[0] === '-' ? '−' : '+'} …` : prev > 0 ? `بدلًا من ${groupNum(prev)}` : 'فارغة الآن') + (isTarget ? ' · المجموعة الحالية' : '');
+    return { kind: 'group', badge: pad2(i + 1), title: cardNames[i], sub, val: groupNum(v.value), strong: true, score,
+      run: () => { applyGroup(i, v.value); setTarget(nextAfter(i)); done(ok(`${escapeHTML(cardNames[i])} ← <b dir="ltr">${groupNum(v.value)}</b>`)); } };
+  }
+  function yearItem(start, score, sub) {
+    const s = +start;
+    const on = yearSel.value === String(s + 1);
+    return { kind: 'year', title: `<span dir="ltr">${s} – ${s + 1}</span>`, html: true, plain: `${s}`, kw: 'سنه ماليه عام', on, score,
+      sub: sub || (String(s + 1) === currentFiscal ? 'السنة الحالية' : ''),
+      run: () => { commitYearStart(String(s)); renderYear(); done(ok(`السنة المالية <b dir="ltr">${s} – ${s + 1}</b>`)); } };
+  }
+  function totalItems(expr, q, score0) {
+    return optionalInputs.map(inp => {
+      const title = inp.closest('.total-field').querySelector('.total-field-head').childNodes[2].textContent.trim();
+      const s = q ? textScore(q, title, 'اجمالي تذاكر خارجي') : 0;
+      if (s === null) return null;
+      if (expr != null) {
+        const d = normalizeDigits(expr).replace(/[^\d]/g, '');
+        if (!d) return null;
+        const n = Math.min(+d, MAX_OPTIONAL);
+        return { kind: 'total', title, sub: inp.value ? `بدلًا من ${inp.value}` : 'اختياري', val: n.toLocaleString('en-US'), strong: true, score: s + score0,
+          run: () => { inp.value = String(n); inp.dispatchEvent(new Event('input')); done(ok(`${escapeHTML(title)} ← <b dir="ltr">${n.toLocaleString('en-US')}</b>`)); } };
+      }
+      return { kind: 'total', title, sub: 'اكتب الرقم بعد الاسم', val: inp.value ? (+inp.value).toLocaleString('en-US') : '—', dim: !inp.value, score: s + score0, complete: title + ' ', run: () => prefill(title + ' ') };
+    }).filter(Boolean);
+  }
+  function choiceItems() {
+    const items = [];
+    classBtns.forEach(b => items.push({ kind: 'class', title: b.dataset.label, sub: b.querySelector('.class-desc').textContent, kw: 'فئه', on: b.dataset.class === activeClass,
+      run: () => { if (b.dataset.class !== activeClass) { setClass(b.dataset.class); refresh(); save(); } done(ok(`الفئة: ${escapeHTML(b.dataset.label)}`)); } }));
+    Array.from(monthSel.options).filter(o => o.value).forEach(o => items.push({ kind: 'month', badge: o.value, title: o.text, kw: `شهر ${o.value}`, on: monthSel.value === o.value,
+      sub: o.value === suggestedMonth ? 'الشهر السابق' : '',
+      run: () => { setSelect(monthSel, o.value); done(ok(`الشهر: ${escapeHTML(o.text)}`)); } }));
+    Array.from(regionSel.options).filter(o => o.value).forEach(o => items.push({ kind: 'region', title: `المنطقة ${o.text}`, kw: 'منطقه', on: regionSel.value === o.value,
+      run: () => { setSelect(regionSel, o.value); done(ok(`المنطقة ${escapeHTML(o.text)}`)); } }));
+    Object.entries(pharmacyOptions).forEach(([cls, regions]) => Object.entries(regions).forEach(([reg, list]) => list.forEach((name, idx) => {
+      const here = cls === activeClass && reg === regionSel.value;
+      const on = here && pharmacySel.value === String(idx + 1);
+      const sent = here && isSent(String(idx + 1));
+      items.push({ kind: 'pharmacy', title: name, kw: `صيدليه ${classLabel(cls)} ${regionLabel(reg)}`, on, boost: here ? -0.5 : cls === activeClass ? -0.25 : 0,
+        sub: `${classLabel(cls)} · المنطقة ${regionLabel(reg)}${sent ? ' · أُرسلت' : ''}`,
+        run: () => {
+          if (cls !== activeClass) setClass(cls, { keepPharmacy: true });
+          regionSel.value = reg;
+          updatePharmacyDropdown(String(idx + 1));
+          refresh(); save();
+          done(ok(`الصيدلية: ${escapeHTML(name)}`));
+        } });
+    })));
+    return items;
+  }
+  function actionItems() {
+    const close = fn => () => { closePal(false); fn(); };
+    const ready = missingList().length === 0;
+    return [
+      { kind: 'action', title: 'إرسال البيانات', kw: 'ارسال submit send', sub: ready ? 'جاهز' : `ينقص ${missingList().length}`, run: close(() => submitBtn.click()) },
+      { kind: 'action', title: 'الانتقال إلى أول مجموعة فارغة', kw: 'فارغه التالي', run: close(() => dockGroups.click()) },
+      { kind: 'action', title: 'سطر الإدخال السريع', kw: 'ادخال سريع', run: close(goToEntry) },
+      { kind: 'action', title: 'تراجع عن آخر إدخال', kw: 'تراجع undo', sub: history.length ? '' : 'لا يوجد', run: () => { const had = history.length; undo(); if (had) done(ok('تم التراجع')); } },
+      { kind: 'action', title: 'عرض المجموعات الفارغة فقط', kw: 'تصفيه فارغه', run: close(() => { setGroupFilter('empty'); $('step-groups').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' }); }) },
+      { kind: 'action', title: 'عرض الدفتر', kw: 'قائمه list view', on: cardsContainer.classList.contains('is-list'), run: () => { setView('list', true); done(ok('عرض الدفتر')); } },
+      { kind: 'action', title: 'عرض البطاقات', kw: 'شبكه grid view', on: cardsContainer.classList.contains('is-grid'), run: () => { setView('grid', true); done(ok('عرض البطاقات')); } },
+      { kind: 'action', title: 'المظهر الفاتح', kw: 'فاتح light theme', on: docEl.dataset.themePref === 'light', run: () => { applyTheme('light', true); done(ok('المظهر الفاتح')); } },
+      { kind: 'action', title: 'المظهر الداكن', kw: 'داكن dark theme ليلي', on: docEl.dataset.themePref === 'dark', run: () => { applyTheme('dark', true); done(ok('المظهر الداكن')); } },
+      { kind: 'action', title: 'المظهر التلقائي', kw: 'تلقائي system theme', on: docEl.dataset.themePref === 'system', run: () => { applyTheme('system', true); done(ok('المظهر التلقائي')); } },
+      { kind: 'action', title: 'رفع دفعة من الملفات', kw: 'رفع upload excel csv', run: close(() => { setUploadOpen(true); uploadToggle.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' }); }) },
+      { kind: 'action', title: 'إعادة تعيين النموذج', kw: 'مسح reset', danger: true, disabled: resetBtn.disabled, run: close(() => resetBtn.click()) }
+    ];
+  }
+  function hintItems() {
+    const map = { 'الفئة': 'فئة ', 'السنة': 'سنة ', 'الشهر': 'شهر ', 'المنطقة': 'منطقة ', 'الصيدلية': 'صيدلية ' };
+    return missingList().filter(m => map[m.label]).map(m => ({ kind: 'hint', title: `اختر ${m.label}`, sub: 'اكتب للبحث', complete: map[m.label], run: () => prefill(map[m.label]) }));
+  }
+
+  function palItems(raw) {
+    const q = toLatin(raw).replace(/\s+/g, ' ').trim();
+    if (!q) {
+      const out = [];
+      const hints = hintItems();
+      if (hints.length) out.push({ head: 'التالي' }, ...hints);
+      out.push({ head: 'المجموعات الدوائية' }, ...cardNames.map((_, i) => groupItem(i, true)));
+      out.push({ head: 'أوامر' }, ...actionItems());
+      return out;
+    }
+    const res = [];
+    const push = it => { if (it) res.push(it); };
+    let m = q.match(/^#?(\d{1,2})\s*[=:]\s*(.+)$/);
+    if (m && +m[1] >= 1 && +m[1] <= cardNames.length) return [setGroupItem(+m[1] - 1, m[2], 0)].filter(Boolean);
+    m = q.match(/^(.*?)\s*([+\-]?\d[\d.,+\-\s]*)$/);
+    const hasLetters = /\p{L}/u.test(q);
+    const text = m && /\p{L}/u.test(m[1]) ? m[1].trim() : (hasLetters && !m ? q : '');
+    const num = m ? m[2].trim() : '';
+    const yearM = num.match(/^(\d{4})(?:\s*[-–\/]\s*\d{2,4})?$/);
+
+    if (num && text) {
+      findGroups(text).slice(0, 6).forEach((i, k) => push(setGroupItem(i, num, k * 0.1)));
+      totalItems(num, text, 0.2).forEach(push);
+      const ys = textScore(text, 'سنه ماليه', 'عام');
+      if (ys !== null && yearM && validStart(yearM[1])) push(yearItem(yearM[1], ys));
+      const ms = textScore(text, 'شهر');
+      if (ms !== null && /^\d{1,2}$/.test(num) && +num >= 1 && +num <= 12) {
+        const o = monthSel.options[+num];
+        push({ kind: 'month', badge: num, title: o.text, score: ms, on: monthSel.value === num, run: () => { setSelect(monthSel, num); done(ok(`الشهر: ${escapeHTML(o.text)}`)); } });
+      }
+    } else if (num && !hasLetters) {
+      if (yearM && /[-–\/]/.test(num) && validStart(yearM[1])) push(yearItem(yearM[1], -1));
+      else {
+        push(setGroupItem(target, num, 0, true));
+        if (yearM && validStart(yearM[1])) push(yearItem(yearM[1], 0.5, 'السنة المالية'));
+        if (/^\d{1,2}$/.test(num) && +num >= 1 && +num <= cardNames.length) push({ ...groupItem(+num - 1, false), score: 0.8, sub: 'انتقال إلى المجموعة', run: () => { setTarget(+num - 1); prefill(cardNames[+num - 1] + ' '); } });
+      }
+    } else {
+      const pool = [
+        ...cardNames.map((_, i) => groupItem(i, false)),
+        ...choiceItems(),
+        ...totalItems(null, null, 0),
+        ...actionItems().map(a => ({ ...a, boost: 0.3 }))
+      ];
+      const yq = textScore(text, 'سنه ماليه', 'عام');
+      if (yq !== null) [-1, 0, 1].forEach(d => pool.push({ ...yearItem(String(+suggestStart + d), 0), boost: Math.abs(d) * 0.05 }));
+      pool.forEach(it => {
+        const s = it.kind === 'year' ? yq : textScore(text, it.plain || it.title, it.kw);
+        if (s === null || s === undefined) return;
+        it.score = s + (it.boost || 0);
+        res.push(it);
+      });
+    }
+    return res.sort((a, b) => (a.score ?? 0) - (b.score ?? 0)).slice(0, 40);
+  }
+
+  function itemHTML(it, i) {
+    if (it.head) return `<li class="pal-sec" role="presentation">${escapeHTML(it.head)}</li>`;
+    const icon = it.badge ? `<span class="pi-badge">${escapeHTML(it.badge)}</span>` : (PICON[it.kind] || PICON.action);
+    const title = it.html ? it.title : escapeHTML(it.title);
+    return `<li class="pal-item pi-${it.kind}${it.on ? ' is-on' : ''}${it.disabled ? ' is-disabled' : ''}${it.danger ? ' is-danger' : ''}" role="option" id="pal-opt-${i}" data-i="${i}" aria-selected="false"${it.disabled ? ' aria-disabled="true"' : ''}>`
+      + `<span class="pi-icon">${icon}</span>`
+      + `<span class="pi-main"><span class="pi-title">${title}</span>${it.sub ? `<span class="pi-sub">${escapeHTML(it.sub)}</span>` : ''}</span>`
+      + (it.val ? `<span class="pi-val${it.strong ? ' is-strong' : ''}${it.dim ? ' is-dim' : ''}" dir="ltr">${escapeHTML(it.val)}</span>` : '')
+      + (it.on ? `<span class="pi-check">${ICONS.check}</span>` : '')
+      + (P.flat ? `<span class="pi-kind">${KIND[it.kind] || ''}</span>` : '')
+      + `</li>`;
+  }
+
+  function palRender(instant) {
+    const raw = palInput.value;
+    P.flat = !!raw.trim();
+    P.items = palItems(raw);
+    palList.innerHTML = P.items.map(itemHTML).join('');
+    const has = P.items.some(it => !it.head);
+    palEmpty.hidden = has;
+    if (!has) palEmpty.innerHTML = /\d/.test(raw) ? 'صيغة غير مفهومة — جرّب <b>قلب 4500</b> أو <b dir="ltr">5=4500</b>' : `لا نتائج لـ «${escapeHTML(raw.trim())}»`;
+    const first = P.items.findIndex(it => !it.head && !it.disabled);
+    setActive(first === -1 ? P.items.findIndex(it => !it.head) : first, { instant: true, scroll: 'top' });
+  }
+
+  function setActive(i, { instant = false, scroll = 'nearest' } = {}) {
+    P.active = i;
+    palList.querySelectorAll('[aria-selected="true"]').forEach(el => el.setAttribute('aria-selected', 'false'));
+    const el = i >= 0 ? palList.querySelector(`[data-i="${i}"]`) : null;
+    if (!el) { palHl.style.opacity = '0'; palInput.removeAttribute('aria-activedescendant'); return; }
+    el.setAttribute('aria-selected', 'true');
+    palInput.setAttribute('aria-activedescendant', el.id);
+    palHl.classList.toggle('no-anim', instant);
+    palHl.style.opacity = '1';
+    palHl.style.transform = `translateY(${el.offsetTop}px)`;
+    palHl.style.height = `${el.offsetHeight}px`;
+    if (instant) { void palHl.offsetWidth; palHl.classList.remove('no-anim'); }
+    if (scroll === 'top') { palBody.scrollTop = 0; return; }
+    const top = el.offsetTop, bottom = top + el.offsetHeight, pad = 28;
+    if (top - pad < palBody.scrollTop) palBody.scrollTop = Math.max(0, top - pad - (el.previousElementSibling?.classList.contains('pal-sec') ? 30 : 0));
+    else if (bottom + 8 > palBody.scrollTop + palBody.clientHeight) palBody.scrollTop = bottom + 8 - palBody.clientHeight;
+  }
+  function moveActive(dir) {
+    const sel = P.items.map((it, i) => (!it.head ? i : -1)).filter(i => i !== -1);
+    if (!sel.length) return;
+    const at = sel.indexOf(P.active);
+    setActive(sel[(at + dir + sel.length) % sel.length]);
+  }
+  function runActive() {
+    const it = P.items[P.active];
+    if (!it || it.head) { rejectPal(); return; }
+    if (it.disabled) { rejectPal(); return; }
+    const el = palList.querySelector(`[data-i="${P.active}"]`);
+    if (el && !reducedMotion()) el.animate([{ transform: 'scale(1)' }, { transform: 'scale(.985)' }, { transform: 'scale(1)' }], { duration: 180, easing: 'ease-out' });
+    it.run();
+  }
+  function rejectPal() {
+    if (reducedMotion()) return;
+    pal.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-5px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }], { duration: 240, composite: 'add' });
+  }
+
+  function openPal(text = '') {
+    if (pal.open) { palInput.focus(); palInput.select(); return; }
+    P.returnFocus = document.activeElement;
+    palFlash.textContent = '';
+    palInput.value = text;
+    pal.classList.remove('is-closing');
+    pal.showModal();
+    palRender(true);
+    palInput.focus();
+  }
+  function closePal(restore = true) {
+    if (!pal.open || P.closing) return;
+    P.closing = true;
+    const finish = () => {
+      pal.close();
+      pal.classList.remove('is-closing');
+      P.closing = false;
+      const back = P.returnFocus;
+      if (restore && back && document.contains(back) && back !== document.body) back.focus({ preventScroll: true });
+    };
+    if (reducedMotion()) finish();
+    else { pal.classList.add('is-closing'); setTimeout(finish, 150); }
+  }
+
+  palInput.addEventListener('input', () => { palFlash.textContent = ''; palRender(); });
+  palInput.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); moveActive(e.key === 'ArrowDown' ? 1 : -1); }
+    else if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); runActive(); }
+    else if (e.key === 'Tab') {
+      const it = P.items[P.active];
+      e.preventDefault();
+      if (it && it.complete && palInput.value !== it.complete) prefill(it.complete);
+      else moveActive(e.shiftKey ? -1 : 1);
+    } else if (e.key === 'Escape') {
+      e.preventDefault(); e.stopPropagation();
+      if (palInput.value) { palInput.value = ''; palRender(); } else closePal();
+    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !palInput.value) {
+      e.preventDefault(); const had = history.length; undo(); if (had) done(ok('تم التراجع'));
+    }
+  });
+  pal.addEventListener('cancel', e => { e.preventDefault(); if (palInput.value) { palInput.value = ''; palRender(); } else closePal(); });
+  let palPointer = null;
+  palList.addEventListener('pointermove', e => {
+    // ignore synthetic moves caused by scrolling under a still pointer
+    if (palPointer && palPointer.x === e.clientX && palPointer.y === e.clientY) return;
+    palPointer = { x: e.clientX, y: e.clientY };
+    const li = e.target.closest('.pal-item');
+    if (li && +li.dataset.i !== P.active) setActive(+li.dataset.i, { scroll: 'none' });
+  });
+  palList.addEventListener('click', e => {
+    const li = e.target.closest('.pal-item');
+    if (!li) return;
+    setActive(+li.dataset.i, { scroll: 'none' });
+    runActive();
+    if (pal.open && !(window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) palInput.focus({ preventScroll: true });
+  });
+  pal.addEventListener('pointerdown', e => {
+    if (e.target !== pal) return;
+    const r = pal.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) closePal();
+  });
+  $('pal-close').addEventListener('click', () => closePal());
+  $('cmd-trigger').addEventListener('click', () => openPal());
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyK' || e.key.toLowerCase() === 'k')) {
+      if (document.querySelector('dialog[open]:not(#palette)')) return;
+      e.preventDefault();
+      pal.open ? closePal() : openPal();
+    }
+  });
 });
