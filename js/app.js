@@ -37,19 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const yearEnd = $('yt-end');
   const yearType = $('year-type');
   const yearHint = $('year-hint');
-  const qeName = $('qe-name');
-  const qeIndex = $('qe-index');
-  const qeCurrent = $('qe-current');
-  const qePreview = $('qe-preview');
-  const qeLast = $('qe-last');
-  const qeProgress = $('qe-progress');
-  const qeTarget = $('qe-target');
   const monthChoices = $('month-choices');
   const regionChoices = $('region-choices');
   const pharmacyChoices = $('pharmacy-choices');
   const pharmacyHint = $('pharmacy-hint');
-  const groupSearch = $('group-search');
-  const searchClear = $('search-clear');
   const groupsEmpty = $('groups-empty');
   const filterBtns = Array.from(document.querySelectorAll('#group-filter .seg-btn'));
   const viewBtns = Array.from(document.querySelectorAll('#view-switch .seg-btn'));
@@ -134,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let isSubmitting = false;
   let lastTotal = 0;
   let groupFilter = 'all';
-  let groupQuery = '';
 
   const darkMql = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   const resolveTheme = mode => mode === 'system' ? (darkMql && darkMql.matches ? 'dark' : 'light') : mode;
@@ -763,10 +753,14 @@ document.addEventListener('DOMContentLoaded', () => {
     goToEntry();
   }
   function goToEntry() {
-    const firstEmpty = cardValues.findIndex(v => !(v > 0));
-    setTarget(firstEmpty === -1 ? target : firstEmpty);
-    $('quick-entry').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
-    groupSearch.focus({ preventScroll: true });
+    const empty = cardValues.findIndex(v => !(v > 0));
+    if (empty === -1) {
+      $('step-totals').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+      setTimeout(() => totalTicketsInput.focus({ preventScroll: true }), reducedMotion() ? 0 : 320);
+      return;
+    }
+    setTarget(empty);
+    jumpToGroup(empty);
   }
   classBtns.forEach(btn => btn.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
@@ -838,7 +832,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (inp.value !== raw) inp.value = raw;
     fitChars(inp, inp.value);
     inp.select();
-    setTarget(idx, { fromCard: true });
+    setTarget(idx);
   });
   cardsContainer.addEventListener('click', e => {
     const btn = e.target.closest('.group-clear');
@@ -877,10 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const v = cardValues[+card.dataset.index];
     if (groupFilter === 'filled' && !(v > 0)) return false;
     if (groupFilter === 'empty' && v > 0) return false;
-    if (!groupQuery) return true;
-    const q = foldArabic(normalizeDigits(groupQuery).replace(/^0+(?=\d)/, ''));
-    if (/^\d+$/.test(q)) return String(+card.dataset.index + 1) === q || String(+card.dataset.index + 1).startsWith(q);
-    return card.dataset.search.includes(q);
+    return true;
   }
   function applyGroupFilter() {
     const active = document.activeElement;
@@ -892,7 +883,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (show) shown++;
     });
     groupsEmpty.hidden = shown > 0;
-    cardsContainer.classList.toggle('is-filtered', !!groupQuery || groupFilter !== 'all');
+    cardsContainer.classList.toggle('is-filtered', groupFilter !== 'all');
   }
   function setGroupFilter(f) {
     groupFilter = f;
@@ -937,17 +928,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const nextAfter = i => (i + 1 < cardNames.length ? i + 1 : (cardValues.findIndex(v => !(v > 0)) + 1 || cardNames.length) - 1);
   const groupNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 3 });
 
-  function setTarget(i, { fromCard = false, scroll = false } = {}) {
+  function setTarget(i, { scroll = false } = {}) {
     target = Math.max(0, Math.min(cardNames.length - 1, i));
     groupCards.forEach((c, k) => c.classList.toggle('is-target', k === target));
-    qeIndex.textContent = String(target + 1).padStart(2, '0');
-    qeName.textContent = cardNames[target];
-    qeCurrent.textContent = cardValues[target] > 0 ? groupNum(cardValues[target]) : '';
-    qeTarget.classList.toggle('has-value', cardValues[target] > 0);
-    if (!fromCard) renderPreview();
     if (scroll) {
       const card = groupCards[target];
-      if (card.hidden) { groupQuery = ''; applyGroupFilter(); }
+      if (card.hidden) { setGroupFilter('all'); }
       card.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
     }
   }
@@ -955,126 +941,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-  function renderPreview() {
-    const raw = groupSearch.value;
-    const p = parseEntry(raw);
-    let html = '';
-    qePreview.className = 'qe-preview';
-    if (!raw.trim()) {
-      html = cardValues[target] > 0
-        ? `<span class="qp-dim">القيمة الحالية</span> <b class="qp-num" dir="ltr">${groupNum(cardValues[target])}</b> <span class="qp-dim">· اكتب لتغييرها، أو <kbd>↵</kbd> للتالي</span>`
-        : `<span class="qp-dim">اكتب قيمة «${escapeHTML(cardNames[target])}» ثم <kbd>↵</kbd></span>`;
-    } else if (p.kind === 'set') {
-      const prev = cardValues[p.index];
-      const elsewhere = p.index !== target;
-      html = `${elsewhere ? `<span class="qp-to">${escapeHTML(cardNames[p.index])}</span> ` : ''}`
-        + (p.compound ? `<span class="qp-dim" dir="ltr">${p.relative ? groupNum(prev) + ' → ' : '= '}</span>` : '')
-        + `<b class="qp-num" dir="ltr">${groupNum(p.value)}</b>`
-        + (prev > 0 && !p.relative ? ` <span class="qp-dim">بدلًا من <span dir="ltr">${groupNum(prev)}</span></span>` : '');
-      qePreview.classList.add('is-set');
-    } else if (p.kind === 'goto') {
-      html = `<span class="qp-dim">انتقال إلى</span> <span class="qp-to">${escapeHTML(cardNames[p.index])}</span>${p.more ? ` <span class="qp-dim">(+${p.more} مطابقة)</span>` : ''} <span class="qp-dim">· أضف الرقم للإدخال مباشرة</span>`;
-    } else if (p.kind === 'nomatch') {
-      html = `<span class="qp-err">لا توجد مجموعة باسم «${escapeHTML(p.query)}»</span>`;
-      qePreview.classList.add('is-err');
-    } else if (p.kind === 'bad') {
-      html = `<span class="qp-err">${escapeHTML(p.msg || 'صيغة غير مفهومة')}</span>`;
-      qePreview.classList.add('is-err');
-    }
-    qePreview.innerHTML = html;
-  }
-
-  function showLast(i, prev, next) {
-    qeLast.hidden = false;
-    qeLast.innerHTML = `<span class="ql-name">${escapeHTML(cardNames[i])}</span><b dir="ltr">${next > 0 ? groupNum(next) : '—'}</b><button type="button" class="link-btn" id="qe-undo">تراجع <kbd>Ctrl Z</kbd></button>`;
-    $('qe-undo').onclick = () => { undo(); groupSearch.focus(); };
-    qeLast.classList.remove('is-new'); void qeLast.offsetWidth; qeLast.classList.add('is-new');
-  }
   function flashCard(i) {
     const card = groupCards[i];
     card.classList.remove('is-landed'); void card.offsetWidth; card.classList.add('is-landed');
   }
   function undo() { return A.undo(); }
-  function rejectEntry() {
-    if (reducedMotion()) return;
-    $('quick-entry').animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-5px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }], { duration: 260 });
-  }
-
-  function commitEntry() {
-    const p = parseEntry(groupSearch.value);
-    if (p.kind === 'bad' || p.kind === 'nomatch') { renderPreview(); rejectEntry(); return; }
-    if (p.kind === 'skip') { setTarget(nextAfter(target), { scroll: true }); return; }
-    if (p.kind === 'goto') { clearSearch(); setTarget(p.index, { scroll: true }); return; }
-    clearSearch();
-    applyGroup(p.index, p.value);
-    setTarget(nextAfter(p.index), { scroll: true });
-  }
   function applyGroup(i, value) {
     const prev = A.setGroup(i, value);
     flashCard(i);
-    showLast(i, prev, value);
     return prev;
   }
 
-  groupSearch.addEventListener('input', () => {
-    const raw = groupSearch.value;
-    searchClear.hidden = !raw;
-    const nameOnly = /\p{L}/u.test(raw) && !/\d/.test(toLatin(raw)) ? raw.trim() : '';
-    if (nameOnly !== groupQuery) { groupQuery = nameOnly; applyGroupFilter(); }
-    renderPreview();
-  });
-  groupSearch.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
-      if (e.shiftKey && !groupSearch.value.trim()) { setTarget(target - 1, { scroll: true }); return; }
-      commitEntry();
-    } else if (e.key === 'Escape') {
-      if (groupSearch.value) { e.preventDefault(); clearSearch(); }
-    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      setTarget(target + (e.key === 'ArrowDown' ? 1 : -1), { scroll: true });
-    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !groupSearch.value) {
-      e.preventDefault();
-      undo();
-    } else if (e.key === 'Tab' && !e.shiftKey && groupSearch.value) {
-      const p = parseEntry(groupSearch.value);
-      if (p.kind === 'goto') { e.preventDefault(); clearSearch(); setTarget(p.index, { scroll: true }); }
-    }
-  });
-  $('qe-go').addEventListener('click', () => { commitEntry(); groupSearch.focus({ preventScroll: true }); });
-  $('qe-prev').addEventListener('click', () => { setTarget(target - 1, { scroll: true }); groupSearch.focus({ preventScroll: true }); });
-  $('qe-next').addEventListener('click', () => { setTarget(target + 1, { scroll: true }); groupSearch.focus({ preventScroll: true }); });
-  const qeKbd = $('qe-kbd');
-  qeKbd.addEventListener('click', e => {
-    e.preventDefault();
-    const text = groupSearch.inputMode !== 'text';
-    groupSearch.inputMode = text ? 'text' : 'decimal';
-    qeKbd.textContent = text ? '123' : 'أ';
-    groupSearch.blur(); groupSearch.focus();
-  });
-
-  function clearSearch() {
-    groupSearch.value = '';
-    groupQuery = '';
-    searchClear.hidden = true;
-    applyGroupFilter();
-    renderPreview();
-  }
-  searchClear.addEventListener('click', () => { clearSearch(); groupSearch.focus(); });
-  $('groups-empty-reset').addEventListener('click', () => { clearSearch(); setGroupFilter('all'); });
+  $('groups-empty-reset').addEventListener('click', () => setGroupFilter('all'));
 
   function jumpToGroup(i) {
     const card = groupCards[i];
-    if (card.hidden) { clearSearch(); setGroupFilter('all'); }
+    if (card.hidden) setGroupFilter('all');
     card.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
     card.classList.remove('needs-attention'); void card.offsetWidth; card.classList.add('needs-attention');
     setTimeout(() => drugInputs[i].focus({ preventScroll: true }), reducedMotion() ? 0 : 320);
   }
-  dockGroups.addEventListener('click', () => {
-    const empty = cardValues.findIndex(v => !(v > 0));
-    if (empty === -1) { $('step-totals').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' }); setTimeout(() => totalTicketsInput.focus({ preventScroll: true }), 300); return; }
-    jumpToGroup(empty);
-  });
+  dockGroups.addEventListener('click', goToEntry);
 
   optionalInputs.forEach(inp => {
     inp.addEventListener('input', () => {
@@ -1089,18 +976,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const isTyping = el => el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); submitBtn.click(); return; }
-    if (e.key === '/' && !isTyping(e.target) && !document.querySelector('dialog[open]')) {
+    const modal = document.querySelector('dialog[open]');
+    if (e.key === '/' && !isTyping(e.target) && !modal && !e.ctrlKey && !e.metaKey && !e.altKey) {
       e.preventDefault();
-      groupSearch.focus();
-      groupSearch.select();
+      openPal();
       return;
     }
-    if ((e.target === document.body || e.target === document.documentElement) && /^[\d\u0660-\u0669\u06F0-\u06F9]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey && !document.querySelector('dialog[open]')) {
+    if ((e.target === document.body || e.target === document.documentElement) && /^[\d\u0660-\u0669\u06F0-\u06F9]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey && !modal) {
       e.preventDefault();
-      groupSearch.focus({ preventScroll: true });
-      groupSearch.value = e.key;
-      groupSearch.dispatchEvent(new Event('input'));
-      $('quick-entry').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+      openPal(e.key);
+      return;
+    }
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'z' && !isTyping(e.target) && !modal) {
+      e.preventDefault();
+      A.undo();
       return;
     }
     const order = focusOrder();
@@ -1110,13 +999,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') dir = e.shiftKey ? -1 : 1;
     else if (e.key === 'ArrowDown') dir = 1;
     else if (e.key === 'ArrowUp') dir = -1;
-    else if (e.key === 'Escape' && e.target.classList.contains('drug-input')) { e.preventDefault(); groupSearch.focus(); groupSearch.select(); return; }
+    else if (e.key === 'Escape' && e.target.classList.contains('drug-input')) { e.preventDefault(); e.target.blur(); return; }
     if (!dir) return;
     e.preventDefault();
     const next = order[idx + dir];
     if (next) next.focus();
     else if (dir > 0) submitBtn.focus();
-    else if (e.key === 'ArrowUp' && e.target === order[0]) groupSearch.focus();
+    else if (e.key === 'ArrowUp' && e.target === order[0]) firstChoice(pharmacyChoices).focus();
   });
 
   function validOptional(inp) { const v = inp.value.trim(); return v === '' || (/^\d+$/.test(v) && +v <= MAX_OPTIONAL); }
@@ -1222,10 +1111,6 @@ document.addEventListener('DOMContentLoaded', () => {
     $('count-filled').textContent = filled;
     $('count-empty').textContent = cardNames.length - filled;
     applyGroupFilter();
-    qeCurrent.textContent = cardValues[target] > 0 ? groupNum(cardValues[target]) : '';
-    qeTarget.classList.toggle('has-value', cardValues[target] > 0);
-    qeProgress.style.setProperty('--p', filled / cardNames.length);
-    if (document.activeElement !== groupSearch) renderPreview();
   }
 
   function renderStatus({ filled }) {
@@ -1323,7 +1208,6 @@ document.addEventListener('DOMContentLoaded', () => {
       for (let k = h.length - 1; k >= 0; k--) A.setGroup(h[k].i, h[k].prev, { record: false });
       setTarget(h[0].i, { scroll: true });
       h.forEach(c => flashCard(c.i));
-      if (history.length) { const l = history[history.length - 1][0]; showLast(l.i, l.prev, l.next); } else qeLast.hidden = true;
       const msg = h.length === 1 ? `أُعيدت «${cardNames[h[0].i]}» إلى ${h[0].prev > 0 ? groupNum(h[0].prev) : 'فارغة'}` : `أُعيدت ${h.length} مجموعات`;
       showToast(msg, 'info', { duration: 2200 });
       return true;
@@ -1332,7 +1216,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function guideTo(item) {
     const step = $(item.step);
-    if (item.step === 'step-groups') { clearSearch(); setGroupFilter('all'); }
+    if (item.step === 'step-groups') setGroupFilter('all');
     step.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
     const target = item.el.closest('.field, .card, .class-grid') || step;
     target.classList.remove('needs-attention'); void target.offsetWidth; target.classList.add('needs-attention');
@@ -1435,8 +1319,6 @@ document.addEventListener('DOMContentLoaded', () => {
     lastTotal = 0;
     totalEl.textContent = fmt3(0);
     history.length = 0;
-    qeLast.hidden = true;
-    clearSearch();
     setGroupFilter('all');
     setTarget(0);
     schedule(D.ALL);
@@ -1457,8 +1339,6 @@ document.addEventListener('DOMContentLoaded', () => {
     drugInputs.forEach(i => { i.value = ''; });
     optionalInputs.forEach(i => { i.value = ''; });
     history.length = 0;
-    qeLast.hidden = true;
-    clearSearch();
     setGroupFilter('all');
     setTarget(0);
     refresh();
@@ -1823,8 +1703,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ready = missingList().length === 0;
     return [
       { kind: 'action', title: 'إرسال البيانات', kw: 'ارسال submit send', sub: ready ? 'جاهز' : `ينقص ${missingList().length}`, run: close(() => submitBtn.click()) },
-      { kind: 'action', title: 'الانتقال إلى أول مجموعة فارغة', kw: 'فارغه التالي', run: close(() => dockGroups.click()) },
-      { kind: 'action', title: 'سطر الإدخال السريع', kw: 'ادخال سريع', run: close(goToEntry) },
+      { kind: 'action', title: 'الانتقال إلى أول مجموعة فارغة', kw: 'فارغه التالي ادخال سريع', run: close(goToEntry) },
       { kind: 'action', title: 'تراجع عن آخر إدخال', kw: 'تراجع undo', sub: history.length ? '' : 'لا يوجد', run: () => { const had = history.length; undo(); if (had) done(ok('تم التراجع')); } },
       { kind: 'action', title: 'عرض المجموعات الفارغة فقط', kw: 'تصفيه فارغه', run: close(() => { setGroupFilter('empty'); $('step-groups').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' }); }) },
       { kind: 'action', title: 'عرض الدفتر', kw: 'قائمه list view', on: cardsContainer.classList.contains('is-list'), run: () => { setView('list', true); done(ok('عرض الدفتر')); } },

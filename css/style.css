@@ -568,38 +568,12 @@ kbd {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: .75rem 1.5rem;
   margin-block-end: 1rem;
   padding-block-end: .75rem;
   border-bottom: 1px dashed var(--line);
 }
-.groups-toolbar .seg:first-of-type { margin-inline-start: auto; }
-.search-box {
-  flex: 1 1 260px;
-  display: flex;
-  align-items: center;
-  gap: .7rem;
-  padding: .4rem .2rem;
-  border-bottom: 1px solid var(--line-2);
-  color: var(--muted);
-  transition: border-color .3s, color .3s;
-}
-.search-box:focus-within { border-color: var(--accent); color: var(--accent); }
-.search-box > svg { width: 1.1rem; height: 1.1rem; flex: none; }
-.search-box input {
-  flex: 1;
-  min-width: 0;
-  border: 0;
-  background: none;
-  padding: .3rem 0;
-  font-size: .95rem;
-  color: var(--ink);
-}
-.search-box input::placeholder { color: var(--faint); }
-.search-box input::-webkit-search-cancel-button { display: none; }
-.search-clear { width: 1.6rem; height: 1.6rem; display: grid; place-items: center; color: var(--muted); border-radius: 50%; }
-.search-clear svg { width: .9rem; height: .9rem; }
-.search-clear:hover { color: var(--ink); background: var(--accent-wash); }
 
 .seg { display: flex; align-items: center; gap: .2rem; }
 .seg-btn {
@@ -1401,183 +1375,9 @@ kbd {
 .pal-keys kbd { font-size: .66rem; }
 
 button, [role="option"], .choice, .class-btn { touch-action: manipulation; }
-.choice:active, .seg-btn:active, .dock-btn:active:not(:disabled), .rail-nudge:active:not(:disabled), .qe-nudge:active, .cmd-trigger:active, .theme-switch-btn:active, .status-chip:active { transform: scale(.96); }
+.choice:active, .seg-btn:active, .dock-btn:active:not(:disabled), .rail-nudge:active:not(:disabled), .cmd-trigger:active, .theme-switch-btn:active, .status-chip:active { transform: scale(.96); }
 .class-btn:active { transform: translateY(0) scale(.985); }
-.seg-btn, .dock-btn, .qe-nudge, .theme-switch-btn, .status-chip { transition-property: color, background, box-shadow, opacity, transform; transition-duration: .25s; transition-timing-function: var(--ease); }
-
-.quick-entry {
-  position: sticky;
-  top: .75rem;
-  z-index: 20;
-  margin-block-end: 1.25rem;
-  padding: .9rem clamp(1rem, 2.5vw, 1.5rem) .7rem;
-  border-radius: var(--wob-lg);
-  background: color-mix(in srgb, var(--sheet) 92%, transparent);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  backdrop-filter: blur(14px) saturate(1.1);
-  box-shadow: var(--shadow), 0 10px 30px -22px rgba(40, 30, 15, .35);
-}
-.quick-entry::before {
-  content: '';
-  position: absolute; inset: 0;
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line-2));
-  border-radius: inherit;
-  pointer-events: none;
-  filter: url(#sketch);
-}
-.quick-entry:focus-within::before { border-color: var(--accent); }
-.qe-target {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-  min-width: 0;
-  padding-block-end: .45rem;
-}
-.qe-nudge {
-  width: 1.9rem; height: 1.9rem; flex: none;
-  display: grid; place-items: center;
-  color: var(--muted);
-  border-radius: 50%;
-  transition: color .25s, background .25s;
-}
-.qe-nudge svg { width: .95rem; height: .95rem; }
-.qe-nudge:hover { color: var(--accent-ink); background: var(--accent-wash); }
-.qe-index {
-  font-family: var(--f-num);
-  font-style: italic;
-  font-size: 1rem;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-}
-.qe-name {
-  font-family: var(--f-hand);
-  font-size: clamp(1.3rem, 2.4vw, 1.55rem);
-  line-height: 1.3;
-  color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0;
-}
-.qe-current {
-  margin-inline-start: auto;
-  font-family: var(--f-num);
-  font-size: 1.05rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums lining-nums;
-  white-space: nowrap;
-}
-.qe-progress {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  height: 1.5px;
-  background: var(--line);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.qe-progress::after {
-  content: '';
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  width: calc(var(--p, 0) * 100%);
-  background: var(--accent);
-  transition: width .6s var(--ease);
-}
-.qe-line { display: flex; align-items: center; gap: .75rem; padding-block: .6rem .5rem; }
-.qe-field {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: .6rem;
-  color: var(--muted);
-  cursor: text;
-}
-.qe-caret { width: 1.3rem; height: 1.3rem; flex: none; color: var(--accent); }
-.qe-caret svg { width: 100%; height: 100%; }
-.qe-input {
-  flex: 1;
-  min-width: 0;
-  border: 0;
-  background: none;
-  padding: .2rem 0;
-  font-family: var(--f-num);
-  font-size: clamp(1.7rem, 4vw, 2.2rem);
-  font-weight: 400;
-  line-height: 1.25;
-  font-variant-numeric: tabular-nums lining-nums;
-  color: var(--ink);
-  caret-color: var(--accent);
-}
-.qe-input::placeholder { font-family: var(--f-body); font-size: 1rem; font-weight: 400; color: var(--faint); }
-.qe-kbd {
-  flex: none;
-  min-width: 2.2rem; height: 2rem;
-  padding-inline: .45rem;
-  font-family: var(--f-num);
-  font-size: .85rem;
-  color: var(--muted);
-  border-radius: 8px;
-  box-shadow: inset 0 0 0 1px var(--line-2);
-  display: none;
-}
-@media (pointer: coarse) { .qe-kbd { display: inline-grid; place-items: center; } }
-.qe-go {
-  flex: none;
-  width: 3rem; height: 3rem;
-  display: grid; place-items: center;
-  border-radius: var(--loop);
-  color: var(--paper);
-  background: var(--accent-ink);
-  transition: background .3s, transform .25s var(--ease);
-}
-.qe-go svg { width: 1.3rem; height: 1.3rem; }
-.qe-go:hover { background: var(--accent); }
-.qe-go:active { transform: scale(.94); }
-.qe-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: .3rem 1rem;
-  min-height: 2rem;
-  padding-block-start: .45rem;
-  border-top: 1px dashed var(--line);
-}
-.qe-preview { margin: 0; font-size: .95rem; color: var(--ink-2); min-width: 0; }
-.qe-preview .qp-dim { color: var(--muted); }
-.qe-preview .qp-to { font-family: var(--f-hand); font-size: 1.08rem; color: var(--accent-ink); }
-.qe-preview .qp-num { font-family: var(--f-num); font-weight: 500; font-size: 1.1rem; color: var(--accent-ink); font-variant-numeric: tabular-nums; }
-.qe-preview .qp-err { color: var(--bad); }
-.qe-preview kbd { font-size: .74rem; }
-.qe-last {
-  display: inline-flex;
-  align-items: baseline;
-  gap: .6rem;
-  margin: 0;
-  font-size: .9rem;
-  color: var(--muted);
-}
-.qe-last b { font-family: var(--f-num); font-weight: 450; color: var(--good); font-variant-numeric: tabular-nums; }
-.qe-last .link-btn { display: inline-flex; align-items: center; gap: .35rem; font-size: .86rem; }
-.qe-last .link-btn kbd { font-size: .68rem; text-decoration: none; }
-.qe-last.is-new { animation: qlast .5s var(--ease); }
-@keyframes qlast { from { opacity: 0; transform: translateY(4px); } }
-.qe-syntax {
-  flex: 1 1 320px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: .35rem 1.25rem;
-  margin: 0;
-  font-size: .86rem;
-  line-height: 1.6;
-  color: var(--muted);
-}
-.qe-syntax b { font-family: var(--f-num); font-weight: 500; color: var(--ink-2); margin-inline-end: .25rem; }
-.qe-syntax b.is-word { font-family: var(--f-body); }
+.seg-btn, .dock-btn, .theme-switch-btn, .status-chip { transition-property: color, background, box-shadow, opacity, transform; transition-duration: .25s; transition-timing-function: var(--ease); }
 
 .group-card.is-target .group-index { color: var(--accent); }
 .group-card.is-target .group-name { color: var(--ink); }
@@ -1614,15 +1414,7 @@ button, [role="option"], .choice, .class-btn { touch-action: manipulation; }
   .choice { font-size: .9rem; padding-inline: .5rem; }
   .step-hint { display: none; }
   .groups-toolbar { gap: .8rem 1rem; }
-  .search-box { flex-basis: 100%; }
   .groups-grid.is-list .group-card { grid-template-columns: 1.6rem minmax(0, auto) minmax(.8rem, 1fr) 9.4rem 1.4rem; column-gap: .4rem; }
-  .quick-entry { top: .4rem; padding: .75rem .9rem .6rem; }
-  .qe-name { font-size: 1.22rem; }
-  .qe-input { font-size: 1.75rem; }
-  .qe-go { width: 2.75rem; height: 2.75rem; }
-  .qe-syntax { font-size: .82rem; gap: .2rem .9rem; }
-  .yc-a { font-size: .78rem; }
-  .yc-b { font-size: 1.12rem; }
   .group-name { font-size: .92rem; white-space: normal; line-height: 1.5; padding-bottom: .25rem; }
   .groups-grid.is-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
   .groups-grid.is-grid .group-card { padding: .9rem 1rem 1.1rem; }
