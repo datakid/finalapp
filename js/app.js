@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
   function restore(s) {
-    setClass(s.activeClass, { keepPharmacy: true });
+    applyClass(s.activeClass, { keepPharmacy: true });
     ensureYearOption(String(s.year || ''));
     yearSel.value = s.year || '';
     monthSel.value = s.month || '';
@@ -278,10 +278,11 @@ document.addEventListener('DOMContentLoaded', () => {
     cardValues = cardNames.map((_, i) => parseDecimal(String((s.cardValues || [])[i] ?? '')));
     drugInputs.forEach((inp, i) => { inp.value = document.activeElement === inp ? displayDecimal(cardValues[i]) : groupedDecimal(cardValues[i]); });
     refresh();
+    flushNow();
   }
 
   const classBtnFor = key => classBtns.find(b => b.dataset.class === key);
-  function setClass(key, { keepPharmacy = false } = {}) {
+  function applyClass(key, { keepPharmacy = false } = {}) {
     const changed = key !== activeClass;
     activeClass = CLASS_THEMES[key] ? key : null;
     classBtns.forEach((btn, i) => {
@@ -294,15 +295,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (activeClass) docEl.classList.add(CLASS_THEMES[activeClass]);
     if (changed && !keepPharmacy) updatePharmacyDropdown('');
   }
-  classBtns.forEach(btn => btn.addEventListener('click', () => {
-    if (btn.dataset.class === activeClass) return;
-    setClass(btn.dataset.class);
-    refresh(); save();
-  }));
-  rovingKeys(classBtns, btn => { if (btn.dataset.class !== activeClass) { setClass(btn.dataset.class); refresh(); save(); } });
+  classBtns.forEach(btn => btn.addEventListener('click', () => A.setClass(btn.dataset.class)));
+  rovingKeys(classBtns, btn => A.setClass(btn.dataset.class));
 
   const periodKey = () => activeClass && yearSel.value && monthSel.value ? `${activeClass}|${yearSel.value}|${monthSel.value}` : null;
-  const sentLog = () => store.get(SENT_KEY, {});
+  const loadSent = () => { const v = store.get(SENT_KEY, {}); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; };
+  let sentCache = loadSent();
+  const sentLog = () => sentCache;
+  window.addEventListener('storage', e => {
+    if (e.key !== SENT_KEY) return;
+    sentCache = loadSent();
+    updatePharmacyDropdown();
+    schedule(D.PICKERS | D.STATUS, false);
+  });
   function isSent(pharmacyValue) {
     const k = periodKey();
     return !!(k && regionSel.value && (sentLog()[k] || []).includes(`${regionSel.value}:${pharmacyValue}`));
@@ -335,17 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
     pharmacySel.value = list.length && preferred && +preferred <= list.length ? String(preferred) : '';
   }
 
-  selects.forEach(s => s.addEventListener('change', () => {
-    if (s === regionSel) updatePharmacyDropdown('');
-    if (s === yearSel || s === monthSel) updatePharmacyDropdown();
-    refresh(); save();
-  }));
-
-  function setSelect(sel, value) {
-    if (sel.value === value) return;
-    sel.value = value;
-    sel.dispatchEvent(new Event('change'));
-  }
 
   const now = new Date();
   const currentFiscal = String(now.getMonth() + 1 >= 7 ? now.getFullYear() + 1 : now.getFullYear());
@@ -388,10 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function commitYearStart(start) {
     if (!validStart(start)) return false;
-    const v = String(+start + 1);
-    ensureYearOption(v);
-    setSelect(yearSel, v);
-    return true;
+    return A.setYearStart(+start);
   }
   function resolveYear(raw) {
     const d = yDigits(raw);
@@ -402,8 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function stepYear(dir) {
     const v = String(Math.max(Y_LO, Math.min(Y_HI, +(yearSel.value || currentFiscal) + dir)));
-    ensureYearOption(v);
-    setSelect(yearSel, v);
+    A.setYearStart(+v - 1);
     yearInput.value = String(+v - 1);
     sizeYear(); yearPreview(); renderYear();
     if (yearFocused()) try { yearInput.setSelectionRange(4, 4); } catch (e) {}
@@ -500,11 +490,11 @@ document.addEventListener('DOMContentLoaded', () => {
     btns.forEach(b => { b.tabIndex = b === tabbable ? 0 : -1; });
     container.closest('.field').classList.toggle('is-filled', !!sel.value && !sel.disabled);
   }
-  function bindChoices(container, sel) {
+  function bindChoices(container, sel, setter) {
     container.addEventListener('click', e => {
       const b = e.target.closest('.choice');
       if (!b) return;
-      setSelect(sel, b.dataset.value);
+      setter(b.dataset.value);
       const again = container.querySelector(`.choice[data-value="${CSS.escape(b.dataset.value)}"]`);
       if (again && document.activeElement !== again) again.focus({ preventScroll: true });
     });
@@ -518,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let next = null;
       if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
-        if (sel.value !== b.dataset.value) setSelect(sel, b.dataset.value);
+        if (sel.value !== b.dataset.value) setter(b.dataset.value);
         advanceFrom(container);
         return;
       }
@@ -538,14 +528,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!next) return;
       e.preventDefault();
-      setSelect(sel, next.dataset.value);
+      setter(next.dataset.value);
       const again = container.querySelector(`.choice[data-value="${CSS.escape(next.dataset.value)}"]`);
       if (again) again.focus();
     });
   }
-  bindChoices(monthChoices, monthSel);
-  bindChoices(regionChoices, regionSel);
-  bindChoices(pharmacyChoices, pharmacySel);
+  bindChoices(monthChoices, monthSel, v => A.setMonth(v));
+  bindChoices(regionChoices, regionSel, v => A.setRegion(v));
+  bindChoices(pharmacyChoices, pharmacySel, v => A.setPharmacy(activeClass, regionSel.value, +v - 1));
 
   function advanceFrom(container) {
     const flow = [$('class-group'), yearInput, monthChoices, regionChoices, pharmacyChoices];
@@ -572,12 +562,12 @@ document.addEventListener('DOMContentLoaded', () => {
   classBtns.forEach(btn => btn.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      if (btn.dataset.class !== activeClass) { setClass(btn.dataset.class); refresh(); save(); }
+      A.setClass(btn.dataset.class);
       advanceFrom($('class-group'));
     } else if (/^[123\u0661-\u0663]$/.test(e.key)) {
       e.preventDefault();
       const b = classBtns[+normalizeDigits(e.key) - 1];
-      b.focus(); if (b.dataset.class !== activeClass) { setClass(b.dataset.class); refresh(); save(); }
+      b.focus(); A.setClass(b.dataset.class);
     }
   }));
 
@@ -607,6 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (drugInputs[i].value !== shown) drugInputs[i].value = shown;
   }
 
+  const focusStart = {};
   cardsContainer.addEventListener('input', e => {
     if (!e.target.classList.contains('drug-input')) return;
     const inp = e.target;
@@ -618,18 +609,22 @@ document.addEventListener('DOMContentLoaded', () => {
       try { inp.setSelectionRange(c, c); } catch (err) {}
     }
     setKeepingCaret(inp, raw, setCardValue(+inp.dataset.index, raw));
-    refresh(); save();
+    schedule(D.TOTALS | D.GROUPS | D.STATUS);
   });
   cardsContainer.addEventListener('focusout', e => {
     if (!e.target.classList.contains('drug-input')) return;
-    writeCard(+e.target.dataset.index, e.target.value, { format: true });
-    refresh(); save();
+    const idx = +e.target.dataset.index;
+    writeCard(idx, e.target.value, { format: true });
+    if (focusStart[idx] !== undefined) pushHistory(idx, focusStart[idx], cardValues[idx]);
+    delete focusStart[idx];
+    schedule(D.TOTALS | D.GROUPS | D.STATUS);
     setTimeout(applyGroupFilter, 0);
   });
   cardsContainer.addEventListener('focusin', e => {
     if (!e.target.classList.contains('drug-input')) return;
     const inp = e.target;
     const idx = +inp.dataset.index;
+    focusStart[idx] = cardValues[idx];
     const raw = groupLive(displayDecimal(cardValues[idx]));
     if (inp.value !== raw) inp.value = raw;
     fitChars(inp, inp.value);
@@ -640,12 +635,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const btn = e.target.closest('.group-clear');
     if (btn) {
       const i = +btn.dataset.index;
-      const prev = cardValues[i];
-      pushHistory(i, prev, 0);
-      writeCard(i, '', { format: true });
-      refresh(); save();
+      const prev = A.setGroup(i, 0);
       drugInputs[i].focus();
-      showToast(`تم مسح «${cardNames[i]}»`, 'info', { duration: 4000, action: { label: 'تراجع', onClick: () => { writeCard(i, String(prev), { format: true }); refresh(); save(); } } });
+      showToast(`تم مسح «${cardNames[i]}»`, 'info', { duration: 4000, action: { label: 'تراجع', onClick: () => A.restoreGroup(i, prev) } });
       return;
     }
     const card = e.target.closest('.group-card');
@@ -660,14 +652,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cells.length === 1) cells = cells[0].split('\t');
     else cells = cells.map(row => row.split('\t')[0]);
     const start = +e.target.dataset.index;
-    let filled = 0;
+    const changes = [];
     cells.forEach((cell, k) => {
       const i = start + k;
       if (i >= cardNames.length) return;
-      writeCard(i, smartNumber(cell), { format: true });
-      filled++;
+      changes.push({ i, value: parseDecimal(smartNumber(cell)) });
     });
-    refresh(); save();
+    const filled = changes.length;
+    A.setGroups(changes);
     drugInputs[Math.min(start + filled, cardNames.length) - 1].focus();
     showToast(`تم لصق ${filled} قيمة بدءًا من «${cardNames[start]}»`, 'success', { duration: 3000 });
   });
@@ -724,11 +716,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let target = 0;
   const history = [];
-  function pushHistory(i, prev, next) {
-    if (prev === next) return;
-    history.push({ i, prev, next });
+  function pushHistoryBatch(changes) {
+    const list = changes.filter(c => c.prev !== c.next);
+    if (!list.length) return;
+    history.push(list);
     if (history.length > 100) history.shift();
   }
+  const pushHistory = (i, prev, next) => pushHistoryBatch([{ i, prev, next }]);
   const foldedNames = cardNames.map(foldArabic);
   const parseEntry = raw => window.PharmaCore.parseEntry(raw, { names: cardNames, values: cardValues, target, folded: foldedNames });
   const nextAfter = i => (i + 1 < cardNames.length ? i + 1 : (cardValues.findIndex(v => !(v > 0)) + 1 || cardNames.length) - 1);
@@ -791,16 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const card = groupCards[i];
     card.classList.remove('is-landed'); void card.offsetWidth; card.classList.add('is-landed');
   }
-  function undo() {
-    const h = history.pop();
-    if (!h) { showToast('لا يوجد ما يمكن التراجع عنه', 'info', { duration: 1800 }); return; }
-    writeCard(h.i, String(h.prev), { format: true });
-    refresh(); save();
-    setTarget(h.i, { scroll: true });
-    flashCard(h.i);
-    if (history.length) { const l = history[history.length - 1]; showLast(l.i, l.prev, l.next); } else qeLast.hidden = true;
-    showToast(`أُعيدت «${cardNames[h.i]}» إلى ${h.prev > 0 ? groupNum(h.prev) : 'فارغة'}`, 'info', { duration: 2200 });
-  }
+  function undo() { return A.undo(); }
   function rejectEntry() {
     if (reducedMotion()) return;
     $('quick-entry').animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-5px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }], { duration: 260 });
@@ -816,10 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTarget(nextAfter(p.index), { scroll: true });
   }
   function applyGroup(i, value) {
-    const prev = cardValues[i];
-    pushHistory(i, prev, value);
-    writeCard(i, String(value), { format: true });
-    refresh(); save();
+    const prev = A.setGroup(i, value);
     flashCard(i);
     showLast(i, prev, value);
     return prev;
@@ -890,7 +872,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let v = normalizeDigits(inp.value).replace(/\D/g, '').replace(/^0+(?=\d)/, '');
       if (v !== '' && +v > MAX_OPTIONAL) v = String(MAX_OPTIONAL);
       if (inp.value !== v) inp.value = v;
-      refresh(); save();
+      schedule(D.GROUPS | D.STATUS);
     });
     inp.addEventListener('focus', () => inp.select());
   });
@@ -965,32 +947,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setChip(chip, text, cls) { chip.textContent = text; chip.className = `status-chip ${cls}`; }
 
-  function refresh() {
-    const total = Math.round(cardValues.reduce((a, v) => a + v, 0) * 1000) / 1000;
-    const filled = cardValues.filter(v => v > 0).length;
-    const max = Math.max(...cardValues);
-    animateTotal(total);
+  const D = { TOTALS: 1, GROUPS: 2, PICKERS: 4, STATUS: 8, ALL: 15 };
+  let dirty = 0, raf = 0;
+  function schedule(flags = D.ALL, persist = true) {
+    dirty |= flags;
+    if (!raf) raf = requestAnimationFrame(flush);
+    if (persist) save();
+  }
+  function flushNow() {
+    if (raf) cancelAnimationFrame(raf);
+    flush();
+  }
+  const refresh = () => schedule(D.ALL, false);
 
+  function groupStats() {
+    let total = 0, filled = 0, max = 0;
+    for (const v of cardValues) {
+      total += v;
+      if (v > 0) { filled++; if (v > max) max = v; }
+    }
+    return { total: Math.round(total * 1000) / 1000, filled, max };
+  }
+
+  function flush() {
+    raf = 0;
+    const f = dirty;
+    dirty = 0;
+    if (!f) return;
+    const st = groupStats();
+    if (f & D.TOTALS) renderTotals(st);
+    if (f & D.GROUPS) renderGroupStates(st);
+    if (f & D.PICKERS) renderPickers();
+    if (f & D.STATUS) renderStatus(st);
+  }
+
+  function renderTotals({ total, filled, max }) {
+    animateTotal(total);
     drugInputs.forEach((inp, i) => {
       const card = groupCards[i];
       const v = cardValues[i];
-      card.classList.toggle('card-active', v > 0);
-      fitChars(inp, inp.value || inp.placeholder);
       card.querySelector('.group-meter-fill').style.width = max > 0 ? `${(v / max) * 100}%` : '0';
       card.querySelector('.group-share').textContent = total > 0 && v > 0 ? `${((v / total) * 100).toFixed(1)}%` : '—';
     });
-    optionalInputs.forEach(inp => {
-      const card = inp.closest('.card');
-      card.classList.toggle('card-active', inp.value !== '' && validOptional(inp));
-      card.classList.toggle('card-invalid', !validOptional(inp));
-    });
-
-    renderPickers();
-
-    groupsCount.textContent = `${filled}/${cardNames.length}`;
-    $('count-all').textContent = cardNames.length;
-    $('count-filled').textContent = filled;
-    $('count-empty').textContent = cardNames.length - filled;
     totalProgressFill.style.width = `${(filled / cardNames.length) * 100}%`;
     totalMeta.textContent = filled ? `${filled} مجموعة · متوسط ${fmtShort(total / filled)}` : '';
     dockGroupsCount.textContent = filled;
@@ -998,7 +996,30 @@ document.addEventListener('DOMContentLoaded', () => {
     ringFill.style.strokeDashoffset = `${RING_LEN * (1 - filled / cardNames.length)}`;
     dockGroups.classList.toggle('is-complete', filled === cardNames.length);
     dockGroups.title = filled === cardNames.length ? 'كل المجموعات مُدخلة' : 'انتقل إلى أول مجموعة فارغة';
+  }
 
+  function renderGroupStates({ filled }) {
+    drugInputs.forEach((inp, i) => {
+      groupCards[i].classList.toggle('card-active', cardValues[i] > 0);
+      fitChars(inp, inp.value || inp.placeholder);
+    });
+    optionalInputs.forEach(inp => {
+      const card = inp.closest('.card');
+      card.classList.toggle('card-active', inp.value !== '' && validOptional(inp));
+      card.classList.toggle('card-invalid', !validOptional(inp));
+    });
+    groupsCount.textContent = `${filled}/${cardNames.length}`;
+    $('count-all').textContent = cardNames.length;
+    $('count-filled').textContent = filled;
+    $('count-empty').textContent = cardNames.length - filled;
+    applyGroupFilter();
+    qeCurrent.textContent = cardValues[target] > 0 ? groupNum(cardValues[target]) : '';
+    qeTarget.classList.toggle('has-value', cardValues[target] > 0);
+    qeProgress.style.setProperty('--p', filled / cardNames.length);
+    if (document.activeElement !== groupSearch) renderPreview();
+  }
+
+  function renderStatus({ filled }) {
     const missing = missingList();
     const fieldsMissing = missing.filter(m => m.step === 'step-fields').map(m => m.label);
     $('step-class').classList.toggle('is-done', !!activeClass);
@@ -1025,13 +1046,80 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!isSubmitting) submitBtn.setAttribute('aria-disabled', String(!ready));
     resetBtn.disabled = isSubmitting || isFormEmpty();
-    applyGroupFilter();
-
-    qeCurrent.textContent = cardValues[target] > 0 ? groupNum(cardValues[target]) : '';
-    qeTarget.classList.toggle('has-value', cardValues[target] > 0);
-    qeProgress.style.setProperty('--p', filled / cardNames.length);
-    if (document.activeElement !== groupSearch) renderPreview();
   }
+
+  const A = {
+    setClass(key, opts) {
+      if (key === activeClass) return;
+      applyClass(key, opts);
+      schedule(D.ALL);
+    },
+    setYearStart(start) {
+      const v = String(start + 1);
+      if (!validEnd(v)) return false;
+      ensureYearOption(v);
+      if (yearSel.value !== v) {
+        yearSel.value = v;
+        updatePharmacyDropdown();
+        schedule(D.PICKERS | D.STATUS);
+      }
+      return true;
+    },
+    setMonth(v) {
+      if (monthSel.value === v) return;
+      monthSel.value = v;
+      updatePharmacyDropdown();
+      schedule(D.PICKERS | D.STATUS);
+    },
+    setRegion(v) {
+      if (regionSel.value === v) return;
+      regionSel.value = v;
+      updatePharmacyDropdown('');
+      schedule(D.PICKERS | D.STATUS);
+    },
+    setPharmacy(cls, reg, idx) {
+      if (cls !== activeClass) applyClass(cls, { keepPharmacy: true });
+      regionSel.value = reg;
+      updatePharmacyDropdown(String(idx + 1));
+      schedule(D.ALL);
+    },
+    setGroup(i, value, { record = true } = {}) {
+      const prev = cardValues[i];
+      if (record) pushHistory(i, prev, value);
+      writeCard(i, String(value), { format: true });
+      schedule(D.TOTALS | D.GROUPS | D.STATUS);
+      return prev;
+    },
+    setGroups(list, { record = true } = {}) {
+      const changes = list.map(({ i, value }) => ({ i, prev: cardValues[i], next: value }));
+      if (record) pushHistoryBatch(changes);
+      changes.forEach(c => writeCard(c.i, String(c.next), { format: true }));
+      schedule(D.TOTALS | D.GROUPS | D.STATUS);
+      return changes;
+    },
+    restoreGroup(i, prev) {
+      const top = history[history.length - 1];
+      if (top && top.length === 1 && top[0].i === i && top[0].prev === prev) history.pop();
+      A.setGroup(i, prev, { record: false });
+    },
+    setTotal(which, n) {
+      const inp = which === 'tickets' ? totalTicketsInput : totalExternalInput;
+      const v = Math.max(0, Math.min(MAX_OPTIONAL, Math.floor(+n) || 0));
+      inp.value = v ? String(v) : '';
+      schedule(D.GROUPS | D.STATUS);
+    },
+    undo() {
+      const h = history.pop();
+      if (!h) { showToast('لا يوجد ما يمكن التراجع عنه', 'info', { duration: 1800 }); return false; }
+      for (let k = h.length - 1; k >= 0; k--) A.setGroup(h[k].i, h[k].prev, { record: false });
+      setTarget(h[0].i, { scroll: true });
+      h.forEach(c => flashCard(c.i));
+      if (history.length) { const l = history[history.length - 1][0]; showLast(l.i, l.prev, l.next); } else qeLast.hidden = true;
+      const msg = h.length === 1 ? `أُعيدت «${cardNames[h[0].i]}» إلى ${h[0].prev > 0 ? groupNum(h[0].prev) : 'فارغة'}` : `أُعيدت ${h.length} مجموعات`;
+      showToast(msg, 'info', { duration: 2200 });
+      return true;
+    }
+  };
 
   function guideTo(item) {
     const step = $(item.step);
@@ -1142,7 +1230,8 @@ document.addEventListener('DOMContentLoaded', () => {
     clearSearch();
     setGroupFilter('all');
     setTarget(0);
-    refresh(); save();
+    schedule(D.ALL);
+    flushNow();
     showToast('اختر الصيدلية التالية.', 'info', { duration: 4000 });
     $('field-pharmacy').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
     const nextUnsent = pharmacyChoices.querySelector('.choice:not(.is-sent)') || firstChoice(pharmacyChoices);
@@ -1150,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetAll() {
-    setClass(null);
+    applyClass(null);
     selects.forEach(s => { s.value = ''; });
     if (hasYear(currentFiscal)) yearSel.value = currentFiscal;
     updatePharmacyDropdown('');
@@ -1163,6 +1252,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setGroupFilter('all');
     setTarget(0);
     refresh();
+    flushNow();
     store.remove(DATA_KEY);
   }
   resetBtn.addEventListener('click', () => {
@@ -1485,7 +1575,7 @@ document.addEventListener('DOMContentLoaded', () => {
       run: () => { commitYearStart(String(s)); renderYear(); done(ok(`السنة المالية <b dir="ltr">${s} – ${s + 1}</b>`)); } };
   }
   function totalItems(expr, q, score0) {
-    return optionalInputs.map(inp => {
+    return optionalInputs.map((inp, which) => {
       const title = inp.closest('.total-field').querySelector('.total-field-head').childNodes[2].textContent.trim();
       const s = q ? textScore(q, title, 'اجمالي تذاكر خارجي') : 0;
       if (s === null) return null;
@@ -1494,7 +1584,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!d) return null;
         const n = Math.min(+d, MAX_OPTIONAL);
         return { kind: 'total', title, sub: inp.value ? `بدلًا من ${inp.value}` : 'اختياري', val: n.toLocaleString('en-US'), strong: true, score: s + score0,
-          run: () => { inp.value = String(n); inp.dispatchEvent(new Event('input')); done(ok(`${escapeHTML(title)} ← <b dir="ltr">${n.toLocaleString('en-US')}</b>`)); } };
+          run: () => { A.setTotal(which === 0 ? 'tickets' : 'external', n); done(ok(`${escapeHTML(title)} ← <b dir="ltr">${n.toLocaleString('en-US')}</b>`)); } };
       }
       return { kind: 'total', title, sub: 'اكتب الرقم بعد الاسم', val: inp.value ? (+inp.value).toLocaleString('en-US') : '—', dim: !inp.value, score: s + score0, complete: title + ' ', run: () => prefill(title + ' ') };
     }).filter(Boolean);
@@ -1502,25 +1592,19 @@ document.addEventListener('DOMContentLoaded', () => {
   function choiceItems() {
     const items = [];
     classBtns.forEach(b => items.push({ kind: 'class', title: b.dataset.label, sub: b.querySelector('.class-desc').textContent, kw: 'فئه', on: b.dataset.class === activeClass,
-      run: () => { if (b.dataset.class !== activeClass) { setClass(b.dataset.class); refresh(); save(); } done(ok(`الفئة: ${escapeHTML(b.dataset.label)}`)); } }));
+      run: () => { A.setClass(b.dataset.class); done(ok(`الفئة: ${escapeHTML(b.dataset.label)}`)); } }));
     Array.from(monthSel.options).filter(o => o.value).forEach(o => items.push({ kind: 'month', badge: o.value, title: o.text, kw: `شهر ${o.value}`, on: monthSel.value === o.value,
       sub: o.value === suggestedMonth ? 'الشهر السابق' : '',
-      run: () => { setSelect(monthSel, o.value); done(ok(`الشهر: ${escapeHTML(o.text)}`)); } }));
+      run: () => { A.setMonth(o.value); done(ok(`الشهر: ${escapeHTML(o.text)}`)); } }));
     Array.from(regionSel.options).filter(o => o.value).forEach(o => items.push({ kind: 'region', title: `المنطقة ${o.text}`, kw: 'منطقه', on: regionSel.value === o.value,
-      run: () => { setSelect(regionSel, o.value); done(ok(`المنطقة ${escapeHTML(o.text)}`)); } }));
+      run: () => { A.setRegion(o.value); done(ok(`المنطقة ${escapeHTML(o.text)}`)); } }));
     Object.entries(pharmacyOptions).forEach(([cls, regions]) => Object.entries(regions).forEach(([reg, list]) => list.forEach((name, idx) => {
       const here = cls === activeClass && reg === regionSel.value;
       const on = here && pharmacySel.value === String(idx + 1);
       const sent = here && isSent(String(idx + 1));
       items.push({ kind: 'pharmacy', title: name, kw: `صيدليه ${classLabel(cls)} ${regionLabel(reg)}`, on, boost: here ? -0.5 : cls === activeClass ? -0.25 : 0,
         sub: `${classLabel(cls)} · المنطقة ${regionLabel(reg)}${sent ? ' · أُرسلت' : ''}`,
-        run: () => {
-          if (cls !== activeClass) setClass(cls, { keepPharmacy: true });
-          regionSel.value = reg;
-          updatePharmacyDropdown(String(idx + 1));
-          refresh(); save();
-          done(ok(`الصيدلية: ${escapeHTML(name)}`));
-        } });
+        run: () => { A.setPharmacy(cls, reg, idx); done(ok(`الصيدلية: ${escapeHTML(name)}`)); } });
     })));
     return items;
   }
@@ -1575,7 +1659,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const ms = textScore(text, 'شهر');
       if (ms !== null && /^\d{1,2}$/.test(num) && +num >= 1 && +num <= 12) {
         const o = monthSel.options[+num];
-        push({ kind: 'month', badge: num, title: o.text, score: ms, on: monthSel.value === num, run: () => { setSelect(monthSel, num); done(ok(`الشهر: ${escapeHTML(o.text)}`)); } });
+        push({ kind: 'month', badge: num, title: o.text, score: ms, on: monthSel.value === num, run: () => { A.setMonth(num); done(ok(`الشهر: ${escapeHTML(o.text)}`)); } });
       }
     } else if (num && !hasLetters) {
       if (yearM && /[-–\/]/.test(num) && validStart(yearM[1])) push(yearItem(yearM[1], -1));
