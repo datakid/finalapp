@@ -289,6 +289,9 @@
   </section>
 
   <div class="action-dock" id="action-dock">
+    <button type="button" class="dock-search" id="dock-search" aria-haspopup="dialog" aria-controls="palette" aria-label="ابحث أو عدّل أي شيء">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 4.5 4.5"/></svg>
+    </button>
     <button type="button" class="dock-ring" id="dock-groups" title="انتقل إلى أول مجموعة فارغة" aria-label="انتقل إلى أول مجموعة فارغة">
       <svg class="ring" viewBox="0 0 40 40" aria-hidden="true"><circle class="ring-track" cx="20" cy="20" r="16"/><circle class="ring-fill" id="ring-fill" cx="20" cy="20" r="16"/></svg>
       <span class="ring-count" id="dock-groups-count">0</span>
@@ -402,8 +405,15 @@
 <dialog id="palette" class="palette" aria-label="لوحة البحث والأوامر">
   <div class="pal-head">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 4.5 4.5"/></svg>
-    <input type="text" id="pal-input" class="pal-input" dir="auto" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="ابحث… أو اكتب «قلب 4500» ، «2024» ، «مارس»" role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list">
+    <input type="text" id="pal-input" class="pal-input" dir="auto" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go" inputmode="text" placeholder="ابحث… أو اكتب «قلب 4500» ، «2024» ، «مارس»" role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list">
+    <button type="button" class="pal-kbd" id="pal-kbd" aria-label="تبديل لوحة المفاتيح بين الحروف والأرقام" title="أرقام / حروف">123</button>
     <button type="button" class="pal-close" id="pal-close" aria-label="إغلاق"><kbd>Esc</kbd></button>
+  </div>
+  <div class="pal-tips" id="pal-tips">
+    <span class="pal-tips-label">جرّب</span>
+    <button type="button" class="pal-tip" data-fill="قلب 4500">قلب 4500</button>
+    <button type="button" class="pal-tip" data-fill="2024" dir="ltr">2024</button>
+    <button type="button" class="pal-tip" data-fill="5=120" dir="ltr">5=120</button>
   </div>
   <div class="pal-body" id="pal-body">
     <span class="pal-hl" id="pal-hl" aria-hidden="true"></span>

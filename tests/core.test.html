@@ -92,6 +92,8 @@
   eq("findGroups('سكر') finds both sugar groups", C.findGroups('سكر', names).slice(0, 2), [5, 6]);
   eq("textScore exact", C.textScore('كلي', 'كلي'), -2);
   eq("textScore miss", C.textScore('zzz', 'كلي'), null);
+  eq("scoreFolded matches textScore", C.scoreFolded(C.foldArabic('قل'), C.foldArabic('قلب'), ''), C.textScore('قل', 'قلب'));
+  eq("scoreFolded empty query", C.scoreFolded('', 'كلي', ''), 0);
 
   section('evalExpr');
   eq("'1200+350-50' -> 1500", pick(C.evalExpr('1200+350-50', 0), ['value']), { value: 1500 });
@@ -107,6 +109,8 @@
   eq("'قلب 4500'", pick(C.parseEntry('قلب 4500', ctx), ['kind', 'index', 'value']), { kind: 'set', index: 4, value: 4500 });
   eq("'5=4500'", pick(C.parseEntry('5=4500', ctx), ['kind', 'index', 'value']), { kind: 'set', index: 4, value: 4500 });
   eq("'#5 : 4500' style", pick(C.parseEntry('#5:4500', ctx), ['kind', 'index', 'value']), { kind: 'set', index: 4, value: 4500 });
+  eq("'#5 4500' hash form", pick(C.parseEntry('#5 4500', ctx), ['kind', 'index', 'value']), { kind: 'set', index: 4, value: 4500 });
+  eq("'#99 4500' out of range", pick(C.parseEntry('#99 4500', ctx), ['kind']), { kind: 'bad' });
   eq("'قلب' goto", pick(C.parseEntry('قلب', ctx), ['kind', 'index']), { kind: 'goto', index: 4 });
   eq("'' skip", C.parseEntry('', ctx), { kind: 'skip' });
   eq("'xyz 4' nomatch", pick(C.parseEntry('xyz 4', ctx), ['kind']), { kind: 'nomatch' });

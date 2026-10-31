@@ -65,7 +65,10 @@
   }
 
   function textScore(q, title, kw = '') {
-    const t = foldArabic(title), k = foldArabic(kw), f = foldArabic(q);
+    return scoreFolded(foldArabic(q), foldArabic(title), foldArabic(kw));
+  }
+
+  function scoreFolded(f, t, k) {
     if (!f) return 0;
     if (t === f) return -2;
     if (t.startsWith(f)) return -1;
@@ -109,6 +112,11 @@
     if (!s) return { kind: 'skip' };
     const wrap = (index, v) => !v ? { kind: 'bad' } : v.error ? { kind: 'bad', msg: v.error } : { kind: 'set', index, ...v };
     let m = s.match(/^#?(\d{1,2})\s*[=:]\s*(.+)$/);
+    if (m && +m[1] >= 1 && +m[1] <= names.length) {
+      const i = +m[1] - 1;
+      return wrap(i, evalExpr(m[2], values[i]));
+    }
+    m = s.match(/^#(\d{1,2})\s+(.+)$/);
     if (m && +m[1] >= 1 && +m[1] <= names.length) {
       const i = +m[1] - 1;
       return wrap(i, evalExpr(m[2], values[i]));
@@ -223,6 +231,7 @@
     foldArabic,
     wordScore,
     textScore,
+    scoreFolded,
     findGroups,
     evalExpr,
     parseEntry,
