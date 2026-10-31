@@ -146,6 +146,14 @@
   eq("'2024/26' typing -> end-mismatch", P('2024/26', 'typing').reason, 'end-mismatch');
   eq("'2024-20' typing stays valid while end is being typed", P('2024-20', 'typing').state, 'valid');
   eq("'2024-' typing -> valid", P('2024-', 'typing').state, 'valid');
+  eq("settled: '2024' is settled", P('2024', 'typing').settled, true);
+  eq("settled: '2024-' is not settled", P('2024-', 'typing').settled, false);
+  eq("settled: '2024-20' is not settled", P('2024-20', 'typing').settled, false);
+  eq("settled: '2024-2' is not settled", P('2024-2', 'typing').settled, false);
+  eq("settled: '2024-25' is settled", P('2024-25', 'typing').settled, true);
+  eq("settled: '2024-2025' is settled", P('2024-2025', 'typing').settled, true);
+  eq("settled: '24/25' is settled", P('24/25', 'typing').settled, true);
+  eq("settled: '2024/26' is invalid, never settled", P('2024/26', 'typing').settled, undefined);
   eq("'2024-' commit -> valid", P('2024-', 'commit').state, 'valid');
   eq("'2024-202' commit -> format", P('2024-202', 'commit').reason, 'format');
   eq("Arabic-Indic digits -> valid 2024", view(P('\u0662\u0660\u0662\u0664', 'commit')), { state: 'valid', start: 2024, end: 2025 });

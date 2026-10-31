@@ -28,6 +28,14 @@
   --space: clamp(3rem, 6vw, 4.5rem);
   --gap-head: 1.5rem;
   --pad-card: clamp(1.25rem, 3vw, 2rem);
+  --s-1: .25rem; --s-2: .5rem; --s-3: .75rem; --s-4: 1rem; --s-5: 1.5rem; --s-6: 2rem; --s-7: 3rem; --s-8: 4rem;
+  --section: clamp(2.5rem, 4.5vw, 3.5rem);
+  --tap: 44px;
+  --dock-h: 4.25rem;
+  --t-fast: 140ms;
+  --t-med: 220ms;
+  --t-slow: 420ms;
+  --spring: cubic-bezier(.34, 1.4, .64, 1);
   color-scheme: light;
 }
 
@@ -1216,15 +1224,30 @@ kbd {
   gap: .45rem;
   margin-inline-start: .5rem;
   color: var(--accent-ink);
-  transition: opacity .35s var(--ease), transform .45s var(--ease), color .3s;
+  transition: opacity var(--t-med) var(--ease), transform var(--t-med) var(--ease), color var(--t-med);
 }
-.yt-dash { color: var(--faint); font-weight: 300; }
+.yt-dash { color: var(--faint); font-weight: 300; transition: color var(--t-med); }
 .yt-end { display: inline-block; font-weight: 300; }
-.yt-tail[data-state="none"] { opacity: 0; transform: translateX(-.5rem); }
-.yt-tail[data-state="ghost"] { opacity: .4; color: var(--muted); }
+.yt-tail[data-state="none"] { opacity: 0; transform: translateX(-6px); }
+.yt-tail[data-state="ghost"] { opacity: .4; color: var(--muted); transform: none; }
 .yt-tail[data-state="on"] { opacity: 1; transform: none; }
+.yt-tail[data-state="far"] { opacity: 1; transform: none; color: var(--warn); }
+.yt-tail[data-state="far"] .yt-dash { color: var(--warn); }
+.year-type.is-far .yt-input { color: var(--warn); }
+.year-type.is-far .yt-box::before { border-color: var(--warn); }
 .year-type.is-invalid .yt-input { color: var(--bad); }
-.year-type.is-invalid .yt-box::before { border-color: var(--bad); }
+.year-type.is-invalid .yt-box::before { border-color: var(--bad); opacity: 1; }
+.yt-roll { position: absolute; pointer-events: none; font: inherit; font-weight: 450; letter-spacing: .01em; color: var(--ink); white-space: pre; }
+.year-quick { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3); margin-block-start: var(--s-3); }
+.year-chip { gap: .55rem; }
+.chip-note { font-size: .74rem; color: var(--muted); }
+.year-chip.is-on .chip-note { color: var(--accent-ink); }
+.year-msg { min-height: 1.5rem; margin: var(--s-2) 0 0; font-size: .86rem; line-height: 1.5; color: var(--muted); transition: color var(--t-med); }
+.year-msg.is-bad { color: var(--bad); }
+.year-msg.is-warn { color: var(--warn); }
+.year-msg.is-dim { color: var(--muted); }
+.year-msg kbd { font-size: .68rem; padding: 0 .35rem; }
+.year-msg .link-btn { font-size: .86rem; color: var(--warn); text-decoration-color: color-mix(in srgb, var(--warn) 45%, transparent); }
 .field-hint .is-bad { color: var(--bad); }
 .field-hint kbd { font-size: .68rem; padding: 0 .35rem; }
 

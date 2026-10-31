@@ -179,7 +179,12 @@
       } else if (phase === 'commit') return { state: 'invalid', reason: 'format', start, end };
     }
     const state = Math.abs(start - cur) > YEAR_SOFT_SPAN ? 'far' : 'valid';
-    return { state, start, end };
+    let settled = !hasSep;
+    if (hasSep && b) {
+      const es = String(end);
+      settled = (b.length === 4 && b === es) || (b.length === 2 && b === es.slice(2));
+    }
+    return { state, start, end, settled };
   }
 
   let compact = null;

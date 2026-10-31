@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const $ = id => document.getElementById(id);
-  const { MAX_GROUP, toLatin, normalizeDigits, sanitizeDecimal, smartNumber, groupLive, parseDecimal, foldArabic, evalExpr, wordScore, textScore, findGroups } = window.PharmaCore;
+  const { MAX_GROUP, YEAR_MIN_START, YEAR_MAX_START, currentFiscalStart, fiscalLabel, parseFiscalInput, toLatin, normalizeDigits, sanitizeDecimal, smartNumber, groupLive, parseDecimal, foldArabic, evalExpr, wordScore, textScore, findGroups } = window.PharmaCore;
   const escapeHTML = str => String(str).replace(/[&<>'"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[m]));
   const reducedMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -342,127 +342,336 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   const now = new Date();
-  const currentFiscal = String(now.getMonth() + 1 >= 7 ? now.getFullYear() + 1 : now.getFullYear());
+  const curStart = currentFiscalStart(now);
+  const currentFiscal = String(curStart + 1);
+  const suggestStart = String(curStart);
   const suggestedMonth = String(((now.getMonth() + 11) % 12) + 1);
-  const Y_LO = 2001, Y_HI = 2099;
-  const validEnd = v => /^\d{4}$/.test(v) && +v >= Y_LO && +v <= Y_HI;
-  const validStart = s => /^\d{4}$/.test(s) && validEnd(String(+s + 1));
+  const YEAR_MIN_END = YEAR_MIN_START + 1;
+  const YEAR_MAX_END = YEAR_MAX_START + 1;
+  const EASE = 'cubic-bezier(.22,.8,.24,1)';
+  const validEnd = v => /^\d{4}$/.test(v) && +v >= YEAR_MIN_END && +v <= YEAR_MAX_END;
   const hasYear = validEnd;
+  const validStart = s => /^\d{4}$/.test(s) && validEnd(String(+s + 1));
+  const committedStart = () => validEnd(yearSel.value) ? +yearSel.value - 1 : null;
+  const committedText = () => { const c = committedStart(); return c === null ? '' : String(c); };
+  const parseYear = (raw, phase) => parseFiscalInput(raw, { now, phase });
+
   function ensureYearOption(v) {
     if (!validEnd(v) || Array.from(yearSel.options).some(o => o.value === v)) return;
     const after = Array.from(yearSel.options).find(o => o.value && +o.value > +v);
-    yearSel.insertBefore(new Option(`${+v - 1}-${v}`, v), after || null);
+    yearSel.insertBefore(new Option(fiscalLabel(+v - 1), v), after || null);
   }
-  for (let y = +currentFiscal - 3; y <= +currentFiscal + 5; y++) ensureYearOption(String(y));
+  const commitYearStart = start => validStart(String(start)) && A.setYearStart(+start);
 
-  const suggestStart = String(+currentFiscal - 1);
-  const yDigits = raw => normalizeDigits(raw).replace(/\D/g, '');
+  const fieldYear = $('field-year');
+  const yearBox = $('yt-box');
+  const yearQuick = $('year-quick');
+  const yearMsg = $('year-msg');
+  let yearArmed = null;
+  let yearNotice = null;
+  let yearNoticeTimer = 0;
+  let suppressMouseUp = false;
+  let quickSig = '';
+
   const yearFocused = () => document.activeElement === yearInput;
-  function sizeYear() { yearInput.style.width = `${yearInput.value.length + 0.12}ch`; }
-  function setTail(start, state) {
-    const ok = validStart(start);
-    if (ok) {
-      const end = String(+start + 1);
-      if (yearEnd.textContent !== end) {
-        const wasOn = yearTail.dataset.state !== 'none';
-        yearEnd.textContent = end;
-        if (wasOn && !reducedMotion()) yearEnd.animate([{ opacity: 0, transform: 'translateY(.4em)' }, { opacity: 1, transform: 'none' }], { duration: 300, easing: 'cubic-bezier(.22,.8,.24,1)' });
-      }
+  const cleanYearText = raw => toLatin(raw).replace(/[\u2010-\u2015\\/]/g, '-').replace(/[^\d-]/g, '').replace(/-+/g, '-').replace(/^-/, '').slice(0, 9);
+  function sizeYear() { yearInput.style.width = `${Math.max(yearInput.value.length, 1) + 0.12}ch`; }
+  function caretToEnd() { try { yearInput.setSelectionRange(yearInput.value.length, yearInput.value.length); } catch (e) {} }
+
+  function setTail(end, state) {
+    if (end && yearEnd.textContent !== String(end)) {
+      const wasOn = yearTail.dataset.state !== 'none';
+      yearEnd.textContent = String(end);
+      if (wasOn && !reducedMotion()) yearEnd.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: EASE });
     }
-    yearTail.dataset.state = ok ? state : 'none';
+    yearTail.dataset.state = end ? state : 'none';
   }
-  function yearPreview() {
-    const d = yDigits(yearInput.value);
-    const ghost = (yearFocused() || !d) && d.length < 4 && suggestStart.startsWith(d) ? suggestStart.slice(d.length) : '';
-    yearGhost.textContent = ghost;
-    if (d.length >= 4) setTail(d.slice(0, 4), 'on');
-    else if (ghost) setTail(d + ghost, 'ghost');
-    else setTail('', 'none');
-    yearType.classList.toggle('is-invalid', d.length >= 4 && !validStart(d.slice(0, 4)));
+
+  const YEAR_REASON = {
+    range: () => `خارج النطاق (${YEAR_MIN_START} – ${YEAR_MAX_START})`,
+    'end-mismatch': r => `سنة النهاية يجب أن تكون ${r.end}`,
+    incomplete: () => 'أكمل السنة بأربعة أرقام',
+    format: () => 'صيغة غير مفهومة، اكتب مثل 2024 أو 2024/25'
+  };
+
+  function setYearMsg(html, cls) {
+    const next = `${cls || ''}|${html}`;
+    if (yearMsg.dataset.sig === next) return;
+    yearMsg.dataset.sig = next;
+    yearMsg.className = `year-msg${cls ? ` ${cls}` : ''}`;
+    yearMsg.innerHTML = html;
   }
-  function commitYearStart(start) {
-    if (!validStart(start)) return false;
-    return A.setYearStart(+start);
+
+  function noticeYear(html, cls, ms) {
+    clearTimeout(yearNoticeTimer);
+    yearNotice = { html, cls };
+    yearNoticeTimer = setTimeout(() => { yearNotice = null; renderYearTyping(); }, ms);
+    renderYearTyping();
   }
-  function resolveYear(raw) {
-    const d = yDigits(raw);
-    if (d.length >= 4) return d.slice(0, 4);
-    if (d && suggestStart.startsWith(d)) return suggestStart;
-    if (d.length === 2) return '20' + d;
-    return null;
+  function clearNotice() {
+    clearTimeout(yearNoticeTimer);
+    yearNotice = null;
   }
-  function stepYear(dir) {
-    const v = String(Math.max(Y_LO, Math.min(Y_HI, +(yearSel.value || currentFiscal) + dir)));
-    A.setYearStart(+v - 1);
-    yearInput.value = String(+v - 1);
-    sizeYear(); yearPreview(); renderYear();
-    if (yearFocused()) try { yearInput.setSelectionRange(4, 4); } catch (e) {}
+
+  function renderYearTyping() {
+    const focused = yearFocused();
+    const committed = committedStart();
+    let r;
+    if (!focused) r = committed === null ? { state: 'empty' } : { state: 'valid', start: committed, end: committed + 1 };
+    else {
+      r = parseYear(yearInput.value, 'typing');
+      if (r.state === 'far' && r.start === committed) r = { ...r, state: 'valid' };
+    }
+    yearGhost.textContent = focused && r.ghost ? r.ghost : '';
+    let tailEnd = 0, tailState = 'none';
+    if (r.state === 'valid') { tailEnd = r.end; tailState = 'on'; }
+    else if (r.state === 'far') { tailEnd = r.end; tailState = 'far'; }
+    else if (focused && r.ghost) { tailEnd = curStart + 1; tailState = 'ghost'; }
+    setTail(tailEnd, tailState);
+    yearType.classList.toggle('is-invalid', r.state === 'invalid');
+    yearType.classList.toggle('is-far', r.state === 'far');
+
+    if (yearNotice) { setYearMsg(yearNotice.html, yearNotice.cls); return; }
+    if (r.state === 'invalid') setYearMsg(escapeHTML(YEAR_REASON[r.reason](r)), 'is-bad');
+    else if (r.state === 'far') {
+      const label = fiscalLabel(r.start);
+      setYearMsg(`سنة بعيدة؟ اضغط <kbd>Enter</kbd> مرة أخرى للتأكيد · <button type="button" class="link-btn" data-year-confirm="${r.start}">نعم، <span dir="ltr">${label}</span></button>`, 'is-warn');
+    } else if (r.state === 'partial' && r.preview) setYearMsg(`سيصبح <span dir="ltr">${fiscalLabel(r.preview)}</span>`, 'is-dim');
+    else setYearMsg('', '');
   }
+
+  function renderYearHint() {
+    const sel = yearSel.value;
+    let html;
+    if (yearFocused()) html = 'اكتب سنة البداية · <kbd>↑</kbd> <kbd>↓</kbd> للتغيير';
+    else if (!validEnd(sel)) html = 'اكتب سنة البداية مثل <b dir="ltr">2024</b>';
+    else if (sel === currentFiscal) html = 'السنة الحالية';
+    else html = '';
+    if (yearHint.dataset.html === html) return;
+    yearHint.dataset.html = html;
+    yearHint.innerHTML = html;
+  }
+
+  function renderYearQuick() {
+    const committed = committedStart();
+    const starts = [curStart, curStart - 1];
+    if (committed !== null && !starts.includes(committed)) starts.push(committed);
+    const sig = starts.join(',');
+    if (sig !== quickSig) {
+      quickSig = sig;
+      yearQuick.innerHTML = starts.map(st => `<button type="button" class="choice year-chip" role="radio" data-start="${st}" aria-checked="false" tabindex="-1"><span class="choice-text" dir="ltr">${fiscalLabel(st)}</span>${st === curStart ? '<span class="chip-note">الحالية</span>' : ''}</button>`).join('');
+    }
+    const btns = Array.from(yearQuick.querySelectorAll('.choice'));
+    btns.forEach(b => {
+      const on = committed !== null && +b.dataset.start === committed;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-checked', String(on));
+    });
+    const tabbable = btns.find(b => b.classList.contains('is-on')) || btns[0];
+    btns.forEach(b => { b.tabIndex = b === tabbable ? 0 : -1; });
+  }
+
+  function renderYear() {
+    const committed = committedStart();
+    if (!yearFocused()) {
+      const t = committedText();
+      if (yearInput.value !== t) yearInput.value = t;
+      sizeYear();
+    }
+    renderYearTyping();
+    renderYearQuick();
+    yearPrev.disabled = committed !== null && committed <= YEAR_MIN_START;
+    yearNext.disabled = committed !== null && committed >= YEAR_MAX_START;
+    fieldYear.classList.toggle('is-filled', committed !== null);
+    renderYearHint();
+  }
+
+  function rollYear(oldText, dir) {
+    if (reducedMotion() || !dir || !oldText) return;
+    const box = yearBox.getBoundingClientRect();
+    const inp = yearInput.getBoundingClientRect();
+    const ghost = document.createElement('span');
+    ghost.className = 'yt-roll';
+    ghost.setAttribute('aria-hidden', 'true');
+    ghost.textContent = oldText;
+    ghost.style.insetInlineStart = '0';
+    ghost.style.left = `${inp.left - box.left}px`;
+    ghost.style.top = `${inp.top - box.top}px`;
+    yearBox.appendChild(ghost);
+    const dist = dir > 0 ? '-55%' : '55%';
+    const out = ghost.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateY(${dist})` }], { duration: 180, easing: EASE, fill: 'forwards' });
+    out.onfinish = () => ghost.remove();
+    yearInput.animate([{ opacity: 0, transform: `translateY(${dir > 0 ? '55%' : '-55%'})` }, { opacity: 1, transform: 'none' }], { duration: 180, easing: EASE });
+  }
+
   function shakeYear() {
     if (reducedMotion()) return;
     yearType.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }], { duration: 240 });
   }
-  function finalizeYear() {
-    const d = yDigits(yearInput.value);
-    if (d && d !== String(+yearSel.value - 1)) {
-      const start = resolveYear(d);
-      if (!commitYearStart(start)) shakeYear();
-    }
-    yearInput.value = yearSel.value ? String(+yearSel.value - 1) : '';
-    sizeYear(); yearPreview(); renderYear();
+
+  function baseStart() {
+    const r = parseYear(yearInput.value, 'typing');
+    if (r.start !== undefined && r.state !== 'invalid') return r.start;
+    const c = committedStart();
+    return c === null ? curStart : c;
   }
-  yearInput.addEventListener('input', e => {
-    let d = yDigits(yearInput.value);
-    if (d.length === 2 && !suggestStart.startsWith(d) && (e.inputType || '').startsWith('insert')) d = '20' + d;
-    d = d.slice(0, 4);
-    if (yearInput.value !== d) yearInput.value = d;
+
+  function stepYearTo(next) {
+    const clamped = Math.max(YEAR_MIN_START, Math.min(YEAR_MAX_START, next));
+    const before = yearInput.value;
+    const dir = clamped - baseStart();
+    yearArmed = null;
+    clearNotice();
+    A.setYearStart(clamped);
+    yearInput.value = String(clamped);
     sizeYear();
-    if (d.length === 4) commitYearStart(d);
-    yearPreview(); renderYearHint();
+    renderYear();
+    if (yearFocused()) { yearInput.select(); } else caretToEnd();
+    rollYear(before, dir);
+  }
+  const stepYear = delta => stepYearTo(baseStart() + delta);
+
+  function revertYear() {
+    yearArmed = null;
+    clearNotice();
+    yearInput.value = committedText();
+    sizeYear();
+    renderYear();
+  }
+
+  function finalizeYear({ enter = false } = {}) {
+    const raw = yearInput.value;
+    const r = parseYear(raw, 'commit');
+    const committed = committedStart();
+    if (r.state === 'empty') { revertYear(); return committed !== null; }
+    if (r.state === 'valid' || (r.state === 'far' && (r.start === committed || yearArmed === r.start))) {
+      A.setYearStart(r.start);
+      yearArmed = null;
+      clearNotice();
+      yearInput.value = String(r.start);
+      sizeYear();
+      renderYear();
+      return true;
+    }
+    if (r.state === 'far') {
+      if (enter) { yearArmed = r.start; renderYearTyping(); shakeYear(); return false; }
+      revertYear();
+      return false;
+    }
+    const msg = YEAR_REASON[r.reason](r);
+    revertYear();
+    noticeYear(escapeHTML(msg), 'is-bad', 2500);
+    shakeYear();
+    return false;
+  }
+
+  function onYearInput() {
+    yearArmed = null;
+    clearNotice();
+    const raw = yearInput.value;
+    const clean = cleanYearText(raw);
+    if (clean !== raw) {
+      const caret = yearInput.selectionStart ?? raw.length;
+      const kept = cleanYearText(raw.slice(0, caret)).length;
+      yearInput.value = clean;
+      try { yearInput.setSelectionRange(kept, kept); } catch (e) {}
+    }
+    sizeYear();
+    const r = parseYear(clean, 'typing');
+    if (r.state === 'valid' && r.settled) A.setYearStart(r.start);
+    renderYearTyping();
+    renderYearHint();
+  }
+
+  yearInput.addEventListener('beforeinput', e => {
+    if (e.inputType === 'insertText' && e.data && /[^\d\u0660-\u0669\u06F0-\u06F9\-\u2010-\u2015/\\]/.test(e.data)) e.preventDefault();
+  });
+  yearInput.addEventListener('input', onYearInput);
+  yearInput.addEventListener('paste', e => {
+    e.preventDefault();
+    const clean = cleanYearText((e.clipboardData || window.clipboardData).getData('text'));
+    if (!clean) return;
+    yearInput.setRangeText(clean, yearInput.selectionStart, yearInput.selectionEnd, 'end');
+    yearInput.dispatchEvent(new Event('input', { bubbles: true }));
   });
   yearInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); finalizeYear(); advanceFrom(yearInput); }
-    else if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); stepYear(1); }
-    else if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); stepYear(-1); }
-    else if (e.key === 'ArrowRight' && yearGhost.textContent && yearInput.selectionStart === yearInput.value.length) {
-      e.preventDefault(); yearInput.value = suggestStart; sizeYear(); commitYearStart(suggestStart); yearPreview(); renderYearHint();
-    } else if (e.key === 'Escape' && yDigits(yearInput.value) !== String(+yearSel.value - 1)) {
-      e.preventDefault(); e.stopPropagation(); yearInput.value = yearSel.value ? String(+yearSel.value - 1) : ''; sizeYear(); yearPreview(); renderYearHint();
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key;
+    if (k === 'Enter') { e.preventDefault(); if (finalizeYear({ enter: true })) advanceFrom(yearInput); }
+    else if (k === 'ArrowUp') { e.preventDefault(); stepYear(e.shiftKey ? 10 : 1); }
+    else if (k === 'ArrowDown') { e.preventDefault(); stepYear(e.shiftKey ? -10 : -1); }
+    else if (k === 'PageUp') { e.preventDefault(); stepYear(10); }
+    else if (k === 'PageDown') { e.preventDefault(); stepYear(-10); }
+    else if (k === 'Home') { e.preventDefault(); stepYearTo(curStart); }
+    else if (k === 'ArrowRight' && yearGhost.textContent && yearInput.selectionStart === yearInput.value.length) {
+      e.preventDefault();
+      yearInput.value = suggestStart;
+      onYearInput();
+      caretToEnd();
+    } else if (k === 'Escape' && (cleanYearText(yearInput.value) !== committedText() || yearArmed !== null || yearNotice)) {
+      e.preventDefault();
+      e.stopPropagation();
+      revertYear();
+      yearInput.select();
     }
   });
-  yearInput.addEventListener('focus', () => { $('field-year').classList.add('is-typing'); yearPreview(); renderYearHint(); requestAnimationFrame(() => yearInput.select()); });
-  yearInput.addEventListener('blur', () => { $('field-year').classList.remove('is-typing'); finalizeYear(); });
-  $('yt-box').addEventListener('pointerdown', e => { if (e.target !== yearInput) { e.preventDefault(); yearInput.focus(); } });
+  yearInput.addEventListener('focus', () => {
+    fieldYear.classList.add('is-typing');
+    yearInput.select();
+    suppressMouseUp = true;
+    setTimeout(() => { suppressMouseUp = false; }, 250);
+    renderYearTyping();
+    renderYearHint();
+  });
+  yearInput.addEventListener('mouseup', e => { if (suppressMouseUp) { e.preventDefault(); suppressMouseUp = false; } });
+  yearInput.addEventListener('blur', () => {
+    fieldYear.classList.remove('is-typing');
+    finalizeYear();
+    renderYearHint();
+  });
+  yearBox.addEventListener('pointerdown', e => { if (e.target !== yearInput) { e.preventDefault(); yearInput.focus(); } });
+  yearMsg.addEventListener('pointerdown', e => { if (e.target.closest('button')) e.preventDefault(); });
+  yearMsg.addEventListener('click', e => {
+    const b = e.target.closest('[data-year-confirm]');
+    if (!b) return;
+    const start = +b.dataset.yearConfirm;
+    yearArmed = start;
+    if (yearFocused()) { finalizeYear({ enter: true }); } else { A.setYearStart(start); renderYear(); }
+  });
   yearPrev.addEventListener('click', () => stepYear(-1));
   yearNext.addEventListener('click', () => stepYear(1));
 
-  function renderYearHint() {
-    const sel = yearSel.value;
-    const d = yDigits(yearInput.value);
-    let html;
-    if (yearFocused() && d.length >= 4 && !validStart(d.slice(0, 4))) html = '<span class="is-bad">سنة غير صالحة</span>';
-    else if (yearFocused()) html = 'اكتب سنة البداية · <kbd>↑</kbd> <kbd>↓</kbd> للتغيير';
-    else if (!sel) html = 'اكتب سنة البداية مثل <b dir="ltr">2024</b>';
-    else if (sel === currentFiscal) html = 'السنة الحالية';
-    else html = `<button type="button" class="link-btn" id="year-today">العودة إلى <span dir="ltr">${+currentFiscal - 1} – ${currentFiscal}</span></button>`;
-    if (yearHint.dataset.html === html) return;
-    yearHint.dataset.html = html;
-    yearHint.innerHTML = html;
-    const today = $('year-today');
-    if (today) today.onclick = () => { commitYearStart(suggestStart); renderYear(); };
-  }
-  function renderYear() {
-    const sel = yearSel.value;
-    if (!yearFocused()) {
-      const s = sel ? String(+sel - 1) : '';
-      if (yearInput.value !== s) yearInput.value = s;
-      sizeYear(); yearPreview();
+  yearQuick.addEventListener('click', e => {
+    const b = e.target.closest('.choice');
+    if (!b) return;
+    clearNotice();
+    yearArmed = null;
+    A.setYearStart(+b.dataset.start);
+    const again = yearQuick.querySelector(`.choice[data-start="${b.dataset.start}"]`);
+    if (again && document.activeElement !== again) again.focus({ preventScroll: true });
+  });
+  yearQuick.addEventListener('keydown', e => {
+    const b = e.target.closest('.choice');
+    if (!b) return;
+    const btns = Array.from(yearQuick.querySelectorAll('.choice'));
+    const i = btns.indexOf(b);
+    const map = { ArrowLeft: 1, ArrowDown: 1, ArrowRight: -1, ArrowUp: -1 };
+    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      A.setYearStart(+b.dataset.start);
+      advanceFrom(yearInput);
+      return;
     }
-    yearPrev.disabled = !!sel && +sel <= Y_LO;
-    yearNext.disabled = !!sel && +sel >= Y_HI;
-    $('field-year').classList.toggle('is-filled', !!sel);
-    renderYearHint();
-  }
+    let next = null;
+    if (e.key in map) next = btns[(i + map[e.key] + btns.length) % btns.length];
+    else if (e.key === 'Home') next = btns[0];
+    else if (e.key === 'End') next = btns[btns.length - 1];
+    if (!next) return;
+    e.preventDefault();
+    A.setYearStart(+next.dataset.start);
+    const again = yearQuick.querySelector(`.choice[data-start="${next.dataset.start}"]`);
+    if (again) again.focus();
+  });
 
   const choiceSig = new WeakMap();
   function renderChoices(container, sel, { empty = '', decorate } = {}) {
@@ -1241,7 +1450,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function resetAll() {
     applyClass(null);
     selects.forEach(s => { s.value = ''; });
-    if (hasYear(currentFiscal)) yearSel.value = currentFiscal;
+    ensureYearOption(currentFiscal);
+    yearSel.value = currentFiscal;
     updatePharmacyDropdown('');
     cardValues.fill(0);
     drugInputs.forEach(i => { i.value = ''; });
@@ -1280,7 +1490,7 @@ document.addEventListener('DOMContentLoaded', () => {
     restore({ ...d, activeClass: btn ? btn.dataset.class : null });
   })();
   (function initEntry() {
-    if (!yearSel.value && hasYear(currentFiscal)) { yearSel.value = currentFiscal; save(); }
+    if (!yearSel.value && hasYear(currentFiscal)) { ensureYearOption(currentFiscal); yearSel.value = currentFiscal; save(); }
     const firstEmpty = cardValues.findIndex(v => !(v > 0));
     setTarget(firstEmpty === -1 ? 0 : firstEmpty);
     refresh();
@@ -1572,7 +1782,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const on = yearSel.value === String(s + 1);
     return { kind: 'year', title: `<span dir="ltr">${s} – ${s + 1}</span>`, html: true, plain: `${s}`, kw: 'سنه ماليه عام', on, score,
       sub: sub || (String(s + 1) === currentFiscal ? 'السنة الحالية' : ''),
-      run: () => { commitYearStart(String(s)); renderYear(); done(ok(`السنة المالية <b dir="ltr">${s} – ${s + 1}</b>`)); } };
+      run: () => { A.setYearStart(s); renderYear(); done(ok(`السنة المالية <b dir="ltr">${s} – ${s + 1}</b>`)); } };
   }
   function totalItems(expr, q, score0) {
     return optionalInputs.map((inp, which) => {

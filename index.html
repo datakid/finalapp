@@ -178,12 +178,14 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5 9 12l5.5 5.5"/></svg>
             </button>
             <div class="yt-box" id="yt-box">
-              <span class="yt-sizer" id="yt-sizer" data-value="2025"><input type="text" id="year-input" class="yt-input" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" dir="ltr" maxlength="9" enterkeyhint="next" aria-describedby="year-hint year-tail"></span><span class="yt-ghost" id="yt-ghost" aria-hidden="true"></span><span class="yt-tail" id="year-tail" data-state="none"><span class="yt-dash" aria-hidden="true">–</span><span class="yt-end" id="yt-end"></span></span>
+              <span class="yt-sizer" id="yt-sizer" data-value="2025"><input type="text" id="year-input" class="yt-input" inputmode="numeric" autocomplete="off" autocorrect="off" spellcheck="false" dir="ltr" maxlength="9" enterkeyhint="next" aria-describedby="year-hint year-tail year-msg"></span><span class="yt-ghost" id="yt-ghost" aria-hidden="true"></span><span class="yt-tail" id="year-tail" data-state="none"><span class="yt-dash" aria-hidden="true">–</span><span class="yt-end" id="yt-end"></span></span>
             </div>
             <button type="button" class="rail-nudge" id="year-next" aria-label="سنة أحدث" tabindex="-1">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6.5 15 12l-5.5 5.5"/></svg>
             </button>
           </div>
+          <div class="year-quick" id="year-quick" role="radiogroup" aria-label="اختيار سريع للسنة"></div>
+          <p class="year-msg" id="year-msg" aria-live="polite"></p>
           <select id="year" hidden tabindex="-1" aria-hidden="true"><option value="">اختر السنة</option></select>
         </div>
 
