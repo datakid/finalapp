@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const $ = id => document.getElementById(id);
+  const { MAX_GROUP, toLatin, normalizeDigits, sanitizeDecimal, smartNumber, groupLive, parseDecimal, foldArabic, evalExpr, wordScore, textScore, findGroups } = window.PharmaCore;
   const escapeHTML = str => String(str).replace(/[&<>'"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[m]));
   const reducedMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -77,7 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const STATUS_KEY = 'pharmacyAppStatusHidden';
   const SENT_KEY = 'pharmacyAppSent';
   const VIEW_KEY = 'pharmacyAppView';
-  const MAX_GROUP = 1000000000;
   const MAX_OPTIONAL = 1000000;
   const RING_LEN = 2 * Math.PI * 16;
 
@@ -116,37 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const fmt3 = n => n.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
   const fmtShort = n => n.toLocaleString('en-US', { maximumFractionDigits: 3 });
 
-  function toLatin(str) {
-    return String(str)
-      .replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))
-      .replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x06F0))
-      .replace(/\u066B/g, '.')
-      .replace(/\u066C/g, '');
-  }
-  const normalizeDigits = str => toLatin(str).replace(/[\s\u00A0\u2009\u202F]/g, '');
-  function sanitizeDecimal(str) {
-    let v = normalizeDigits(str).replace(/[^\d.]/g, '');
-    const i = v.indexOf('.');
-    if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
-    return v;
-  }
-  function smartNumber(str) {
-    let s = normalizeDigits(str);
-    const commas = (s.match(/,/g) || []).length;
-    if (commas) {
-      if (s.includes('.') || commas > 1 || (/,\d{3}$/.test(s) && !/^0,/.test(s))) s = s.replace(/,/g, '');
-      else s = s.replace(',', '.');
-    }
-    return sanitizeDecimal(s);
-  }
-  function groupLive(clean) {
-    if (!clean) return '';
-    let [int, frac] = clean.split('.');
-    int = int.replace(/^0+(?=\d)/, '');
-    if (!int && frac !== undefined) int = '0';
-    const g = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    return frac !== undefined ? `${g}.${frac.slice(0, 3)}` : g;
-  }
   function setKeepingCaret(inp, raw, shown) {
     const caret = inp.selectionStart ?? raw.length;
     const sig = raw.slice(0, caret).replace(/[^\d.\u0660-\u0669\u06F0-\u06F9\u066B]/g, '').length;
@@ -156,18 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
     while (pos < shown.length && count < sig) { if (/[\d.]/.test(shown[pos])) count++; pos++; }
     try { inp.setSelectionRange(pos, pos); } catch (e) {}
   }
-  function parseDecimal(str) {
-    const n = parseFloat(sanitizeDecimal(str));
-    if (isNaN(n) || n <= 0) return 0;
-    return Math.min(Math.round(n * 1000) / 1000, MAX_GROUP);
-  }
   const displayDecimal = n => n > 0 ? String(Math.round(n * 1000) / 1000) : '';
   const groupedDecimal = n => n > 0 ? n.toLocaleString('en-US', { maximumFractionDigits: 3 }) : '';
   const fitChars = (el, text) => el.style.setProperty('--chars', Math.max(6, String(text).length));
-  const foldArabic = s => String(s)
-    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
-    .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
-    .replace(/\s+/g, ' ').trim().toLowerCase();
 
   let cardValues = Array(cardNames.length).fill(0);
   let activeClass = null;
@@ -769,6 +729,8 @@ document.addEventListener('DOMContentLoaded', () => {
     history.push({ i, prev, next });
     if (history.length > 100) history.shift();
   }
+  const foldedNames = cardNames.map(foldArabic);
+  const parseEntry = raw => window.PharmaCore.parseEntry(raw, { names: cardNames, values: cardValues, target, folded: foldedNames });
   const nextAfter = i => (i + 1 < cardNames.length ? i + 1 : (cardValues.findIndex(v => !(v > 0)) + 1 || cardNames.length) - 1);
   const groupNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 3 });
 
@@ -787,51 +749,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function findGroups(q) {
-    const f = foldArabic(q);
-    if (!f) return [];
-    const names = cardNames.map(foldArabic);
-    const score = n => n.startsWith(f) ? 0 : n.split(' ').some(w => w.startsWith(f)) ? 1 : n.includes(f) ? 2 : 9;
-    return names.map((n, i) => [i, score(n)]).filter(x => x[1] < 9).sort((a, b) => a[1] - b[1] || a[0] - b[0]).map(x => x[0]);
-  }
 
-  function evalExpr(expr, current) {
-    const e = expr.replace(/[\s\u00A0]+/g, '');
-    if (!e || /[^\d.,+\-]/.test(e)) return null;
-    const relative = /^[+\-]/.test(e);
-    const terms = e.split(/(?=[+\-])/).filter(Boolean);
-    let sum = 0;
-    for (const t of terms) {
-      const sign = t[0] === '-' ? -1 : 1;
-      const c = smartNumber(t.replace(/^[+\-]/, ''));
-      if (!c || isNaN(parseFloat(c))) return null;
-      sum += sign * parseFloat(c);
-    }
-    const value = Math.round(((relative ? current : 0) + sum) * 1000) / 1000;
-    if (value < 0) return { error: 'النتيجة أقل من صفر' };
-    return { value: Math.min(value, MAX_GROUP), relative, compound: terms.length > 1 || relative };
-  }
 
-  function parseEntry(raw) {
-    const s = toLatin(raw).trim();
-    if (!s) return { kind: 'skip' };
-    let m = s.match(/^#?(\d{1,2})\s*[=:]\s*(.+)$/);
-    if (m && +m[1] >= 1 && +m[1] <= cardNames.length) {
-      const i = +m[1] - 1;
-      const v = evalExpr(m[2], cardValues[i]);
-      return !v ? { kind: 'bad' } : v.error ? { kind: 'bad', msg: v.error } : { kind: 'set', index: i, ...v };
-    }
-    m = s.match(/^(.*?\p{L}[^\d+\-]*?)\s*([+\-]?\d[\d.,+\-\s]*)?$/u);
-    if (m && /\p{L}/u.test(m[1])) {
-      const hits = findGroups(m[1]);
-      if (!hits.length) return { kind: 'nomatch', query: m[1].trim() };
-      if (!m[2]) return { kind: 'goto', index: hits[0], more: hits.length - 1 };
-      const v = evalExpr(m[2], cardValues[hits[0]]);
-      return !v ? { kind: 'bad' } : v.error ? { kind: 'bad', msg: v.error } : { kind: 'set', index: hits[0], ...v };
-    }
-    const v = evalExpr(s, cardValues[target]);
-    return !v ? { kind: 'bad' } : v.error ? { kind: 'bad', msg: v.error } : { kind: 'set', index: target, ...v };
-  }
 
   function renderPreview() {
     const raw = groupSearch.value;
@@ -1533,26 +1452,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const classLabel = k => classBtnFor(k)?.dataset.label || '';
   const pad2 = n => String(n).padStart(2, '0');
 
-  function wordScore(w, s) {
-    if (s.startsWith(w)) return 0;
-    if ((' ' + s).includes(' ' + w)) return 1;
-    if (s.includes(w)) return 2;
-    if (w.length > 2) { let k = 0; for (const ch of s) if (ch === w[k]) k++; if (k === w.length) return 4; }
-    return Infinity;
-  }
-  function textScore(q, title, kw = '') {
-    const t = foldArabic(title), k = foldArabic(kw), f = foldArabic(q);
-    if (!f) return 0;
-    if (t === f) return -2;
-    if (t.startsWith(f)) return -1;
-    let total = 0;
-    for (const w of f.split(' ')) {
-      const s = Math.min(wordScore(w, t), wordScore(w, k) + 0.6);
-      if (s === Infinity) return null;
-      total += s;
-    }
-    return total;
-  }
 
   function prefill(text) { palInput.value = text; palRender(); palInput.focus(); try { palInput.setSelectionRange(text.length, text.length); } catch (e) {} }
   function done(html) {
@@ -1669,7 +1568,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const yearM = num.match(/^(\d{4})(?:\s*[-–\/]\s*\d{2,4})?$/);
 
     if (num && text) {
-      findGroups(text).slice(0, 6).forEach((i, k) => push(setGroupItem(i, num, k * 0.1)));
+      findGroups(text, cardNames, foldedNames).slice(0, 6).forEach((i, k) => push(setGroupItem(i, num, k * 0.1)));
       totalItems(num, text, 0.2).forEach(push);
       const ys = textScore(text, 'سنه ماليه', 'عام');
       if (ys !== null && yearM && validStart(yearM[1])) push(yearItem(yearM[1], ys));
