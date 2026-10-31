@@ -1136,7 +1136,6 @@ kbd {
 .field.needs-attention { animation-name: attention-soft; }
 @keyframes attention-soft { 0%, 100% { background: transparent; } 30% { background: var(--accent-wash-2); } }
 
-/* ───────── Typed fiscal year: write "2024", the season finishes itself → 2024 – 2025 ───────── */
 .year-type { display: flex; align-items: center; gap: .3rem; min-height: 2.9rem; }
 .rail-nudge {
   width: 2.25rem; height: 2.25rem; flex: none;
@@ -1166,7 +1165,6 @@ kbd {
   cursor: text;
   transition: background .3s var(--ease);
 }
-/* dotted rule underneath, like the ledger leaders */
 .yt-box::after {
   content: '';
   position: absolute;
@@ -1178,7 +1176,6 @@ kbd {
   transition: opacity .3s;
   pointer-events: none;
 }
-/* the same pen loop every chosen value gets */
 .yt-box::before {
   content: '';
   position: absolute;
@@ -1231,7 +1228,6 @@ kbd {
 .field-hint .is-bad { color: var(--bad); }
 .field-hint kbd { font-size: .68rem; padding: 0 .35rem; }
 
-/* ───────── Command palette ───────── */
 .topbar-tools { display: flex; align-items: center; gap: .7rem; min-width: 0; }
 .cmd-trigger {
   display: inline-flex;
@@ -1381,13 +1377,11 @@ kbd {
 .pal-keys span { display: inline-flex; align-items: center; gap: .35rem; }
 .pal-keys kbd { font-size: .66rem; }
 
-/* ───────── Buttery press feedback ───────── */
 button, [role="option"], .choice, .class-btn { touch-action: manipulation; }
 .choice:active, .seg-btn:active, .dock-btn:active:not(:disabled), .rail-nudge:active:not(:disabled), .qe-nudge:active, .cmd-trigger:active, .theme-switch-btn:active, .status-chip:active { transform: scale(.96); }
 .class-btn:active { transform: translateY(0) scale(.985); }
 .seg-btn, .dock-btn, .qe-nudge, .theme-switch-btn, .status-chip { transition-property: color, background, box-shadow, opacity, transform; transition-duration: .25s; transition-timing-function: var(--ease); }
 
-/* ───────── Quick-entry console: a single ruled line on the page ───────── */
 .quick-entry {
   position: sticky;
   top: .75rem;
@@ -1562,7 +1556,6 @@ button, [role="option"], .choice, .class-btn { touch-action: manipulation; }
 .qe-syntax b { font-family: var(--f-num); font-weight: 500; color: var(--ink-2); margin-inline-end: .25rem; }
 .qe-syntax b.is-word { font-family: var(--f-body); }
 
-/* target row in the ledger + landing flash */
 .group-card.is-target .group-index { color: var(--accent); }
 .group-card.is-target .group-name { color: var(--ink); }
 .groups-grid.is-list .group-card.is-target { background: linear-gradient(to left, var(--accent-wash), transparent 85%); border-radius: 12px 12px 0 0; }

@@ -116,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const fmt3 = n => n.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
   const fmtShort = n => n.toLocaleString('en-US', { maximumFractionDigits: 3 });
 
-  // Arabic-Indic / Persian digits -> Latin; Arabic decimal mark -> '.'; Arabic thousands mark dropped.
   function toLatin(str) {
     return String(str)
       .replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))
@@ -125,14 +124,12 @@ document.addEventListener('DOMContentLoaded', () => {
       .replace(/\u066C/g, '');
   }
   const normalizeDigits = str => toLatin(str).replace(/[\s\u00A0\u2009\u202F]/g, '');
-  // Strict: commas are always thousands separators (used while typing).
   function sanitizeDecimal(str) {
     let v = normalizeDigits(str).replace(/[^\d.]/g, '');
     const i = v.indexOf('.');
     if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
     return v;
   }
-  // Smart: for pasted / typed-in-console values. "1,234,567.5" and "1,234" are thousands; "12,5" and "0,250" are decimals.
   function smartNumber(str) {
     let s = normalizeDigits(str);
     const commas = (s.match(/,/g) || []).length;
@@ -142,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     return sanitizeDecimal(s);
   }
-  // Thousands grouping for a clean "digits[.digits]" string, kept while typing.
   function groupLive(clean) {
     if (!clean) return '';
     let [int, frac] = clean.split('.');
@@ -151,7 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const g = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     return frac !== undefined ? `${g}.${frac.slice(0, 3)}` : g;
   }
-  // Rewrite an input's value while keeping the caret after the same significant character.
   function setKeepingCaret(inp, raw, shown) {
     const caret = inp.selectionStart ?? raw.length;
     const sig = raw.slice(0, caret).replace(/[^\d.\u0660-\u0669\u06F0-\u06F9\u066B]/g, '').length;
@@ -395,12 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const now = new Date();
   const currentFiscal = String(now.getMonth() + 1 >= 7 ? now.getFullYear() + 1 : now.getFullYear());
   const suggestedMonth = String(((now.getMonth() + 11) % 12) + 1);
-  // Fiscal years are stored by their END year ("2026" = 2025-2026), exactly as before.
-  /* ───────────── Typed fiscal year ─────────────
-     Type the START year (2024) → the line finishes the season for you: "2024 – 2025".
-     "24" expands to 2024, a ghost completes partial input, ↑ ↓ step, Enter moves on.
-     Stored value is unchanged: the END year ("2025").                                  */
-  const Y_LO = 2001, Y_HI = 2099; // valid END years
+  const Y_LO = 2001, Y_HI = 2099;
   const validEnd = v => /^\d{4}$/.test(v) && +v >= Y_LO && +v <= Y_HI;
   const validStart = s => /^\d{4}$/.test(s) && validEnd(String(+s + 1));
   const hasYear = validEnd;
@@ -473,7 +463,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   yearInput.addEventListener('input', e => {
     let d = yDigits(yearInput.value);
-    // "24" → 2024 instantly (unless it is the beginning of the suggested year, e.g. "20")
     if (d.length === 2 && !suggestStart.startsWith(d) && (e.inputType || '').startsWith('insert')) d = '20' + d;
     d = d.slice(0, 4);
     if (yearInput.value !== d) yearInput.value = d;
@@ -577,7 +566,6 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (e.key === 'Home') next = btns[0];
       else if (e.key === 'End') next = btns[btns.length - 1];
       else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.key !== ' ') {
-        // Type-ahead: letters match the label, digits match the position (months: 1-12)
         clearTimeout(typedTimer);
         typed += foldArabic(normalizeDigits(e.key));
         typedTimer = setTimeout(() => { typed = ''; }, 900);
@@ -599,7 +587,6 @@ document.addEventListener('DOMContentLoaded', () => {
   bindChoices(regionChoices, regionSel);
   bindChoices(pharmacyChoices, pharmacySel);
 
-  // Enter on any picker confirms it and walks forward: class → year → month → region → pharmacy → quick entry.
   function advanceFrom(container) {
     const flow = [$('class-group'), yearInput, monthChoices, regionChoices, pharmacyChoices];
     const filled = [() => !!activeClass, () => !!yearSel.value, () => !!monthSel.value, () => !!regionSel.value, () => !!pharmacySel.value];
@@ -664,7 +651,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!e.target.classList.contains('drug-input')) return;
     const inp = e.target;
     let raw = inp.value;
-    // A comma typed by hand is a decimal mark (grouping commas are added automatically).
     if (e.inputType === 'insertText' && e.data === ',' && !raw.includes('.')) {
       const c = inp.selectionStart;
       raw = raw.slice(0, c - 1) + '.' + raw.slice(c);
@@ -776,15 +762,6 @@ document.addEventListener('DOMContentLoaded', () => {
   rovingKeys(viewBtns, b => setView(b.dataset.view, true));
   setView(store.get(VIEW_KEY, 'list'), false);
 
-  /* ───────────── Quick-entry console ─────────────
-     One line, always ready. Grammar:
-       4500          → set the target group, move to the next one
-       1200+350-50   → arithmetic, result goes to the target
-       +300 / -50    → add to / subtract from the target's current value
-       قلب 4500      → set a group by (part of) its name
-       5=4500        → set a group by its number
-       قلب           → move the target there (also filters the ledger)
-       Enter on empty line → skip to next group                      */
   let target = 0;
   const history = [];
   function pushHistory(i, prev, next) {
@@ -919,7 +896,6 @@ document.addEventListener('DOMContentLoaded', () => {
     applyGroup(p.index, p.value);
     setTarget(nextAfter(p.index), { scroll: true });
   }
-  // Shared by the quick-entry line and the command palette.
   function applyGroup(i, value) {
     const prev = cardValues[i];
     pushHistory(i, prev, value);
@@ -933,7 +909,6 @@ document.addEventListener('DOMContentLoaded', () => {
   groupSearch.addEventListener('input', () => {
     const raw = groupSearch.value;
     searchClear.hidden = !raw;
-    // Typing a name filters the ledger; typing numbers never hides anything.
     const nameOnly = /\p{L}/u.test(raw) && !/\d/.test(toLatin(raw)) ? raw.trim() : '';
     if (nameOnly !== groupQuery) { groupQuery = nameOnly; applyGroupFilter(); }
     renderPreview();
@@ -952,7 +927,6 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       undo();
     } else if (e.key === 'Tab' && !e.shiftKey && groupSearch.value) {
-      // Tab completes a name match into the target without committing a value
       const p = parseEntry(groupSearch.value);
       if (p.kind === 'goto') { e.preventDefault(); clearSearch(); setTarget(p.index, { scroll: true }); }
     }
@@ -1011,7 +985,6 @@ document.addEventListener('DOMContentLoaded', () => {
       groupSearch.select();
       return;
     }
-    // Start typing a number anywhere on the page → it lands in the quick-entry line
     if ((e.target === document.body || e.target === document.documentElement) && /^[\d\u0660-\u0669\u06F0-\u06F9]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey && !document.querySelector('dialog[open]')) {
       e.preventDefault();
       groupSearch.focus({ preventScroll: true });
@@ -1298,7 +1271,6 @@ document.addEventListener('DOMContentLoaded', () => {
     restore({ ...d, activeClass: btn ? btn.dataset.class : null });
   })();
   (function initEntry() {
-    // Fresh sheet: preselect the current fiscal year (one less decision); saved year always wins.
     if (!yearSel.value && hasYear(currentFiscal)) { yearSel.value = currentFiscal; save(); }
     const firstEmpty = cardValues.findIndex(v => !(v > 0));
     setTarget(firstEmpty === -1 ? 0 : firstEmpty);
@@ -1530,13 +1502,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderFileList();
 
-  /* ───────────── Command palette (Ctrl/⌘ K) ─────────────
-     One box to find and edit anything:
-       قلب 4500      → set a group         4500 → set the current target group
-       5=4500        → set group #5        2024 → fiscal year 2024 – 2025
-       مارس / دمنهور → pick month / any pharmacy (class + region follow automatically)
-       تذاكر 1200    → totals              فاتح / بطاقات / إرسال → commands
-     Enter applies and keeps the palette open for the next edit; Esc closes. */
   const pal = $('palette');
   const palInput = $('pal-input');
   const palList = $('pal-list');
@@ -1568,7 +1533,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const classLabel = k => classBtnFor(k)?.dataset.label || '';
   const pad2 = n => String(n).padStart(2, '0');
 
-  // Fuzzy scoring: every query word must hit the title (or keywords, slightly penalised).
   function wordScore(w, s) {
     if (s.startsWith(w)) return 0;
     if ((' ' + s).includes(' ' + w)) return 1;
@@ -1599,7 +1563,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   const ok = s => `<span class="pf-ok">${ICONS.check}</span>${s}`;
 
-  /* item factories */
   function groupItem(i, browse) {
     const v = cardValues[i];
     return { kind: 'group', badge: pad2(i + 1), title: cardNames[i], kw: `مجموعه ${i + 1}`, on: i === target && browse,
@@ -1845,7 +1808,6 @@ document.addEventListener('DOMContentLoaded', () => {
   pal.addEventListener('cancel', e => { e.preventDefault(); if (palInput.value) { palInput.value = ''; palRender(); } else closePal(); });
   let palPointer = null;
   palList.addEventListener('pointermove', e => {
-    // ignore synthetic moves caused by scrolling under a still pointer
     if (palPointer && palPointer.x === e.clientX && palPointer.y === e.clientY) return;
     palPointer = { x: e.clientX, y: e.clientY };
     const li = e.target.closest('.pal-item');
