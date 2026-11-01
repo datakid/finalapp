@@ -249,12 +249,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const visibleDrugInputs = () => drugInputs.filter(inp => !inp.closest('.group-card').hidden);
   const focusOrder = () => [...visibleDrugInputs(), totalTicketsInput, totalExternalInput];
 
+  let glowEvent = null;
+  let glowRaf = 0;
   appShell.addEventListener('pointermove', e => {
-    const el = e.target.closest('.reveal');
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    el.style.setProperty('--mx', `${e.clientX - r.left}px`);
-    el.style.setProperty('--my', `${e.clientY - r.top}px`);
+    if (e.pointerType === 'touch') return;
+    glowEvent = e;
+    if (glowRaf) return;
+    glowRaf = requestAnimationFrame(() => {
+      glowRaf = 0;
+      const ev = glowEvent;
+      glowEvent = null;
+      const el = ev && ev.target.closest ? ev.target.closest('.reveal') : null;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${ev.clientX - r.left}px`);
+      el.style.setProperty('--my', `${ev.clientY - r.top}px`);
+    });
   }, { passive: true });
 
   let saveTimer = null, flashTimer = null;
@@ -1314,7 +1324,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const missing = missingList();
     if (missing.length) {
       showToast(`أكمل أولًا: ${missing.map(m => m.label).join('، ')}`, 'error', { duration: 5000 });
-      submitBtn.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'translateX(0)' }], { duration: 380 });
+      if (!reducedMotion()) submitBtn.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'translateX(0)' }], { duration: 380 });
       guideTo(missing[0]);
       return;
     }
@@ -1666,7 +1676,7 @@ document.addEventListener('DOMContentLoaded', () => {
     error: svg('<circle cx="12" cy="12" r="8.5"/><path d="M12 8v4.5M12 16h.01"/>')
   };
   const KIND = { group: 'مجموعة', class: 'فئة', year: 'سنة', month: 'شهر', region: 'منطقة', pharmacy: 'صيدلية', total: 'إجمالي', action: 'أمر', hint: 'التالي' };
-  const P = { items: [], rows: [], sig: '', flat: false, active: -1, returnFocus: null, closing: false };
+  const P = { items: [], rows: [], sig: '', flat: false, active: -1, returnFocus: null, closing: false, lastEdit: null };
 
   const regionLabel = v => regionSel.querySelector(`option[value="${v}"]`)?.text || '';
   const classLabel = k => classBtnFor(k)?.dataset.label || '';
@@ -1674,7 +1684,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   function prefill(text) { palInput.value = text; palRender(); palInput.focus(); try { palInput.setSelectionRange(text.length, text.length); } catch (e) {} }
-  function done(html) {
+  function done(html, editedIndex = null) {
+    P.lastEdit = editedIndex;
     palFlash.innerHTML = html;
     if (!reducedMotion()) palFlash.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.22,.8,.24,1)' });
     palInput.value = '';
@@ -1734,7 +1745,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const base = v.relative ? `${groupNum(prev)} ${expr.trim()[0] === '-' ? '−' : '+'} …` : prev > 0 ? `بدلًا من ${groupNum(prev)}` : 'فارغة الآن';
     const sub = isTarget ? `المجموعة الحالية · ${base}` : base;
     return { kind: 'group', id: `s${i}`, badge: pad2(i + 1), title: cardNames[i], sub, val: groupNum(v.value), strong: true, score,
-      run: () => { applyGroup(i, v.value); setTarget(nextEmptyAfter(i)); done(ok(`${escapeHTML(cardNames[i])} ← <b dir="ltr">${groupNum(v.value)}</b>`)); } };
+      run: () => { applyGroup(i, v.value); setTarget(nextEmptyAfter(i)); done(ok(`${escapeHTML(cardNames[i])} ← <b dir="ltr">${groupNum(v.value)}</b>`), i); } };
   }
   function yearItem(start, score, sub) {
     const s = +start;
@@ -1818,7 +1829,7 @@ document.addEventListener('DOMContentLoaded', () => {
         A.setGroups(entries);
         entries.forEach(e => flashCard(e.i));
         setTarget(nextEmptyAfter(last));
-        done(ok(`طُبّقت الدفعة · <b dir="ltr">${n}</b>`));
+        done(ok(`طُبّقت الدفعة · <b dir="ltr">${n}</b>`), last);
       } }];
   }
 
@@ -1981,12 +1992,25 @@ document.addEventListener('DOMContentLoaded', () => {
   function openPal(text = '') {
     if (pal.open) { palInput.focus(); palInput.select(); return; }
     P.returnFocus = document.activeElement;
+    P.lastEdit = null;
     palFlash.textContent = '';
     palInput.value = text;
     pal.classList.remove('is-closing');
     pal.showModal();
     palRender(true);
     palInput.focus();
+  }
+  function revealLastEdit() {
+    const i = P.lastEdit;
+    P.lastEdit = null;
+    if (i === null || i === undefined) return;
+    const card = groupCards[i];
+    if (card.hidden) return;
+    const r = card.getBoundingClientRect();
+    if (r.top < 0 || r.bottom > window.innerHeight) {
+      card.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+      flashCard(i);
+    }
   }
   function closePal(restore = true) {
     if (!pal.open || P.closing) return;
@@ -1997,6 +2021,7 @@ document.addEventListener('DOMContentLoaded', () => {
       P.closing = false;
       const back = P.returnFocus;
       if (restore && back && document.contains(back) && back !== document.body) back.focus({ preventScroll: true });
+      revealLastEdit();
     };
     if (reducedMotion()) finish();
     else { pal.classList.add('is-closing'); setTimeout(finish, 150); }
