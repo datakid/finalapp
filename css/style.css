@@ -135,8 +135,7 @@ img { display: block; max-width: 100%; }
 .bm-dot { fill: var(--warm); animation: leaf .6s 1.3s var(--ease) both; transition: fill var(--t-slow); }
 @keyframes leaf { from { opacity: 0; transform: scale(.4) rotate(-20deg); } }
 .brand-words { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
-.brand-name { font-family: var(--f-hand); font-size: 1.25rem; color: var(--ink); }
-.brand-sub { font-size: .8rem; color: var(--muted); letter-spacing: .01em; }
+.brand-name { font-family: var(--f-hand); font-size: 1.35rem; color: var(--ink); white-space: nowrap; }
 
 .theme-switch {
   --pos: 1;
@@ -1464,7 +1463,6 @@ button, [role="option"], .choice, .class-btn { touch-action: manipulation; }
   body { font-size: 15px; }
   .app-shell { width: min(100% - 2rem, 1080px); padding-block-start: max(var(--s-3), env(safe-area-inset-top)); }
   .topbar { gap: var(--s-2); }
-  .brand-sub { display: none; }
   .masthead { grid-template-columns: 1fr; gap: 0; padding-block: var(--s-6) var(--s-4); }
   .masthead-art { position: absolute; inset-inline-end: -.25rem; top: 3.6rem; width: 112px; opacity: .4; }
   .masthead-text { position: relative; z-index: 1; }
