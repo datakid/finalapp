@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const $ = id => document.getElementById(id);
-  const { MAX_GROUP, YEAR_MIN_START, YEAR_MAX_START, YEAR_SOFT_SPAN, scoreFolded, splitBatch, currentFiscalStart, fiscalLabel, parseFiscalInput, toLatin, normalizeDigits, sanitizeDecimal, smartNumber, groupLive, parseDecimal, foldArabic, evalExpr, wordScore, textScore, findGroups } = window.PharmaCore;
+  const { MAX_GROUP, magnitudeLabel, YEAR_MIN_START, YEAR_MAX_START, YEAR_SOFT_SPAN, scoreFolded, splitBatch, currentFiscalStart, fiscalLabel, parseFiscalInput, toLatin, normalizeDigits, sanitizeDecimal, smartNumber, groupLive, parseDecimal, foldArabic, evalExpr, wordScore, textScore, findGroups } = window.PharmaCore;
   const escapeHTML = str => String(str).replace(/[&<>'"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[m]));
   const reducedMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -119,6 +119,27 @@ document.addEventListener('DOMContentLoaded', () => {
   const displayDecimal = n => n > 0 ? String(Math.round(n * 1000) / 1000) : '';
   const groupedDecimal = n => n > 0 ? n.toLocaleString('en-US', { maximumFractionDigits: 3 }) : '';
   const fitChars = (el, text) => el.style.setProperty('--chars', Math.max(6, String(text).length));
+  const field = { w: 0, font: 0, dirty: true };
+  function measureField() {
+    const visible = drugInputs.filter(i => i.clientWidth > 0);
+    if (!visible.length) return;
+    const inp = visible.find(i => !i.classList.contains('is-long')) || visible[0];
+    const wasLong = inp.classList.contains('is-long');
+    if (wasLong) inp.classList.remove('is-long');
+    const cs = getComputedStyle(inp);
+    field.font = parseFloat(cs.fontSize);
+    field.w = inp.clientWidth - parseFloat(cs.paddingInlineStart) - parseFloat(cs.paddingInlineEnd);
+    if (wasLong) inp.classList.add('is-long');
+    field.dirty = false;
+  }
+  function textEm(s) {
+    let em = 0;
+    for (const ch of s) em += ch === ',' || ch === '.' ? 0.3 : 0.62;
+    return em;
+  }
+  function fitLong(inp) {
+    inp.classList.toggle('is-long', field.w > 0 && textEm(inp.value || '') * field.font > field.w);
+  }
 
   let cardValues = Array(cardNames.length).fill(0);
   let activeClass = null;
@@ -216,10 +237,14 @@ document.addEventListener('DOMContentLoaded', () => {
     card.dataset.index = i;
     card.dataset.search = `${foldArabic(name)} ${i + 1}`;
     const id = `drug-${i}`;
-    card.innerHTML = `<div class="group-head"><span class="group-index">${String(i + 1).padStart(2, '0')}</span><label class="group-name" for="${id}">${escapeHTML(name)}</label><span class="group-share">—</span><button type="button" class="group-clear" data-index="${i}" aria-label="مسح ${escapeHTML(name)}" tabindex="-1">${ICONS.close}</button></div><div class="group-field"><input type="text" class="num-input drug-input" id="${id}" data-index="${i}" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="0.000" enterkeyhint="next"></div><div class="group-meter" aria-hidden="true"><span class="group-meter-track"><span class="group-meter-fill"></span></span></div>`;
+    card.innerHTML = `<div class="group-head"><span class="group-index">${String(i + 1).padStart(2, '0')}</span><label class="group-name" for="${id}" title="${escapeHTML(name)}">${escapeHTML(name)}</label><span class="group-share">—</span><button type="button" class="group-clear" data-index="${i}" aria-label="مسح ${escapeHTML(name)}" tabindex="-1">${ICONS.close}</button></div><div class="group-field"><input type="text" class="num-input drug-input" id="${id}" data-index="${i}" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="0.000" enterkeyhint="next"><span class="group-mag" aria-hidden="true"></span></div><div class="group-meter" aria-hidden="true"><span class="group-meter-track"><span class="group-meter-fill"></span></span></div>`;
     cardsContainer.appendChild(card);
   });
   const groupCards = Array.from(cardsContainer.querySelectorAll('.group-card'));
+  const groupMeters = groupCards.map(c => c.querySelector('.group-meter-fill'));
+  const groupShares = groupCards.map(c => c.querySelector('.group-share'));
+  const groupMags = groupCards.map(c => c.querySelector('.group-mag'));
+  const magCache = new Array(groupCards.length).fill('');
   const drugInputs = Array.from(cardsContainer.querySelectorAll('.drug-input'));
   const visibleDrugInputs = () => drugInputs.filter(inp => !inp.closest('.group-card').hidden);
   const focusOrder = () => [...visibleDrugInputs(), totalTicketsInput, totalExternalInput];
@@ -828,7 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
     focusStart[idx] = cardValues[idx];
     const raw = groupLive(displayDecimal(cardValues[idx]));
     if (inp.value !== raw) inp.value = raw;
-    fitChars(inp, inp.value);
+    fitLong(inp);
     inp.select();
     setTarget(idx);
   });
@@ -885,6 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function setGroupFilter(f) {
     groupFilter = f;
+    field.dirty = true;
     filterBtns.forEach(b => {
       const on = b.dataset.filter === f;
       b.classList.toggle('is-on', on);
@@ -907,8 +933,12 @@ document.addEventListener('DOMContentLoaded', () => {
       b.tabIndex = on ? 0 : -1;
     });
     if (persist) store.set(VIEW_KEY, view);
+    field.dirty = true;
+    requestAnimationFrame(() => schedule(D.GROUPS, false));
   }
   viewBtns.forEach(b => b.addEventListener('click', () => setView(b.dataset.view, true)));
+  if (window.ResizeObserver) new ResizeObserver(() => { field.dirty = true; schedule(D.GROUPS, false); }).observe(cardsContainer);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { field.dirty = true; schedule(D.GROUPS, false); });
   rovingKeys(viewBtns, b => setView(b.dataset.view, true));
   setView(store.get(VIEW_KEY, 'list'), false);
 
@@ -1084,12 +1114,17 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderTotals({ total, filled, max }) {
     animateTotal(total);
     drugInputs.forEach((inp, i) => {
-      const card = groupCards[i];
       const v = cardValues[i];
-      card.querySelector('.group-meter-fill').style.width = max > 0 ? `${(v / max) * 100}%` : '0';
-      card.querySelector('.group-share').textContent = total > 0 && v > 0 ? `${((v / total) * 100).toFixed(1)}%` : '—';
+      groupMeters[i].style.setProperty('--p', max > 0 ? v / max : 0);
+      groupShares[i].textContent = total > 0 && v > 0 ? `${((v / total) * 100).toFixed(1)}%` : '—';
+      const mag = v > 0 ? magnitudeLabel(v) : '';
+      if (mag !== magCache[i]) {
+        magCache[i] = mag;
+        groupMags[i].textContent = mag ? `≈ ${mag}` : '';
+        inp.title = mag ? `≈ ${mag}` : '';
+      }
     });
-    totalProgressFill.style.width = `${(filled / cardNames.length) * 100}%`;
+    totalProgressFill.style.setProperty('--p', filled / cardNames.length);
     totalMeta.textContent = filled ? `${filled} مجموعة · متوسط ${fmtShort(total / filled)}` : '';
     dockGroupsCount.textContent = filled;
     ringFill.style.strokeDasharray = `${RING_LEN}`;
@@ -1099,9 +1134,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderGroupStates({ filled }) {
+    if (field.dirty) measureField();
     drugInputs.forEach((inp, i) => {
       groupCards[i].classList.toggle('card-active', cardValues[i] > 0);
-      fitChars(inp, inp.value || inp.placeholder);
+      fitLong(inp);
     });
     optionalInputs.forEach(inp => {
       const card = inp.closest('.card');
@@ -1507,7 +1543,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setProgress(pct, text) {
-    progressBar.style.width = `${pct}%`;
+    progressBar.style.setProperty('--p', pct / 100);
     progressTrack.setAttribute('aria-valuenow', String(pct));
     progressText.textContent = text;
   }
