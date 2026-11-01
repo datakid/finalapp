@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>core tests</title>
+<style>
+  body { font: 15px/1.6 system-ui, sans-serif; margin: 2rem auto; max-width: 52rem; padding: 0 1rem; color: #26282e; background: #f5f1e9; }
+  h1 { font-size: 1.2rem; }
+  #summary { padding: .6rem 1rem; border-radius: 8px; font-weight: 600; margin-bottom: 1rem; }
+  #summary.ok { background: #dcebd9; color: #2f5a36; }
+  #summary.bad { background: #f3d7d3; color: #8a2f27; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { padding: .2rem 0; border-bottom: 1px solid rgba(0, 0, 0, .08); font-family: ui-monospace, monospace; font-size: .85rem; }
+  li.pass::before { content: '\2713  '; color: #2f7a3c; }
+  li.fail::before { content: '\2717  '; color: #a4483f; }
+  li.fail { color: #a4483f; }
+  h2 { font-size: .95rem; margin: 1.2rem 0 .3rem; }
+</style>
+</head>
+<body>
+<h1>PharmaCore tests</h1>
+<div id="summary">running…</div>
+<div id="out"></div>
+<script src="../js/core.js"></script>
+<script>
+(function () {
+  const C = window.PharmaCore;
+  const out = document.getElementById('out');
+  const summary = document.getElementById('summary');
+  const results = { pass: 0, fail: 0, failures: [] };
+  let list = null;
+
+  function section(name) {
+    const h = document.createElement('h2');
+    h.textContent = name;
+    out.appendChild(h);
+    list = document.createElement('ul');
+    out.appendChild(list);
+  }
+
+  function record(name, ok, detail) {
+    const li = document.createElement('li');
+    li.className = ok ? 'pass' : 'fail';
+    li.textContent = ok ? name : `${name} \u2014 ${detail}`;
+    list.appendChild(li);
+    if (ok) results.pass++;
+    else { results.fail++; results.failures.push(`${name} \u2014 ${detail}`); console.error('FAIL', name, detail); }
+  }
+
+  function same(a, b) {
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+
+  function eq(name, actual, expected) {
+    record(name, same(actual, expected), `expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+  }
+
+  function pick(obj, keys) {
+    const r = {};
+    keys.forEach(k => { if (obj[k] !== undefined) r[k] = obj[k]; });
+    return r;
+  }
+
+  const names = ['المسكنات', 'مضادات حيوية', 'كلي', 'نفسية و عصبية', 'قلب', 'سكر حقن', 'سكر فم', 'نسا', 'كبد', 'جهاز هضمي', 'جهاز تنفسي', 'امراض جلدية', 'عيون و رمد', 'انف و اذن', 'مضادات تقلصات', 'اورام', 'فيتامينات', 'مختلفة'];
+  const zeros = names.map(() => 0);
+
+  section('smartNumber');
+  eq("'1,234,567' -> '1234567'", C.smartNumber('1,234,567'), '1234567');
+  eq("'12,5' -> '12.5'", C.smartNumber('12,5'), '12.5');
+  eq("'0,250' -> '0.250'", C.smartNumber('0,250'), '0.250');
+  eq("Arabic-Indic digits and thousands mark", C.smartNumber('\u0661\u066C\u0662\u0663\u0664'), '1234');
+  eq("'1,234.5' -> '1234.5'", C.smartNumber('1,234.5'), '1234.5');
+  eq("'1,234' -> '1234'", C.smartNumber('1,234'), '1234');
+
+  section('sanitizeDecimal / groupLive / parseDecimal');
+  eq("sanitizeDecimal('1.2.3')", C.sanitizeDecimal('1.2.3'), '1.23');
+  eq("sanitizeDecimal('ab12')", C.sanitizeDecimal('ab12'), '12');
+  eq("groupLive('1234567')", C.groupLive('1234567'), '1,234,567');
+  eq("groupLive('1234.56789')", C.groupLive('1234.56789'), '1,234.567');
+  eq("groupLive('000123')", C.groupLive('000123'), '123');
+  eq("groupLive('.5')", C.groupLive('.5'), '0.5');
+  eq("groupLive('')", C.groupLive(''), '');
+  eq("parseDecimal caps at 1e9", C.parseDecimal('99999999999'), 1000000000);
+  eq("parseDecimal rounds to 3 decimals", C.parseDecimal('1.23456'), 1.235);
+  eq("parseDecimal('abc')", C.parseDecimal('abc'), 0);
+  eq("parseDecimal('999,999,999.999')", C.parseDecimal('999999999.999'), 999999999.999);
+
+  section('foldArabic / scoring');
+  eq("foldArabic folds alef, ya, ta marbuta", C.foldArabic('أمراض الصيدلية'), 'امراض الصيدليه');
+  eq("findGroups('قلب')", C.findGroups('قلب', names)[0], 4);
+  eq("findGroups('سكر') finds both sugar groups", C.findGroups('سكر', names).slice(0, 2), [5, 6]);
+  eq("textScore exact", C.textScore('كلي', 'كلي'), -2);
+  eq("textScore miss", C.textScore('zzz', 'كلي'), null);
+  eq("scoreFolded matches textScore", C.scoreFolded(C.foldArabic('قل'), C.foldArabic('قلب'), ''), C.textScore('قل', 'قلب'));
+  eq("scoreFolded empty query", C.scoreFolded('', 'كلي', ''), 0);
+
+  section('evalExpr');
+  eq("'1200+350-50' -> 1500", pick(C.evalExpr('1200+350-50', 0), ['value']), { value: 1500 });
+  eq("'+300' relative to 100 -> 400", pick(C.evalExpr('+300', 100), ['value', 'relative']), { value: 400, relative: true });
+  eq("'-500' relative to 100 -> error", C.evalExpr('-500', 100), { error: 'النتيجة أقل من صفر' });
+  eq("'abc' -> null", C.evalExpr('abc', 0), null);
+  eq("'' -> null", C.evalExpr('', 0), null);
+  eq("caps at 1e9", C.evalExpr('5000000000', 0).value, 1000000000);
+  eq("'1,234,567' is thousands", C.evalExpr('1,234,567', 0).value, 1234567);
+
+  section('parseEntry');
+  const ctx = { names, values: zeros.slice(), target: 2 };
+  eq("'قلب 4500'", pick(C.parseEntry('قلب 4500', ctx), ['kind', 'index', 'value']), { kind: 'set', index: 4, value: 4500 });
+  eq("'5=4500'", pick(C.parseEntry('5=4500', ctx), ['kind', 'index', 'value']), { kind: 'set', index: 4, value: 4500 });
+  eq("'#5 : 4500' style", pick(C.parseEntry('#5:4500', ctx), ['kind', 'index', 'value']), { kind: 'set', index: 4, value: 4500 });
+  eq("'#5 4500' hash form", pick(C.parseEntry('#5 4500', ctx), ['kind', 'index', 'value']), { kind: 'set', index: 4, value: 4500 });
+  eq("'#99 4500' out of range", pick(C.parseEntry('#99 4500', ctx), ['kind']), { kind: 'bad' });
+  eq("'قلب' goto", pick(C.parseEntry('قلب', ctx), ['kind', 'index']), { kind: 'goto', index: 4 });
+  eq("'' skip", C.parseEntry('', ctx), { kind: 'skip' });
+  eq("'xyz 4' nomatch", pick(C.parseEntry('xyz 4', ctx), ['kind']), { kind: 'nomatch' });
+  eq("'4500' targets current group", pick(C.parseEntry('4500', ctx), ['kind', 'index', 'value']), { kind: 'set', index: 2, value: 4500 });
+  eq("Arabic-Indic digits", pick(C.parseEntry('قلب \u0664\u0665\u0660\u0660', ctx), ['kind', 'index', 'value']), { kind: 'set', index: 4, value: 4500 });
+  const ctx2 = { names, values: names.map((_, i) => (i === 4 ? 1200 : 0)), target: 0 };
+  eq("'قلب +300' relative", pick(C.parseEntry('قلب +300', ctx2), ['kind', 'index', 'value', 'relative']), { kind: 'set', index: 4, value: 1500, relative: true });
+  eq("'قلب 1200+350' sum", pick(C.parseEntry('قلب 1200+350', ctx2), ['kind', 'value']), { kind: 'set', value: 1550 });
+  eq("'قلب -5000' negative result", pick(C.parseEntry('قلب -5000', ctx2), ['kind']), { kind: 'bad' });
+  eq("'99=5' out-of-range number falls back to target", pick(C.parseEntry('99=5', ctx), ['kind']), { kind: 'bad' });
+
+  section('splitBatch');
+  eq("'قلب 4500\u061B كلي 300' -> 2", C.splitBatch('قلب 4500\u061B كلي 300').length, 2);
+  eq("'قلب 4,500' stays 1", C.splitBatch('قلب 4,500').length, 1);
+  eq("semicolon and newline", C.splitBatch('قلب 4500; كلي 300\n5=120').length, 3);
+  eq("empty parts dropped", C.splitBatch(' \u061B \u061B '), []);
+  eq("batch parts keep content", C.splitBatch('قلب 4500\u061B كلي 300'), ['قلب 4500', 'كلي 300']);
+
+  section('parseFiscalInput (now = 2026-10-30, current start 2026)');
+  const now = new Date('2026-10-30T12:00:00Z');
+  const P = (raw, phase) => C.parseFiscalInput(raw, { now, phase });
+  const view = (r) => pick(r, ['state', 'start', 'end', 'reason']);
+  eq('currentFiscalStart(2026-10-30) = 2026', C.currentFiscalStart(now), 2026);
+  eq('currentFiscalStart(2026-03-15) = 2025', C.currentFiscalStart(new Date('2026-03-15T12:00:00Z')), 2025);
+  eq('currentFiscalStart(2026-07-01) = 2026', C.currentFiscalStart(new Date('2026-07-01T12:00:00Z')), 2026);
+  eq('currentFiscalStart(2026-06-30) = 2025', C.currentFiscalStart(new Date('2026-06-30T12:00:00Z')), 2025);
+  ['typing', 'commit'].forEach(ph => eq(`'' (${ph}) -> empty`, P('', ph).state, 'empty'));
+  eq("'2' typing -> partial, ghost '026'", pick(P('2', 'typing'), ['state', 'ghost']), { state: 'partial', ghost: '026' });
+  eq("'20' typing -> ghost '26'", pick(P('20', 'typing'), ['state', 'ghost']), { state: 'partial', ghost: '26' });
+  eq("'19' typing -> partial, ghost '' and no rewrite", pick(P('19', 'typing'), ['state', 'ghost']), { state: 'partial', ghost: '' });
+  eq("'24' typing -> partial with preview 2024", pick(P('24', 'typing'), ['state', 'preview']), { state: 'partial', preview: 2024 });
+  eq("'98' commit -> far 1998", view(P('98', 'commit')), { state: 'far', start: 1998, end: 1999 });
+  eq("'24' commit -> valid 2024", view(P('24', 'commit')), { state: 'valid', start: 2024, end: 2025 });
+  ['typing', 'commit'].forEach(ph => eq(`'2024' (${ph}) -> valid 2024`, view(P('2024', ph)), { state: 'valid', start: 2024, end: 2025 }));
+  ['2024-2025', '2024/25', '2024\u201325', '24/25', '2024\u20142025', '2024 - 2025', '2024-25'].forEach(raw => eq(`'${raw}' commit -> valid 2024`, view(P(raw, 'commit')), { state: 'valid', start: 2024, end: 2025 }));
+  eq("'2024-2026' commit -> end-mismatch", view(P('2024-2026', 'commit')), { state: 'invalid', start: 2024, end: 2025, reason: 'end-mismatch' });
+  eq("'2024/26' typing -> end-mismatch", P('2024/26', 'typing').reason, 'end-mismatch');
+  eq("'2024-20' typing stays valid while end is being typed", P('2024-20', 'typing').state, 'valid');
+  eq("'2024-' typing -> valid", P('2024-', 'typing').state, 'valid');
+  eq("settled: '2024' is settled", P('2024', 'typing').settled, true);
+  eq("settled: '2024-' is not settled", P('2024-', 'typing').settled, false);
+  eq("settled: '2024-20' is not settled", P('2024-20', 'typing').settled, false);
+  eq("settled: '2024-2' is not settled", P('2024-2', 'typing').settled, false);
+  eq("settled: '2024-25' is settled", P('2024-25', 'typing').settled, true);
+  eq("settled: '2024-2025' is settled", P('2024-2025', 'typing').settled, true);
+  eq("settled: '24/25' is settled", P('24/25', 'typing').settled, true);
+  eq("settled: '2024/26' is invalid, never settled", P('2024/26', 'typing').settled, undefined);
+  eq("'2024-' commit -> valid", P('2024-', 'commit').state, 'valid');
+  eq("'2024-202' commit -> format", P('2024-202', 'commit').reason, 'format');
+  eq("Arabic-Indic digits -> valid 2024", view(P('\u0662\u0660\u0662\u0664', 'commit')), { state: 'valid', start: 2024, end: 2025 });
+  eq("Arabic-Indic range -> valid 2024", P('\u0662\u0660\u0662\u0664/\u0662\u0665', 'commit').start, 2024);
+  ['typing', 'commit'].forEach(ph => {
+    eq(`'1899' (${ph}) -> invalid range`, view(P('1899', ph)), { state: 'invalid', start: 1899, reason: 'range' });
+    eq(`'2199' (${ph}) -> invalid range`, view(P('2199', ph)), { state: 'invalid', start: 2199, reason: 'range' });
+    eq(`'0000' (${ph}) -> invalid range`, P('0000', ph).reason, 'range');
+    eq(`'2250' (${ph}) -> invalid range`, P('2250', ph).reason, 'range');
+    eq(`'1850' (${ph}) -> invalid range`, P('1850', ph).reason, 'range');
+  });
+  eq("'1900' commit -> far (lowest allowed)", view(P('1900', 'commit')), { state: 'far', start: 1900, end: 1901 });
+  eq("'2198' commit -> far (highest allowed)", view(P('2198', 'commit')), { state: 'far', start: 2198, end: 2199 });
+  eq("'1998' -> far, tail 1999", view(P('1998', 'typing')), { state: 'far', start: 1998, end: 1999 });
+  eq("'2036' -> valid (exactly the soft span)", P('2036', 'commit').state, 'valid');
+  eq("'2037' -> far", P('2037', 'commit').state, 'far');
+  eq("'2016' -> valid (exactly -10)", P('2016', 'commit').state, 'valid');
+  eq("'2015' -> far", P('2015', 'commit').state, 'far');
+  eq("'2042' -> far", P('2042', 'commit').state, 'far');
+  ['typing', 'commit'].forEach(ph => eq(`'abc' (${ph}) -> empty`, P('abc', ph).state, 'empty'));
+  eq("'202' commit -> invalid incomplete", pick(P('202', 'commit'), ['state', 'reason']), { state: 'invalid', reason: 'incomplete' });
+  eq("'2' commit -> invalid incomplete", pick(P('2', 'commit'), ['state', 'reason']), { state: 'invalid', reason: 'incomplete' });
+  eq("'202' typing -> partial", P('202', 'typing').state, 'partial');
+  eq("'20242025' commit -> valid", P('20242025', 'commit').start, 2024);
+  eq("'202420' commit -> format", P('202420', 'commit').reason, 'format');
+  eq("typing 1-3 digits is never invalid", ['1', '12', '123', '9', '99', '999'].every(d => P(d, 'typing').state === 'partial'), true);
+  eq("every year 1900..2198 parses, stored end is 4 digits", (() => {
+    for (let y = 1900; y <= 2198; y++) {
+      const r = P(String(y), 'commit');
+      if (!(r.state === 'valid' || r.state === 'far') || !/^\d{4}$/.test(String(r.end))) return y;
+    }
+    return true;
+  })(), true);
+
+  section('expandTwoDigit / fiscalLabel');
+  eq('expand 24 -> 2024', C.expandTwoDigit(24, 2026), 2024);
+  eq('expand 56 -> 2056 (cur+30)', C.expandTwoDigit(56, 2026), 2056);
+  eq('expand 57 -> 1957', C.expandTwoDigit(57, 2026), 1957);
+  eq('expand 98 -> 1998', C.expandTwoDigit(98, 2026), 1998);
+  eq('expand 0 -> 2000', C.expandTwoDigit(0, 2026), 2000);
+  eq('fiscalLabel(2024)', C.fiscalLabel(2024), '2024 \u2013 2025');
+
+  section('magnitudeLabel');
+  eq('below a million -> empty', C.magnitudeLabel(999999), '');
+  eq('1,250,000', C.magnitudeLabel(1250000), '1.25\u00A0مليون');
+  eq('3,400,000,000', C.magnitudeLabel(3400000000), '3.4\u00A0مليار');
+  eq('uses Latin digits', /[\u0660-\u0669]/.test(C.magnitudeLabel(1250000)), false);
+
+  section('API surface');
+  eq('PharmaCore is frozen', Object.isFrozen(C), true);
+  eq('exposes MAX_GROUP', C.MAX_GROUP, 1000000000);
+
+  summary.textContent = results.fail ? `${results.fail} failed, ${results.pass} passed` : `all green \u2014 ${results.pass} passed`;
+  summary.className = results.fail ? 'bad' : 'ok';
+  window.__results = results;
+  console.log(summary.textContent);
+})();
+</script>
+</body>
+</html>

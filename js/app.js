@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const $ = id => document.getElementById(id);
+  const { MAX_GROUP, magnitudeLabel, YEAR_MIN_START, YEAR_MAX_START, YEAR_SOFT_SPAN, scoreFolded, splitBatch, currentFiscalStart, fiscalLabel, parseFiscalInput, toLatin, normalizeDigits, sanitizeDecimal, smartNumber, groupLive, parseDecimal, foldArabic, evalExpr, wordScore, textScore, findGroups } = window.PharmaCore;
   const escapeHTML = str => String(str).replace(/[&<>'"]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[m]));
   const reducedMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -30,21 +31,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const selects = [yearSel, monthSel, regionSel, pharmacySel];
   const yearPrev = $('year-prev');
   const yearNext = $('year-next');
-  const yearChoices = $('year-choices');
+  const yearInput = $('year-input');
+  const yearGhost = $('yt-ghost');
+  const yearTail = $('year-tail');
+  const yearEnd = $('yt-end');
+  const yearType = $('year-type');
   const yearHint = $('year-hint');
-  const qeName = $('qe-name');
-  const qeIndex = $('qe-index');
-  const qeCurrent = $('qe-current');
-  const qePreview = $('qe-preview');
-  const qeLast = $('qe-last');
-  const qeProgress = $('qe-progress');
-  const qeTarget = $('qe-target');
   const monthChoices = $('month-choices');
   const regionChoices = $('region-choices');
   const pharmacyChoices = $('pharmacy-choices');
   const pharmacyHint = $('pharmacy-hint');
-  const groupSearch = $('group-search');
-  const searchClear = $('search-clear');
   const groupsEmpty = $('groups-empty');
   const filterBtns = Array.from(document.querySelectorAll('#group-filter .seg-btn'));
   const viewBtns = Array.from(document.querySelectorAll('#view-switch .seg-btn'));
@@ -73,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const STATUS_KEY = 'pharmacyAppStatusHidden';
   const SENT_KEY = 'pharmacyAppSent';
   const VIEW_KEY = 'pharmacyAppView';
-  const MAX_GROUP = 1000000000;
   const MAX_OPTIONAL = 1000000;
   const RING_LEN = 2 * Math.PI * 16;
 
@@ -112,42 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const fmt3 = n => n.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
   const fmtShort = n => n.toLocaleString('en-US', { maximumFractionDigits: 3 });
 
-  // Arabic-Indic / Persian digits -> Latin; Arabic decimal mark -> '.'; Arabic thousands mark dropped.
-  function toLatin(str) {
-    return String(str)
-      .replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))
-      .replace(/[\u06F0-\u06F9]/g, d => String(d.charCodeAt(0) - 0x06F0))
-      .replace(/\u066B/g, '.')
-      .replace(/\u066C/g, '');
-  }
-  const normalizeDigits = str => toLatin(str).replace(/[\s\u00A0\u2009\u202F]/g, '');
-  // Strict: commas are always thousands separators (used while typing).
-  function sanitizeDecimal(str) {
-    let v = normalizeDigits(str).replace(/[^\d.]/g, '');
-    const i = v.indexOf('.');
-    if (i !== -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '');
-    return v;
-  }
-  // Smart: for pasted / typed-in-console values. "1,234,567.5" and "1,234" are thousands; "12,5" and "0,250" are decimals.
-  function smartNumber(str) {
-    let s = normalizeDigits(str);
-    const commas = (s.match(/,/g) || []).length;
-    if (commas) {
-      if (s.includes('.') || commas > 1 || (/,\d{3}$/.test(s) && !/^0,/.test(s))) s = s.replace(/,/g, '');
-      else s = s.replace(',', '.');
-    }
-    return sanitizeDecimal(s);
-  }
-  // Thousands grouping for a clean "digits[.digits]" string, kept while typing.
-  function groupLive(clean) {
-    if (!clean) return '';
-    let [int, frac] = clean.split('.');
-    int = int.replace(/^0+(?=\d)/, '');
-    if (!int && frac !== undefined) int = '0';
-    const g = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    return frac !== undefined ? `${g}.${frac.slice(0, 3)}` : g;
-  }
-  // Rewrite an input's value while keeping the caret after the same significant character.
   function setKeepingCaret(inp, raw, shown) {
     const caret = inp.selectionStart ?? raw.length;
     const sig = raw.slice(0, caret).replace(/[^\d.\u0660-\u0669\u06F0-\u06F9\u066B]/g, '').length;
@@ -157,25 +116,36 @@ document.addEventListener('DOMContentLoaded', () => {
     while (pos < shown.length && count < sig) { if (/[\d.]/.test(shown[pos])) count++; pos++; }
     try { inp.setSelectionRange(pos, pos); } catch (e) {}
   }
-  function parseDecimal(str) {
-    const n = parseFloat(sanitizeDecimal(str));
-    if (isNaN(n) || n <= 0) return 0;
-    return Math.min(Math.round(n * 1000) / 1000, MAX_GROUP);
-  }
   const displayDecimal = n => n > 0 ? String(Math.round(n * 1000) / 1000) : '';
   const groupedDecimal = n => n > 0 ? n.toLocaleString('en-US', { maximumFractionDigits: 3 }) : '';
   const fitChars = (el, text) => el.style.setProperty('--chars', Math.max(6, String(text).length));
-  const foldArabic = s => String(s)
-    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')
-    .replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي')
-    .replace(/\s+/g, ' ').trim().toLowerCase();
+  const field = { w: 0, font: 0, dirty: true };
+  function measureField() {
+    const visible = drugInputs.filter(i => i.clientWidth > 0);
+    if (!visible.length) return;
+    const inp = visible.find(i => !i.classList.contains('is-long')) || visible[0];
+    const wasLong = inp.classList.contains('is-long');
+    if (wasLong) inp.classList.remove('is-long');
+    const cs = getComputedStyle(inp);
+    field.font = parseFloat(cs.fontSize);
+    field.w = inp.clientWidth - parseFloat(cs.paddingInlineStart) - parseFloat(cs.paddingInlineEnd);
+    if (wasLong) inp.classList.add('is-long');
+    field.dirty = false;
+  }
+  function textEm(s) {
+    let em = 0;
+    for (const ch of s) em += ch === ',' || ch === '.' ? 0.3 : 0.62;
+    return em;
+  }
+  function fitLong(inp) {
+    inp.classList.toggle('is-long', field.w > 0 && textEm(inp.value || '') * field.font > field.w);
+  }
 
   let cardValues = Array(cardNames.length).fill(0);
   let activeClass = null;
   let isSubmitting = false;
   let lastTotal = 0;
   let groupFilter = 'all';
-  let groupQuery = '';
 
   const darkMql = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   const resolveTheme = mode => mode === 'system' ? (darkMql && darkMql.matches ? 'dark' : 'light') : mode;
@@ -267,20 +237,34 @@ document.addEventListener('DOMContentLoaded', () => {
     card.dataset.index = i;
     card.dataset.search = `${foldArabic(name)} ${i + 1}`;
     const id = `drug-${i}`;
-    card.innerHTML = `<div class="group-head"><span class="group-index">${String(i + 1).padStart(2, '0')}</span><label class="group-name" for="${id}">${escapeHTML(name)}</label><span class="group-share">—</span><button type="button" class="group-clear" data-index="${i}" aria-label="مسح ${escapeHTML(name)}" tabindex="-1">${ICONS.close}</button></div><div class="group-field"><input type="text" class="num-input drug-input" id="${id}" data-index="${i}" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="0.000" enterkeyhint="next"></div><div class="group-meter" aria-hidden="true"><span class="group-meter-track"><span class="group-meter-fill"></span></span></div>`;
+    card.innerHTML = `<div class="group-head"><span class="group-index">${String(i + 1).padStart(2, '0')}</span><label class="group-name" for="${id}" title="${escapeHTML(name)}">${escapeHTML(name)}</label><span class="group-share">—</span><button type="button" class="group-clear" data-index="${i}" aria-label="مسح ${escapeHTML(name)}" tabindex="-1">${ICONS.close}</button></div><div class="group-field"><input type="text" class="num-input drug-input" id="${id}" data-index="${i}" inputmode="decimal" autocomplete="off" dir="ltr" placeholder="0.000" enterkeyhint="next"><span class="group-mag" aria-hidden="true"></span></div><div class="group-meter" aria-hidden="true"><span class="group-meter-track"><span class="group-meter-fill"></span></span></div>`;
     cardsContainer.appendChild(card);
   });
   const groupCards = Array.from(cardsContainer.querySelectorAll('.group-card'));
+  const groupMeters = groupCards.map(c => c.querySelector('.group-meter-fill'));
+  const groupShares = groupCards.map(c => c.querySelector('.group-share'));
+  const groupMags = groupCards.map(c => c.querySelector('.group-mag'));
+  const magCache = new Array(groupCards.length).fill('');
   const drugInputs = Array.from(cardsContainer.querySelectorAll('.drug-input'));
   const visibleDrugInputs = () => drugInputs.filter(inp => !inp.closest('.group-card').hidden);
   const focusOrder = () => [...visibleDrugInputs(), totalTicketsInput, totalExternalInput];
 
+  let glowEvent = null;
+  let glowRaf = 0;
   appShell.addEventListener('pointermove', e => {
-    const el = e.target.closest('.reveal');
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    el.style.setProperty('--mx', `${e.clientX - r.left}px`);
-    el.style.setProperty('--my', `${e.clientY - r.top}px`);
+    if (e.pointerType === 'touch') return;
+    glowEvent = e;
+    if (glowRaf) return;
+    glowRaf = requestAnimationFrame(() => {
+      glowRaf = 0;
+      const ev = glowEvent;
+      glowEvent = null;
+      const el = ev && ev.target.closest ? ev.target.closest('.reveal') : null;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${ev.clientX - r.left}px`);
+      el.style.setProperty('--my', `${ev.clientY - r.top}px`);
+    });
   }, { passive: true });
 
   let saveTimer = null, flashTimer = null;
@@ -307,7 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
   function restore(s) {
-    setClass(s.activeClass, { keepPharmacy: true });
+    applyClass(s.activeClass, { keepPharmacy: true });
+    ensureYearOption(String(s.year || ''));
     yearSel.value = s.year || '';
     monthSel.value = s.month || '';
     regionSel.value = s.region || '';
@@ -318,10 +303,11 @@ document.addEventListener('DOMContentLoaded', () => {
     cardValues = cardNames.map((_, i) => parseDecimal(String((s.cardValues || [])[i] ?? '')));
     drugInputs.forEach((inp, i) => { inp.value = document.activeElement === inp ? displayDecimal(cardValues[i]) : groupedDecimal(cardValues[i]); });
     refresh();
+    flushNow();
   }
 
   const classBtnFor = key => classBtns.find(b => b.dataset.class === key);
-  function setClass(key, { keepPharmacy = false } = {}) {
+  function applyClass(key, { keepPharmacy = false } = {}) {
     const changed = key !== activeClass;
     activeClass = CLASS_THEMES[key] ? key : null;
     classBtns.forEach((btn, i) => {
@@ -334,15 +320,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (activeClass) docEl.classList.add(CLASS_THEMES[activeClass]);
     if (changed && !keepPharmacy) updatePharmacyDropdown('');
   }
-  classBtns.forEach(btn => btn.addEventListener('click', () => {
-    if (btn.dataset.class === activeClass) return;
-    setClass(btn.dataset.class);
-    refresh(); save();
-  }));
-  rovingKeys(classBtns, btn => { if (btn.dataset.class !== activeClass) { setClass(btn.dataset.class); refresh(); save(); } });
+  classBtns.forEach(btn => btn.addEventListener('click', () => A.setClass(btn.dataset.class)));
+  rovingKeys(classBtns, btn => A.setClass(btn.dataset.class));
 
   const periodKey = () => activeClass && yearSel.value && monthSel.value ? `${activeClass}|${yearSel.value}|${monthSel.value}` : null;
-  const sentLog = () => store.get(SENT_KEY, {});
+  const loadSent = () => { const v = store.get(SENT_KEY, {}); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; };
+  let sentCache = loadSent();
+  const sentLog = () => sentCache;
+  window.addEventListener('storage', e => {
+    if (e.key !== SENT_KEY) return;
+    sentCache = loadSent();
+    updatePharmacyDropdown();
+    schedule(D.PICKERS | D.STATUS, false);
+  });
   function isSent(pharmacyValue) {
     const k = periodKey();
     return !!(k && regionSel.value && (sentLog()[k] || []).includes(`${regionSel.value}:${pharmacyValue}`));
@@ -375,105 +365,336 @@ document.addEventListener('DOMContentLoaded', () => {
     pharmacySel.value = list.length && preferred && +preferred <= list.length ? String(preferred) : '';
   }
 
-  selects.forEach(s => s.addEventListener('change', () => {
-    if (s === regionSel) updatePharmacyDropdown('');
-    if (s === yearSel || s === monthSel) updatePharmacyDropdown();
-    refresh(); save();
-  }));
-
-  function setSelect(sel, value) {
-    if (sel.value === value) return;
-    sel.value = value;
-    sel.dispatchEvent(new Event('change'));
-  }
 
   const now = new Date();
-  const currentFiscal = String(now.getMonth() + 1 >= 7 ? now.getFullYear() + 1 : now.getFullYear());
+  const curStart = currentFiscalStart(now);
+  const currentFiscal = String(curStart + 1);
+  const suggestStart = String(curStart);
   const suggestedMonth = String(((now.getMonth() + 11) % 12) + 1);
-  // Fiscal years are stored by their END year ("2026" = 2025-2026), exactly as before.
-  const YEAR_MIN = Math.min(2025, +currentFiscal - 3);
-  const YEAR_MAX = Math.max(2035, +currentFiscal + 5);
-  for (let y = YEAR_MIN; y <= YEAR_MAX; y++) yearSel.appendChild(new Option(`${y - 1}-${y}`, String(y)));
-  const yearValues = Array.from(yearSel.options).map(o => o.value).filter(Boolean);
-  const hasYear = v => yearValues.includes(v);
-  const YEAR_WIN = 3;
-  let yearWinStart = null;
-  const clampWin = s => Math.max(0, Math.min(yearValues.length - YEAR_WIN, s));
-  function centerYearWindow() {
-    const idx = yearValues.indexOf(yearSel.value || currentFiscal);
-    yearWinStart = clampWin((idx === -1 ? 0 : idx) - 1);
-  }
-  function ensureYearVisible() {
-    const idx = yearValues.indexOf(yearSel.value);
-    if (idx === -1) return;
-    if (yearWinStart === null || idx < yearWinStart || idx >= yearWinStart + YEAR_WIN) centerYearWindow();
-  }
-  function pickYear(v, { focus = false } = {}) {
-    if (!hasYear(v)) return;
-    setSelect(yearSel, v);
-    ensureYearVisible();
-    renderYear();
-    if (focus) { const b = yearChoices.querySelector(`.year-chip[data-value="${v}"]`); if (b) b.focus({ preventScroll: true }); }
-  }
-  function slideYears(dir) {
-    if (yearWinStart === null) centerYearWindow();
-    const next = clampWin(yearWinStart + dir);
-    if (next === yearWinStart) return;
-    yearWinStart = next;
-    yearChoices.dataset.slide = dir > 0 ? 'fwd' : 'back';
-    renderYear(true);
-  }
-  // RTL: the right-hand arrow goes back in time, the left-hand one forward.
-  yearPrev.addEventListener('click', () => slideYears(-1));
-  yearNext.addEventListener('click', () => slideYears(1));
-  yearChoices.addEventListener('click', e => {
-    const b = e.target.closest('.year-chip');
-    if (b) pickYear(b.dataset.value, { focus: true });
-  });
-  let yearTyped = '', yearTypedTimer = null;
-  yearChoices.addEventListener('keydown', e => {
-    const idx = yearValues.indexOf(yearSel.value || currentFiscal);
-    const map = { ArrowLeft: 1, ArrowDown: 1, ArrowRight: -1, ArrowUp: -1 };
-    if (e.key in map) { e.preventDefault(); pickYear(yearValues[Math.max(0, Math.min(yearValues.length - 1, idx + map[e.key]))], { focus: true }); return; }
-    if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); pickYear(e.key === 'Home' ? currentFiscal : yearValues[yearValues.length - 1], { focus: true }); return; }
-    const d = normalizeDigits(e.key);
-    if (/^\d$/.test(d)) {
-      e.preventDefault();
-      clearTimeout(yearTypedTimer);
-      yearTyped = (yearTyped + d).slice(-4);
-      yearTypedTimer = setTimeout(() => { yearTyped = ''; }, 1100);
-      // "26" or "2026" -> the fiscal year ending 2026 (2025-2026)
-      const hit = yearValues.find(v => yearTyped.length >= 2 && v.endsWith(yearTyped));
-      if (hit) pickYear(hit, { focus: true });
-    }
-  });
+  const YEAR_MIN_END = YEAR_MIN_START + 1;
+  const YEAR_MAX_END = YEAR_MAX_START + 1;
+  const EASE = 'cubic-bezier(.22,.8,.24,1)';
+  const validEnd = v => /^\d{4}$/.test(v) && +v >= YEAR_MIN_END && +v <= YEAR_MAX_END;
+  const hasYear = validEnd;
+  const committedStart = () => validEnd(yearSel.value) ? +yearSel.value - 1 : null;
+  const committedText = () => { const c = committedStart(); return c === null ? '' : String(c); };
+  const parseYear = (raw, phase) => parseFiscalInput(raw, { now, phase });
 
-  function renderYear(animate) {
-    if (yearWinStart === null) centerYearWindow();
-    const win = yearValues.slice(yearWinStart, yearWinStart + YEAR_WIN);
-    const sel = yearSel.value;
-    const tabValue = win.includes(sel) ? sel : (win.includes(currentFiscal) ? currentFiscal : win[0]);
-    const sig = win.join(',') + '|' + sel;
-    if (yearChoices.dataset.sig !== sig) {
-      yearChoices.dataset.sig = sig;
-      yearChoices.innerHTML = win.map(v => {
-        const on = v === sel;
-        const cur = v === currentFiscal;
-        return `<button type="button" class="year-chip${on ? ' is-on' : ''}${cur ? ' is-current' : ''}" role="radio" aria-checked="${on}" data-value="${v}" tabindex="${v === tabValue ? 0 : -1}" aria-label="${+v - 1}-${v}${cur ? ' (الحالية)' : ''}"><span class="yc-a">${+v - 1}</span><span class="yc-sep">–</span><span class="yc-b">${v}</span></button>`;
-      }).join('');
-      if (animate && !reducedMotion()) {
-        yearChoices.classList.remove('is-sliding'); void yearChoices.offsetWidth; yearChoices.classList.add('is-sliding');
-      }
-    }
-    yearPrev.disabled = yearWinStart <= 0;
-    yearNext.disabled = yearWinStart >= yearValues.length - YEAR_WIN;
-    $('field-year').classList.toggle('is-filled', !!sel);
-    yearHint.innerHTML = !sel ? 'اكتب <b dir="ltr">26</b> لـ 2025-2026'
-      : sel === currentFiscal ? 'السنة الحالية'
-      : `<button type="button" class="link-btn" id="year-today">العودة إلى ${+currentFiscal - 1}-${currentFiscal}</button>`;
-    const today = $('year-today');
-    if (today) today.onclick = () => pickYear(currentFiscal, { focus: true });
+  function ensureYearOption(v) {
+    if (!validEnd(v) || Array.from(yearSel.options).some(o => o.value === v)) return;
+    const after = Array.from(yearSel.options).find(o => o.value && +o.value > +v);
+    yearSel.insertBefore(new Option(fiscalLabel(+v - 1), v), after || null);
   }
+
+  const fieldYear = $('field-year');
+  const yearBox = $('yt-box');
+  const yearQuick = $('year-quick');
+  const yearMsg = $('year-msg');
+  let yearArmed = null;
+  let yearNotice = null;
+  let yearNoticeTimer = 0;
+  let suppressMouseUp = false;
+  let quickSig = '';
+
+  const yearFocused = () => document.activeElement === yearInput;
+  const cleanYearText = raw => toLatin(raw).replace(/[\u2010-\u2015\\/]/g, '-').replace(/[^\d-]/g, '').replace(/-+/g, '-').replace(/^-/, '').slice(0, 9);
+  function sizeYear() { yearInput.style.width = `${Math.max(yearInput.value.length, 1) + 0.12}ch`; }
+  function caretToEnd() { try { yearInput.setSelectionRange(yearInput.value.length, yearInput.value.length); } catch (e) {} }
+
+  function setTail(end, state) {
+    if (end && yearEnd.textContent !== String(end)) {
+      const wasOn = yearTail.dataset.state !== 'none';
+      yearEnd.textContent = String(end);
+      if (wasOn && !reducedMotion()) yearEnd.animate([{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: EASE });
+    }
+    yearTail.dataset.state = end ? state : 'none';
+  }
+
+  const YEAR_REASON = {
+    range: () => `خارج النطاق (${YEAR_MIN_START} – ${YEAR_MAX_START})`,
+    'end-mismatch': r => `سنة النهاية يجب أن تكون ${r.end}`,
+    incomplete: () => 'أكمل السنة بأربعة أرقام',
+    format: () => 'صيغة غير مفهومة، اكتب مثل 2024 أو 2024/25'
+  };
+
+  function setYearMsg(html, cls) {
+    const next = `${cls || ''}|${html}`;
+    if (yearMsg.dataset.sig === next) return;
+    yearMsg.dataset.sig = next;
+    yearMsg.className = `year-msg${cls ? ` ${cls}` : ''}`;
+    yearMsg.innerHTML = html;
+  }
+
+  function noticeYear(html, cls, ms) {
+    clearTimeout(yearNoticeTimer);
+    yearNotice = { html, cls };
+    yearNoticeTimer = setTimeout(() => { yearNotice = null; renderYearTyping(); }, ms);
+    renderYearTyping();
+  }
+  function clearNotice() {
+    clearTimeout(yearNoticeTimer);
+    yearNotice = null;
+  }
+
+  function renderYearTyping() {
+    const focused = yearFocused();
+    const committed = committedStart();
+    let r;
+    if (!focused) r = committed === null ? { state: 'empty' } : { state: 'valid', start: committed, end: committed + 1 };
+    else {
+      r = parseYear(yearInput.value, 'typing');
+      if (r.state === 'far' && r.start === committed) r = { ...r, state: 'valid' };
+    }
+    yearGhost.textContent = focused && r.ghost ? r.ghost : '';
+    let tailEnd = 0, tailState = 'none';
+    if (r.state === 'valid') { tailEnd = r.end; tailState = 'on'; }
+    else if (r.state === 'far') { tailEnd = r.end; tailState = 'far'; }
+    else if (focused && r.ghost) { tailEnd = curStart + 1; tailState = 'ghost'; }
+    setTail(tailEnd, tailState);
+    yearType.classList.toggle('is-invalid', r.state === 'invalid');
+    yearType.classList.toggle('is-far', r.state === 'far');
+
+    if (yearNotice) { setYearMsg(yearNotice.html, yearNotice.cls); return; }
+    if (r.state === 'invalid') setYearMsg(escapeHTML(YEAR_REASON[r.reason](r)), 'is-bad');
+    else if (r.state === 'far') {
+      const label = fiscalLabel(r.start);
+      setYearMsg(`سنة بعيدة؟ اضغط <kbd>Enter</kbd> مرة أخرى للتأكيد · <button type="button" class="link-btn" data-year-confirm="${r.start}">نعم، <span dir="ltr">${label}</span></button>`, 'is-warn');
+    } else if (r.state === 'partial' && r.preview) setYearMsg(`سيصبح <span dir="ltr">${fiscalLabel(r.preview)}</span>`, 'is-dim');
+    else setYearMsg('', '');
+  }
+
+  function renderYearHint() {
+    const sel = yearSel.value;
+    let html;
+    if (yearFocused()) html = 'اكتب سنة البداية · <kbd>↑</kbd> <kbd>↓</kbd> للتغيير';
+    else if (!validEnd(sel)) html = 'اكتب سنة البداية مثل <b dir="ltr">2024</b>';
+    else if (sel === currentFiscal) html = 'السنة الحالية';
+    else html = '';
+    if (yearHint.dataset.html === html) return;
+    yearHint.dataset.html = html;
+    yearHint.innerHTML = html;
+  }
+
+  function renderYearQuick() {
+    const committed = committedStart();
+    const starts = [curStart, curStart - 1];
+    if (committed !== null && !starts.includes(committed)) starts.push(committed);
+    const sig = starts.join(',');
+    if (sig !== quickSig) {
+      quickSig = sig;
+      yearQuick.innerHTML = starts.map(st => `<button type="button" class="choice year-chip" role="radio" data-start="${st}" aria-checked="false" tabindex="-1"><span class="choice-text" dir="ltr">${fiscalLabel(st)}</span>${st === curStart ? '<span class="chip-note">الحالية</span>' : ''}</button>`).join('');
+    }
+    const btns = Array.from(yearQuick.querySelectorAll('.choice'));
+    btns.forEach(b => {
+      const on = committed !== null && +b.dataset.start === committed;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-checked', String(on));
+    });
+    const tabbable = btns.find(b => b.classList.contains('is-on')) || btns[0];
+    btns.forEach(b => { b.tabIndex = b === tabbable ? 0 : -1; });
+  }
+
+  function renderYear() {
+    const committed = committedStart();
+    if (!yearFocused()) {
+      const t = committedText();
+      if (yearInput.value !== t) yearInput.value = t;
+      sizeYear();
+    }
+    renderYearTyping();
+    renderYearQuick();
+    yearPrev.disabled = committed !== null && committed <= YEAR_MIN_START;
+    yearNext.disabled = committed !== null && committed >= YEAR_MAX_START;
+    fieldYear.classList.toggle('is-filled', committed !== null);
+    renderYearHint();
+  }
+
+  function rollYear(oldText, dir) {
+    if (reducedMotion() || !dir || !oldText) return;
+    const box = yearBox.getBoundingClientRect();
+    const inp = yearInput.getBoundingClientRect();
+    const ghost = document.createElement('span');
+    ghost.className = 'yt-roll';
+    ghost.setAttribute('aria-hidden', 'true');
+    ghost.textContent = oldText;
+    ghost.style.insetInlineStart = '0';
+    ghost.style.left = `${inp.left - box.left}px`;
+    ghost.style.top = `${inp.top - box.top}px`;
+    yearBox.appendChild(ghost);
+    const dist = dir > 0 ? '-55%' : '55%';
+    const out = ghost.animate([{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateY(${dist})` }], { duration: 180, easing: EASE, fill: 'forwards' });
+    out.onfinish = () => ghost.remove();
+    yearInput.animate([{ opacity: 0, transform: `translateY(${dir > 0 ? '55%' : '-55%'})` }, { opacity: 1, transform: 'none' }], { duration: 180, easing: EASE });
+  }
+
+  function shakeYear() {
+    if (reducedMotion()) return;
+    yearType.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' }, { transform: 'translateX(0)' }], { duration: 240 });
+  }
+
+  function baseStart() {
+    const r = parseYear(yearInput.value, 'typing');
+    if (r.start !== undefined && r.state !== 'invalid') return r.start;
+    const c = committedStart();
+    return c === null ? curStart : c;
+  }
+
+  function stepYearTo(next) {
+    const clamped = Math.max(YEAR_MIN_START, Math.min(YEAR_MAX_START, next));
+    const before = yearInput.value;
+    const dir = clamped - baseStart();
+    yearArmed = null;
+    clearNotice();
+    A.setYearStart(clamped);
+    yearInput.value = String(clamped);
+    sizeYear();
+    renderYear();
+    if (yearFocused()) { yearInput.select(); } else caretToEnd();
+    rollYear(before, dir);
+  }
+  const stepYear = delta => stepYearTo(baseStart() + delta);
+
+  function revertYear() {
+    yearArmed = null;
+    clearNotice();
+    yearInput.value = committedText();
+    sizeYear();
+    renderYear();
+  }
+
+  function finalizeYear({ enter = false } = {}) {
+    const raw = yearInput.value;
+    const r = parseYear(raw, 'commit');
+    const committed = committedStart();
+    if (r.state === 'empty') { revertYear(); return committed !== null; }
+    if (r.state === 'valid' || (r.state === 'far' && (r.start === committed || yearArmed === r.start))) {
+      A.setYearStart(r.start);
+      yearArmed = null;
+      clearNotice();
+      yearInput.value = String(r.start);
+      sizeYear();
+      renderYear();
+      return true;
+    }
+    if (r.state === 'far') {
+      if (enter) { yearArmed = r.start; renderYearTyping(); shakeYear(); return false; }
+      revertYear();
+      return false;
+    }
+    const msg = YEAR_REASON[r.reason](r);
+    revertYear();
+    noticeYear(escapeHTML(msg), 'is-bad', 2500);
+    shakeYear();
+    return false;
+  }
+
+  function onYearInput() {
+    yearArmed = null;
+    clearNotice();
+    const raw = yearInput.value;
+    const clean = cleanYearText(raw);
+    if (clean !== raw) {
+      const caret = yearInput.selectionStart ?? raw.length;
+      const kept = cleanYearText(raw.slice(0, caret)).length;
+      yearInput.value = clean;
+      try { yearInput.setSelectionRange(kept, kept); } catch (e) {}
+    }
+    sizeYear();
+    const r = parseYear(clean, 'typing');
+    if (r.state === 'valid' && r.settled) A.setYearStart(r.start);
+    renderYearTyping();
+    renderYearHint();
+  }
+
+  yearInput.addEventListener('beforeinput', e => {
+    if (e.inputType === 'insertText' && e.data && /[^\d\u0660-\u0669\u06F0-\u06F9\-\u2010-\u2015/\\]/.test(e.data)) e.preventDefault();
+  });
+  yearInput.addEventListener('input', onYearInput);
+  yearInput.addEventListener('paste', e => {
+    e.preventDefault();
+    const clean = cleanYearText((e.clipboardData || window.clipboardData).getData('text'));
+    if (!clean) return;
+    yearInput.setRangeText(clean, yearInput.selectionStart, yearInput.selectionEnd, 'end');
+    yearInput.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  yearInput.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key;
+    if (k === 'Enter') { e.preventDefault(); if (finalizeYear({ enter: true })) advanceFrom(yearInput); }
+    else if (k === 'ArrowUp') { e.preventDefault(); stepYear(e.shiftKey ? 10 : 1); }
+    else if (k === 'ArrowDown') { e.preventDefault(); stepYear(e.shiftKey ? -10 : -1); }
+    else if (k === 'PageUp') { e.preventDefault(); stepYear(10); }
+    else if (k === 'PageDown') { e.preventDefault(); stepYear(-10); }
+    else if (k === 'Home') { e.preventDefault(); stepYearTo(curStart); }
+    else if (k === 'ArrowRight' && yearGhost.textContent && yearInput.selectionStart === yearInput.value.length) {
+      e.preventDefault();
+      yearInput.value = suggestStart;
+      onYearInput();
+      caretToEnd();
+    } else if (k === 'Escape' && (cleanYearText(yearInput.value) !== committedText() || yearArmed !== null || yearNotice)) {
+      e.preventDefault();
+      e.stopPropagation();
+      revertYear();
+      yearInput.select();
+    }
+  });
+  yearInput.addEventListener('focus', () => {
+    fieldYear.classList.add('is-typing');
+    yearInput.select();
+    suppressMouseUp = true;
+    setTimeout(() => { suppressMouseUp = false; }, 250);
+    renderYearTyping();
+    renderYearHint();
+  });
+  yearInput.addEventListener('mouseup', e => { if (suppressMouseUp) { e.preventDefault(); suppressMouseUp = false; } });
+  yearInput.addEventListener('blur', () => {
+    fieldYear.classList.remove('is-typing');
+    finalizeYear();
+    renderYearHint();
+  });
+  yearBox.addEventListener('pointerdown', e => { if (e.target !== yearInput) { e.preventDefault(); yearInput.focus(); } });
+  yearMsg.addEventListener('pointerdown', e => { if (e.target.closest('button')) e.preventDefault(); });
+  yearMsg.addEventListener('click', e => {
+    const b = e.target.closest('[data-year-confirm]');
+    if (!b) return;
+    const start = +b.dataset.yearConfirm;
+    yearArmed = start;
+    if (yearFocused()) { finalizeYear({ enter: true }); } else { A.setYearStart(start); renderYear(); }
+  });
+  yearPrev.addEventListener('click', () => stepYear(-1));
+  yearNext.addEventListener('click', () => stepYear(1));
+
+  yearQuick.addEventListener('click', e => {
+    const b = e.target.closest('.choice');
+    if (!b) return;
+    clearNotice();
+    yearArmed = null;
+    A.setYearStart(+b.dataset.start);
+    const again = yearQuick.querySelector(`.choice[data-start="${b.dataset.start}"]`);
+    if (again && document.activeElement !== again) again.focus({ preventScroll: true });
+  });
+  yearQuick.addEventListener('keydown', e => {
+    const b = e.target.closest('.choice');
+    if (!b) return;
+    const btns = Array.from(yearQuick.querySelectorAll('.choice'));
+    const i = btns.indexOf(b);
+    const map = { ArrowLeft: 1, ArrowDown: 1, ArrowRight: -1, ArrowUp: -1 };
+    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      A.setYearStart(+b.dataset.start);
+      advanceFrom(yearInput);
+      return;
+    }
+    let next = null;
+    if (e.key in map) next = btns[(i + map[e.key] + btns.length) % btns.length];
+    else if (e.key === 'Home') next = btns[0];
+    else if (e.key === 'End') next = btns[btns.length - 1];
+    if (!next) return;
+    e.preventDefault();
+    A.setYearStart(+next.dataset.start);
+    const again = yearQuick.querySelector(`.choice[data-start="${next.dataset.start}"]`);
+    if (again) again.focus();
+  });
 
   const choiceSig = new WeakMap();
   function renderChoices(container, sel, { empty = '', decorate } = {}) {
@@ -501,11 +722,11 @@ document.addEventListener('DOMContentLoaded', () => {
     btns.forEach(b => { b.tabIndex = b === tabbable ? 0 : -1; });
     container.closest('.field').classList.toggle('is-filled', !!sel.value && !sel.disabled);
   }
-  function bindChoices(container, sel) {
+  function bindChoices(container, sel, setter) {
     container.addEventListener('click', e => {
       const b = e.target.closest('.choice');
       if (!b) return;
-      setSelect(sel, b.dataset.value);
+      setter(b.dataset.value);
       const again = container.querySelector(`.choice[data-value="${CSS.escape(b.dataset.value)}"]`);
       if (again && document.activeElement !== again) again.focus({ preventScroll: true });
     });
@@ -519,7 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
       let next = null;
       if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
-        if (sel.value !== b.dataset.value) setSelect(sel, b.dataset.value);
+        if (sel.value !== b.dataset.value) setter(b.dataset.value);
         advanceFrom(container);
         return;
       }
@@ -527,7 +748,6 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (e.key === 'Home') next = btns[0];
       else if (e.key === 'End') next = btns[btns.length - 1];
       else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && e.key !== ' ') {
-        // Type-ahead: letters match the label, digits match the position (months: 1-12)
         clearTimeout(typedTimer);
         typed += foldArabic(normalizeDigits(e.key));
         typedTimer = setTimeout(() => { typed = ''; }, 900);
@@ -540,24 +760,23 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!next) return;
       e.preventDefault();
-      setSelect(sel, next.dataset.value);
+      setter(next.dataset.value);
       const again = container.querySelector(`.choice[data-value="${CSS.escape(next.dataset.value)}"]`);
       if (again) again.focus();
     });
   }
-  bindChoices(monthChoices, monthSel);
-  bindChoices(regionChoices, regionSel);
-  bindChoices(pharmacyChoices, pharmacySel);
+  bindChoices(monthChoices, monthSel, v => A.setMonth(v));
+  bindChoices(regionChoices, regionSel, v => A.setRegion(v));
+  bindChoices(pharmacyChoices, pharmacySel, v => A.setPharmacy(activeClass, regionSel.value, +v - 1));
 
-  // Enter on any picker confirms it and walks forward: class → year → month → region → pharmacy → quick entry.
   function advanceFrom(container) {
-    const flow = [$('class-group'), yearChoices, monthChoices, regionChoices, pharmacyChoices];
+    const flow = [$('class-group'), yearInput, monthChoices, regionChoices, pharmacyChoices];
     const filled = [() => !!activeClass, () => !!yearSel.value, () => !!monthSel.value, () => !!regionSel.value, () => !!pharmacySel.value];
     const at = flow.indexOf(container);
     for (let k = at + 1; k < flow.length; k++) {
       if (filled[k]() && k !== flow.length - 1) continue;
       const c = flow[k];
-      const btn = c.querySelector('[tabindex="0"]') || c.querySelector('button');
+      const btn = c === yearInput ? c : (c.querySelector('[tabindex="0"]') || c.querySelector('button'));
       if (btn) {
         btn.focus({ preventScroll: true });
         btn.closest('.field, .class-grid')?.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
@@ -567,27 +786,24 @@ document.addEventListener('DOMContentLoaded', () => {
     goToEntry();
   }
   function goToEntry() {
-    const firstEmpty = cardValues.findIndex(v => !(v > 0));
-    setTarget(firstEmpty === -1 ? target : firstEmpty);
-    $('quick-entry').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
-    groupSearch.focus({ preventScroll: true });
-  }
-  yearChoices.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && e.target.closest('.year-chip')) {
-      e.preventDefault();
-      if (yearSel.value !== e.target.dataset.value) pickYear(e.target.dataset.value);
-      advanceFrom(yearChoices);
+    const empty = cardValues.findIndex(v => !(v > 0));
+    if (empty === -1) {
+      $('step-totals').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+      setTimeout(() => totalTicketsInput.focus({ preventScroll: true }), reducedMotion() ? 0 : 320);
+      return;
     }
-  });
+    setTarget(empty);
+    jumpToGroup(empty);
+  }
   classBtns.forEach(btn => btn.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
-      if (btn.dataset.class !== activeClass) { setClass(btn.dataset.class); refresh(); save(); }
+      A.setClass(btn.dataset.class);
       advanceFrom($('class-group'));
     } else if (/^[123\u0661-\u0663]$/.test(e.key)) {
       e.preventDefault();
       const b = classBtns[+normalizeDigits(e.key) - 1];
-      b.focus(); if (b.dataset.class !== activeClass) { setClass(b.dataset.class); refresh(); save(); }
+      b.focus(); A.setClass(b.dataset.class);
     }
   }));
 
@@ -617,11 +833,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (drugInputs[i].value !== shown) drugInputs[i].value = shown;
   }
 
+  const focusStart = {};
   cardsContainer.addEventListener('input', e => {
     if (!e.target.classList.contains('drug-input')) return;
     const inp = e.target;
     let raw = inp.value;
-    // A comma typed by hand is a decimal mark (grouping commas are added automatically).
     if (e.inputType === 'insertText' && e.data === ',' && !raw.includes('.')) {
       const c = inp.selectionStart;
       raw = raw.slice(0, c - 1) + '.' + raw.slice(c);
@@ -629,34 +845,35 @@ document.addEventListener('DOMContentLoaded', () => {
       try { inp.setSelectionRange(c, c); } catch (err) {}
     }
     setKeepingCaret(inp, raw, setCardValue(+inp.dataset.index, raw));
-    refresh(); save();
+    schedule(D.TOTALS | D.GROUPS | D.STATUS);
   });
   cardsContainer.addEventListener('focusout', e => {
     if (!e.target.classList.contains('drug-input')) return;
-    writeCard(+e.target.dataset.index, e.target.value, { format: true });
-    refresh(); save();
+    const idx = +e.target.dataset.index;
+    writeCard(idx, e.target.value, { format: true });
+    if (focusStart[idx] !== undefined) pushHistory(idx, focusStart[idx], cardValues[idx]);
+    delete focusStart[idx];
+    schedule(D.TOTALS | D.GROUPS | D.STATUS);
     setTimeout(applyGroupFilter, 0);
   });
   cardsContainer.addEventListener('focusin', e => {
     if (!e.target.classList.contains('drug-input')) return;
     const inp = e.target;
     const idx = +inp.dataset.index;
+    focusStart[idx] = cardValues[idx];
     const raw = groupLive(displayDecimal(cardValues[idx]));
     if (inp.value !== raw) inp.value = raw;
-    fitChars(inp, inp.value);
+    fitLong(inp);
     inp.select();
-    setTarget(idx, { fromCard: true });
+    setTarget(idx);
   });
   cardsContainer.addEventListener('click', e => {
     const btn = e.target.closest('.group-clear');
     if (btn) {
       const i = +btn.dataset.index;
-      const prev = cardValues[i];
-      pushHistory(i, prev, 0);
-      writeCard(i, '', { format: true });
-      refresh(); save();
+      const prev = A.setGroup(i, 0);
       drugInputs[i].focus();
-      showToast(`تم مسح «${cardNames[i]}»`, 'info', { duration: 4000, action: { label: 'تراجع', onClick: () => { writeCard(i, String(prev), { format: true }); refresh(); save(); } } });
+      showToast(`تم مسح «${cardNames[i]}»`, 'info', { duration: 4000, action: { label: 'تراجع', onClick: () => A.restoreGroup(i, prev) } });
       return;
     }
     const card = e.target.closest('.group-card');
@@ -671,14 +888,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cells.length === 1) cells = cells[0].split('\t');
     else cells = cells.map(row => row.split('\t')[0]);
     const start = +e.target.dataset.index;
-    let filled = 0;
+    const changes = [];
     cells.forEach((cell, k) => {
       const i = start + k;
       if (i >= cardNames.length) return;
-      writeCard(i, smartNumber(cell), { format: true });
-      filled++;
+      changes.push({ i, value: parseDecimal(smartNumber(cell)) });
     });
-    refresh(); save();
+    const filled = changes.length;
+    A.setGroups(changes);
     drugInputs[Math.min(start + filled, cardNames.length) - 1].focus();
     showToast(`تم لصق ${filled} قيمة بدءًا من «${cardNames[start]}»`, 'success', { duration: 3000 });
   });
@@ -687,10 +904,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const v = cardValues[+card.dataset.index];
     if (groupFilter === 'filled' && !(v > 0)) return false;
     if (groupFilter === 'empty' && v > 0) return false;
-    if (!groupQuery) return true;
-    const q = foldArabic(normalizeDigits(groupQuery).replace(/^0+(?=\d)/, ''));
-    if (/^\d+$/.test(q)) return String(+card.dataset.index + 1) === q || String(+card.dataset.index + 1).startsWith(q);
-    return card.dataset.search.includes(q);
+    return true;
   }
   function applyGroupFilter() {
     const active = document.activeElement;
@@ -702,10 +916,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (show) shown++;
     });
     groupsEmpty.hidden = shown > 0;
-    cardsContainer.classList.toggle('is-filtered', !!groupQuery || groupFilter !== 'all');
+    cardsContainer.classList.toggle('is-filtered', groupFilter !== 'all');
   }
   function setGroupFilter(f) {
     groupFilter = f;
+    field.dirty = true;
     filterBtns.forEach(b => {
       const on = b.dataset.filter === f;
       b.classList.toggle('is-on', on);
@@ -728,228 +943,74 @@ document.addEventListener('DOMContentLoaded', () => {
       b.tabIndex = on ? 0 : -1;
     });
     if (persist) store.set(VIEW_KEY, view);
+    field.dirty = true;
+    requestAnimationFrame(() => schedule(D.GROUPS, false));
   }
   viewBtns.forEach(b => b.addEventListener('click', () => setView(b.dataset.view, true)));
+  if (window.ResizeObserver) new ResizeObserver(() => { field.dirty = true; schedule(D.GROUPS, false); }).observe(cardsContainer);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { field.dirty = true; schedule(D.GROUPS, false); });
   rovingKeys(viewBtns, b => setView(b.dataset.view, true));
   setView(store.get(VIEW_KEY, 'list'), false);
 
-  /* ───────────── Quick-entry console ─────────────
-     One line, always ready. Grammar:
-       4500          → set the target group, move to the next one
-       1200+350-50   → arithmetic, result goes to the target
-       +300 / -50    → add to / subtract from the target's current value
-       قلب 4500      → set a group by (part of) its name
-       5=4500        → set a group by its number
-       قلب           → move the target there (also filters the ledger)
-       Enter on empty line → skip to next group                      */
   let target = 0;
   const history = [];
-  function pushHistory(i, prev, next) {
-    if (prev === next) return;
-    history.push({ i, prev, next });
+  function pushHistoryBatch(changes) {
+    const list = changes.filter(c => c.prev !== c.next);
+    if (!list.length) return;
+    history.push(list);
     if (history.length > 100) history.shift();
   }
-  const nextAfter = i => (i + 1 < cardNames.length ? i + 1 : (cardValues.findIndex(v => !(v > 0)) + 1 || cardNames.length) - 1);
+  const pushHistory = (i, prev, next) => pushHistoryBatch([{ i, prev, next }]);
+  const foldedNames = cardNames.map(foldArabic);
+  const parseEntry = raw => window.PharmaCore.parseEntry(raw, { names: cardNames, values: cardValues, target, folded: foldedNames });
+  const nextEmptyAfter = i => {
+    const n = cardNames.length;
+    for (let k = 1; k <= n; k++) { const j = (i + k) % n; if (!(cardValues[j] > 0)) return j; }
+    return i;
+  };
   const groupNum = n => n.toLocaleString('en-US', { maximumFractionDigits: 3 });
 
-  function setTarget(i, { fromCard = false, scroll = false } = {}) {
+  function setTarget(i, { scroll = false } = {}) {
     target = Math.max(0, Math.min(cardNames.length - 1, i));
     groupCards.forEach((c, k) => c.classList.toggle('is-target', k === target));
-    qeIndex.textContent = String(target + 1).padStart(2, '0');
-    qeName.textContent = cardNames[target];
-    qeCurrent.textContent = cardValues[target] > 0 ? groupNum(cardValues[target]) : '';
-    qeTarget.classList.toggle('has-value', cardValues[target] > 0);
-    if (!fromCard) renderPreview();
     if (scroll) {
       const card = groupCards[target];
-      if (card.hidden) { groupQuery = ''; applyGroupFilter(); }
+      if (card.hidden) { setGroupFilter('all'); }
       card.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
     }
   }
 
-  function findGroups(q) {
-    const f = foldArabic(q);
-    if (!f) return [];
-    const names = cardNames.map(foldArabic);
-    const score = n => n.startsWith(f) ? 0 : n.split(' ').some(w => w.startsWith(f)) ? 1 : n.includes(f) ? 2 : 9;
-    return names.map((n, i) => [i, score(n)]).filter(x => x[1] < 9).sort((a, b) => a[1] - b[1] || a[0] - b[0]).map(x => x[0]);
-  }
 
-  function evalExpr(expr, current) {
-    const e = expr.replace(/[\s\u00A0]+/g, '');
-    if (!e || /[^\d.,+\-]/.test(e)) return null;
-    const relative = /^[+\-]/.test(e);
-    const terms = e.split(/(?=[+\-])/).filter(Boolean);
-    let sum = 0;
-    for (const t of terms) {
-      const sign = t[0] === '-' ? -1 : 1;
-      const c = smartNumber(t.replace(/^[+\-]/, ''));
-      if (!c || isNaN(parseFloat(c))) return null;
-      sum += sign * parseFloat(c);
-    }
-    const value = Math.round(((relative ? current : 0) + sum) * 1000) / 1000;
-    if (value < 0) return { error: 'النتيجة أقل من صفر' };
-    return { value: Math.min(value, MAX_GROUP), relative, compound: terms.length > 1 || relative };
-  }
 
-  function parseEntry(raw) {
-    const s = toLatin(raw).trim();
-    if (!s) return { kind: 'skip' };
-    let m = s.match(/^#?(\d{1,2})\s*[=:]\s*(.+)$/);
-    if (m && +m[1] >= 1 && +m[1] <= cardNames.length) {
-      const i = +m[1] - 1;
-      const v = evalExpr(m[2], cardValues[i]);
-      return !v ? { kind: 'bad' } : v.error ? { kind: 'bad', msg: v.error } : { kind: 'set', index: i, ...v };
-    }
-    m = s.match(/^(.*?\p{L}[^\d+\-]*?)\s*([+\-]?\d[\d.,+\-\s]*)?$/u);
-    if (m && /\p{L}/u.test(m[1])) {
-      const hits = findGroups(m[1]);
-      if (!hits.length) return { kind: 'nomatch', query: m[1].trim() };
-      if (!m[2]) return { kind: 'goto', index: hits[0], more: hits.length - 1 };
-      const v = evalExpr(m[2], cardValues[hits[0]]);
-      return !v ? { kind: 'bad' } : v.error ? { kind: 'bad', msg: v.error } : { kind: 'set', index: hits[0], ...v };
-    }
-    const v = evalExpr(s, cardValues[target]);
-    return !v ? { kind: 'bad' } : v.error ? { kind: 'bad', msg: v.error } : { kind: 'set', index: target, ...v };
-  }
 
-  function renderPreview() {
-    const raw = groupSearch.value;
-    const p = parseEntry(raw);
-    let html = '';
-    qePreview.className = 'qe-preview';
-    if (!raw.trim()) {
-      html = cardValues[target] > 0
-        ? `<span class="qp-dim">القيمة الحالية</span> <b class="qp-num" dir="ltr">${groupNum(cardValues[target])}</b> <span class="qp-dim">· اكتب لتغييرها، أو <kbd>↵</kbd> للتالي</span>`
-        : `<span class="qp-dim">اكتب قيمة «${escapeHTML(cardNames[target])}» ثم <kbd>↵</kbd></span>`;
-    } else if (p.kind === 'set') {
-      const prev = cardValues[p.index];
-      const elsewhere = p.index !== target;
-      html = `${elsewhere ? `<span class="qp-to">${escapeHTML(cardNames[p.index])}</span> ` : ''}`
-        + (p.compound ? `<span class="qp-dim" dir="ltr">${p.relative ? groupNum(prev) + ' → ' : '= '}</span>` : '')
-        + `<b class="qp-num" dir="ltr">${groupNum(p.value)}</b>`
-        + (prev > 0 && !p.relative ? ` <span class="qp-dim">بدلًا من <span dir="ltr">${groupNum(prev)}</span></span>` : '');
-      qePreview.classList.add('is-set');
-    } else if (p.kind === 'goto') {
-      html = `<span class="qp-dim">انتقال إلى</span> <span class="qp-to">${escapeHTML(cardNames[p.index])}</span>${p.more ? ` <span class="qp-dim">(+${p.more} مطابقة)</span>` : ''} <span class="qp-dim">· أضف الرقم للإدخال مباشرة</span>`;
-    } else if (p.kind === 'nomatch') {
-      html = `<span class="qp-err">لا توجد مجموعة باسم «${escapeHTML(p.query)}»</span>`;
-      qePreview.classList.add('is-err');
-    } else if (p.kind === 'bad') {
-      html = `<span class="qp-err">${escapeHTML(p.msg || 'صيغة غير مفهومة')}</span>`;
-      qePreview.classList.add('is-err');
-    }
-    qePreview.innerHTML = html;
-  }
-
-  function showLast(i, prev, next) {
-    qeLast.hidden = false;
-    qeLast.innerHTML = `<span class="ql-name">${escapeHTML(cardNames[i])}</span><b dir="ltr">${next > 0 ? groupNum(next) : '—'}</b><button type="button" class="link-btn" id="qe-undo">تراجع <kbd>Ctrl Z</kbd></button>`;
-    $('qe-undo').onclick = () => { undo(); groupSearch.focus(); };
-    qeLast.classList.remove('is-new'); void qeLast.offsetWidth; qeLast.classList.add('is-new');
-  }
   function flashCard(i) {
     const card = groupCards[i];
     card.classList.remove('is-landed'); void card.offsetWidth; card.classList.add('is-landed');
   }
-  function undo() {
-    const h = history.pop();
-    if (!h) { showToast('لا يوجد ما يمكن التراجع عنه', 'info', { duration: 1800 }); return; }
-    writeCard(h.i, String(h.prev), { format: true });
-    refresh(); save();
-    setTarget(h.i, { scroll: true });
-    flashCard(h.i);
-    if (history.length) { const l = history[history.length - 1]; showLast(l.i, l.prev, l.next); } else qeLast.hidden = true;
-    showToast(`أُعيدت «${cardNames[h.i]}» إلى ${h.prev > 0 ? groupNum(h.prev) : 'فارغة'}`, 'info', { duration: 2200 });
-  }
-  function rejectEntry() {
-    if (reducedMotion()) return;
-    $('quick-entry').animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-5px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }], { duration: 260 });
+  function undo() { return A.undo(); }
+  function applyGroup(i, value) {
+    const prev = A.setGroup(i, value);
+    flashCard(i);
+    return prev;
   }
 
-  function commitEntry() {
-    const p = parseEntry(groupSearch.value);
-    if (p.kind === 'bad' || p.kind === 'nomatch') { renderPreview(); rejectEntry(); return; }
-    if (p.kind === 'skip') { setTarget(nextAfter(target), { scroll: true }); return; }
-    if (p.kind === 'goto') { clearSearch(); setTarget(p.index, { scroll: true }); return; }
-    const prev = cardValues[p.index];
-    pushHistory(p.index, prev, p.value);
-    writeCard(p.index, String(p.value), { format: true });
-    clearSearch();
-    refresh(); save();
-    flashCard(p.index);
-    showLast(p.index, prev, p.value);
-    setTarget(nextAfter(p.index), { scroll: true });
-  }
-
-  groupSearch.addEventListener('input', () => {
-    const raw = groupSearch.value;
-    searchClear.hidden = !raw;
-    // Typing a name filters the ledger; typing numbers never hides anything.
-    const nameOnly = /\p{L}/u.test(raw) && !/\d/.test(toLatin(raw)) ? raw.trim() : '';
-    if (nameOnly !== groupQuery) { groupQuery = nameOnly; applyGroupFilter(); }
-    renderPreview();
-  });
-  groupSearch.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
-      if (e.shiftKey && !groupSearch.value.trim()) { setTarget(target - 1, { scroll: true }); return; }
-      commitEntry();
-    } else if (e.key === 'Escape') {
-      if (groupSearch.value) { e.preventDefault(); clearSearch(); }
-    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      setTarget(target + (e.key === 'ArrowDown' ? 1 : -1), { scroll: true });
-    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !groupSearch.value) {
-      e.preventDefault();
-      undo();
-    } else if (e.key === 'Tab' && !e.shiftKey && groupSearch.value) {
-      // Tab completes a name match into the target without committing a value
-      const p = parseEntry(groupSearch.value);
-      if (p.kind === 'goto') { e.preventDefault(); clearSearch(); setTarget(p.index, { scroll: true }); }
-    }
-  });
-  $('qe-go').addEventListener('click', () => { commitEntry(); groupSearch.focus({ preventScroll: true }); });
-  $('qe-prev').addEventListener('click', () => { setTarget(target - 1, { scroll: true }); groupSearch.focus({ preventScroll: true }); });
-  $('qe-next').addEventListener('click', () => { setTarget(target + 1, { scroll: true }); groupSearch.focus({ preventScroll: true }); });
-  const qeKbd = $('qe-kbd');
-  qeKbd.addEventListener('click', e => {
-    e.preventDefault();
-    const text = groupSearch.inputMode !== 'text';
-    groupSearch.inputMode = text ? 'text' : 'decimal';
-    qeKbd.textContent = text ? '123' : 'أ';
-    groupSearch.blur(); groupSearch.focus();
-  });
-
-  function clearSearch() {
-    groupSearch.value = '';
-    groupQuery = '';
-    searchClear.hidden = true;
-    applyGroupFilter();
-    renderPreview();
-  }
-  searchClear.addEventListener('click', () => { clearSearch(); groupSearch.focus(); });
-  $('groups-empty-reset').addEventListener('click', () => { clearSearch(); setGroupFilter('all'); });
+  $('groups-empty-reset').addEventListener('click', () => setGroupFilter('all'));
 
   function jumpToGroup(i) {
     const card = groupCards[i];
-    if (card.hidden) { clearSearch(); setGroupFilter('all'); }
+    if (card.hidden) setGroupFilter('all');
     card.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
     card.classList.remove('needs-attention'); void card.offsetWidth; card.classList.add('needs-attention');
     setTimeout(() => drugInputs[i].focus({ preventScroll: true }), reducedMotion() ? 0 : 320);
   }
-  dockGroups.addEventListener('click', () => {
-    const empty = cardValues.findIndex(v => !(v > 0));
-    if (empty === -1) { $('step-totals').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' }); setTimeout(() => totalTicketsInput.focus({ preventScroll: true }), 300); return; }
-    jumpToGroup(empty);
-  });
+  dockGroups.addEventListener('click', goToEntry);
 
   optionalInputs.forEach(inp => {
     inp.addEventListener('input', () => {
       let v = normalizeDigits(inp.value).replace(/\D/g, '').replace(/^0+(?=\d)/, '');
       if (v !== '' && +v > MAX_OPTIONAL) v = String(MAX_OPTIONAL);
       if (inp.value !== v) inp.value = v;
-      refresh(); save();
+      schedule(D.GROUPS | D.STATUS);
     });
     inp.addEventListener('focus', () => inp.select());
   });
@@ -957,19 +1018,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const isTyping = el => el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); submitBtn.click(); return; }
-    if (e.key === '/' && !isTyping(e.target) && !document.querySelector('dialog[open]')) {
+    const modal = document.querySelector('dialog[open]');
+    if (e.key === '/' && !isTyping(e.target) && !modal && !e.ctrlKey && !e.metaKey && !e.altKey) {
       e.preventDefault();
-      groupSearch.focus();
-      groupSearch.select();
+      openPal();
       return;
     }
-    // Start typing a number anywhere on the page → it lands in the quick-entry line
-    if ((e.target === document.body || e.target === document.documentElement) && /^[\d\u0660-\u0669\u06F0-\u06F9]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey && !document.querySelector('dialog[open]')) {
+    if ((e.target === document.body || e.target === document.documentElement) && /^[\d\u0660-\u0669\u06F0-\u06F9]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey && !modal) {
       e.preventDefault();
-      groupSearch.focus({ preventScroll: true });
-      groupSearch.value = e.key;
-      groupSearch.dispatchEvent(new Event('input'));
-      $('quick-entry').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+      openPal(e.key);
+      return;
+    }
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'z' && !isTyping(e.target) && !modal) {
+      e.preventDefault();
+      A.undo();
       return;
     }
     const order = focusOrder();
@@ -979,13 +1041,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') dir = e.shiftKey ? -1 : 1;
     else if (e.key === 'ArrowDown') dir = 1;
     else if (e.key === 'ArrowUp') dir = -1;
-    else if (e.key === 'Escape' && e.target.classList.contains('drug-input')) { e.preventDefault(); groupSearch.focus(); groupSearch.select(); return; }
+    else if (e.key === 'Escape' && e.target.classList.contains('drug-input')) { e.preventDefault(); e.target.blur(); return; }
     if (!dir) return;
     e.preventDefault();
     const next = order[idx + dir];
     if (next) next.focus();
     else if (dir > 0) submitBtn.focus();
-    else if (e.key === 'ArrowUp' && e.target === order[0]) groupSearch.focus();
+    else if (e.key === 'ArrowUp' && e.target === order[0]) firstChoice(pharmacyChoices).focus();
   });
 
   function validOptional(inp) { const v = inp.value.trim(); return v === '' || (/^\d+$/.test(v) && +v <= MAX_OPTIONAL); }
@@ -993,7 +1055,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function missingList() {
     const m = [];
     if (!activeClass) m.push({ label: 'الفئة', el: classBtns[0], step: 'step-class' });
-    if (!yearSel.value) m.push({ label: 'السنة', el: yearChoices.querySelector('.year-chip[tabindex="0"]') || yearChoices, step: 'step-fields' });
+    if (!yearSel.value) m.push({ label: 'السنة', el: yearInput, step: 'step-fields' });
     if (!monthSel.value) m.push({ label: 'الشهر', el: firstChoice(monthChoices), step: 'step-fields' });
     if (!regionSel.value) m.push({ label: 'المنطقة', el: firstChoice(regionChoices), step: 'step-fields' });
     if (!pharmacySel.value) m.push({ label: 'الصيدلية', el: firstChoice(pharmacyChoices), step: 'step-fields' });
@@ -1025,40 +1087,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setChip(chip, text, cls) { chip.textContent = text; chip.className = `status-chip ${cls}`; }
 
-  function refresh() {
-    const total = Math.round(cardValues.reduce((a, v) => a + v, 0) * 1000) / 1000;
-    const filled = cardValues.filter(v => v > 0).length;
-    const max = Math.max(...cardValues);
+  const D = { TOTALS: 1, GROUPS: 2, PICKERS: 4, STATUS: 8, ALL: 15 };
+  let dirty = 0, raf = 0;
+  function schedule(flags = D.ALL, persist = true) {
+    dirty |= flags;
+    if (!raf) raf = requestAnimationFrame(flush);
+    if (persist) save();
+  }
+  function flushNow() {
+    if (raf) cancelAnimationFrame(raf);
+    flush();
+  }
+  const refresh = () => schedule(D.ALL, false);
+
+  function groupStats() {
+    let total = 0, filled = 0, max = 0;
+    for (const v of cardValues) {
+      total += v;
+      if (v > 0) { filled++; if (v > max) max = v; }
+    }
+    return { total: Math.round(total * 1000) / 1000, filled, max };
+  }
+
+  function flush() {
+    raf = 0;
+    const f = dirty;
+    dirty = 0;
+    if (!f) return;
+    const st = groupStats();
+    if (f & D.TOTALS) renderTotals(st);
+    if (f & D.GROUPS) renderGroupStates(st);
+    if (f & D.PICKERS) renderPickers();
+    if (f & D.STATUS) renderStatus(st);
+  }
+
+  function renderTotals({ total, filled, max }) {
     animateTotal(total);
-
     drugInputs.forEach((inp, i) => {
-      const card = groupCards[i];
       const v = cardValues[i];
-      card.classList.toggle('card-active', v > 0);
-      fitChars(inp, inp.value || inp.placeholder);
-      card.querySelector('.group-meter-fill').style.width = max > 0 ? `${(v / max) * 100}%` : '0';
-      card.querySelector('.group-share').textContent = total > 0 && v > 0 ? `${((v / total) * 100).toFixed(1)}%` : '—';
+      groupMeters[i].style.setProperty('--p', max > 0 ? v / max : 0);
+      groupShares[i].textContent = total > 0 && v > 0 ? `${((v / total) * 100).toFixed(1)}%` : '—';
+      const mag = v > 0 ? magnitudeLabel(v) : '';
+      if (mag !== magCache[i]) {
+        magCache[i] = mag;
+        groupMags[i].textContent = mag ? `≈ ${mag}` : '';
+        inp.title = mag ? `≈ ${mag}` : '';
+      }
     });
-    optionalInputs.forEach(inp => {
-      const card = inp.closest('.card');
-      card.classList.toggle('card-active', inp.value !== '' && validOptional(inp));
-      card.classList.toggle('card-invalid', !validOptional(inp));
-    });
-
-    renderPickers();
-
-    groupsCount.textContent = `${filled}/${cardNames.length}`;
-    $('count-all').textContent = cardNames.length;
-    $('count-filled').textContent = filled;
-    $('count-empty').textContent = cardNames.length - filled;
-    totalProgressFill.style.width = `${(filled / cardNames.length) * 100}%`;
+    totalProgressFill.style.setProperty('--p', filled / cardNames.length);
     totalMeta.textContent = filled ? `${filled} مجموعة · متوسط ${fmtShort(total / filled)}` : '';
     dockGroupsCount.textContent = filled;
     ringFill.style.strokeDasharray = `${RING_LEN}`;
     ringFill.style.strokeDashoffset = `${RING_LEN * (1 - filled / cardNames.length)}`;
     dockGroups.classList.toggle('is-complete', filled === cardNames.length);
     dockGroups.title = filled === cardNames.length ? 'كل المجموعات مُدخلة' : 'انتقل إلى أول مجموعة فارغة';
+  }
 
+  function renderGroupStates({ filled }) {
+    if (field.dirty) measureField();
+    drugInputs.forEach((inp, i) => {
+      groupCards[i].classList.toggle('card-active', cardValues[i] > 0);
+      fitLong(inp);
+    });
+    optionalInputs.forEach(inp => {
+      const card = inp.closest('.card');
+      card.classList.toggle('card-active', inp.value !== '' && validOptional(inp));
+      card.classList.toggle('card-invalid', !validOptional(inp));
+    });
+    groupsCount.textContent = `${filled}/${cardNames.length}`;
+    $('count-all').textContent = cardNames.length;
+    $('count-filled').textContent = filled;
+    $('count-empty').textContent = cardNames.length - filled;
+    applyGroupFilter();
+  }
+
+  function renderStatus({ filled }) {
     const missing = missingList();
     const fieldsMissing = missing.filter(m => m.step === 'step-fields').map(m => m.label);
     $('step-class').classList.toggle('is-done', !!activeClass);
@@ -1085,17 +1188,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!isSubmitting) submitBtn.setAttribute('aria-disabled', String(!ready));
     resetBtn.disabled = isSubmitting || isFormEmpty();
-    applyGroupFilter();
-
-    qeCurrent.textContent = cardValues[target] > 0 ? groupNum(cardValues[target]) : '';
-    qeTarget.classList.toggle('has-value', cardValues[target] > 0);
-    qeProgress.style.setProperty('--p', filled / cardNames.length);
-    if (document.activeElement !== groupSearch) renderPreview();
   }
+
+  const A = {
+    setClass(key, opts) {
+      if (key === activeClass) return;
+      applyClass(key, opts);
+      schedule(D.ALL);
+    },
+    setYearStart(start) {
+      const v = String(start + 1);
+      if (!validEnd(v)) return false;
+      ensureYearOption(v);
+      if (yearSel.value !== v) {
+        yearSel.value = v;
+        updatePharmacyDropdown();
+        schedule(D.PICKERS | D.STATUS);
+      }
+      return true;
+    },
+    setMonth(v) {
+      if (monthSel.value === v) return;
+      monthSel.value = v;
+      updatePharmacyDropdown();
+      schedule(D.PICKERS | D.STATUS);
+    },
+    setRegion(v) {
+      if (regionSel.value === v) return;
+      regionSel.value = v;
+      updatePharmacyDropdown('');
+      schedule(D.PICKERS | D.STATUS);
+    },
+    setPharmacy(cls, reg, idx) {
+      if (cls !== activeClass) applyClass(cls, { keepPharmacy: true });
+      regionSel.value = reg;
+      updatePharmacyDropdown(String(idx + 1));
+      schedule(D.ALL);
+    },
+    setGroup(i, value, { record = true } = {}) {
+      const prev = cardValues[i];
+      if (record) pushHistory(i, prev, value);
+      writeCard(i, String(value), { format: true });
+      schedule(D.TOTALS | D.GROUPS | D.STATUS);
+      return prev;
+    },
+    setGroups(list, { record = true } = {}) {
+      const changes = list.map(({ i, value }) => ({ i, prev: cardValues[i], next: value }));
+      if (record) pushHistoryBatch(changes);
+      changes.forEach(c => writeCard(c.i, String(c.next), { format: true }));
+      schedule(D.TOTALS | D.GROUPS | D.STATUS);
+      return changes;
+    },
+    restoreGroup(i, prev) {
+      const top = history[history.length - 1];
+      if (top && top.length === 1 && top[0].i === i && top[0].prev === prev) history.pop();
+      A.setGroup(i, prev, { record: false });
+    },
+    setTotal(which, n) {
+      const inp = which === 'tickets' ? totalTicketsInput : totalExternalInput;
+      const v = Math.max(0, Math.min(MAX_OPTIONAL, Math.floor(+n) || 0));
+      inp.value = v ? String(v) : '';
+      schedule(D.GROUPS | D.STATUS);
+    },
+    undo() {
+      const h = history.pop();
+      if (!h) { showToast('لا يوجد ما يمكن التراجع عنه', 'info', { duration: 1800 }); return false; }
+      for (let k = h.length - 1; k >= 0; k--) A.setGroup(h[k].i, h[k].prev, { record: false });
+      setTarget(h[0].i, { scroll: true });
+      h.forEach(c => flashCard(c.i));
+      const msg = h.length === 1 ? `أُعيدت «${cardNames[h[0].i]}» إلى ${h[0].prev > 0 ? groupNum(h[0].prev) : 'فارغة'}` : `أُعيدت ${h.length} مجموعات`;
+      showToast(msg, 'info', { duration: 2200 });
+      return true;
+    }
+  };
 
   function guideTo(item) {
     const step = $(item.step);
-    if (item.step === 'step-groups') { clearSearch(); setGroupFilter('all'); }
+    if (item.step === 'step-groups') setGroupFilter('all');
     step.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
     const target = item.el.closest('.field, .card, .class-grid') || step;
     target.classList.remove('needs-attention'); void target.offsetWidth; target.classList.add('needs-attention');
@@ -1155,7 +1324,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const missing = missingList();
     if (missing.length) {
       showToast(`أكمل أولًا: ${missing.map(m => m.label).join('، ')}`, 'error', { duration: 5000 });
-      submitBtn.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'translateX(0)' }], { duration: 380 });
+      if (!reducedMotion()) submitBtn.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-3px)' }, { transform: 'translateX(0)' }], { duration: 380 });
       guideTo(missing[0]);
       return;
     }
@@ -1198,11 +1367,10 @@ document.addEventListener('DOMContentLoaded', () => {
     lastTotal = 0;
     totalEl.textContent = fmt3(0);
     history.length = 0;
-    qeLast.hidden = true;
-    clearSearch();
     setGroupFilter('all');
     setTarget(0);
-    refresh(); save();
+    schedule(D.ALL);
+    flushNow();
     showToast('اختر الصيدلية التالية.', 'info', { duration: 4000 });
     $('field-pharmacy').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
     const nextUnsent = pharmacyChoices.querySelector('.choice:not(.is-sent)') || firstChoice(pharmacyChoices);
@@ -1210,20 +1378,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetAll() {
-    setClass(null);
+    applyClass(null);
     selects.forEach(s => { s.value = ''; });
-    if (hasYear(currentFiscal)) yearSel.value = currentFiscal;
-    centerYearWindow();
+    ensureYearOption(currentFiscal);
+    yearSel.value = currentFiscal;
     updatePharmacyDropdown('');
     cardValues.fill(0);
     drugInputs.forEach(i => { i.value = ''; });
     optionalInputs.forEach(i => { i.value = ''; });
     history.length = 0;
-    qeLast.hidden = true;
-    clearSearch();
     setGroupFilter('all');
     setTarget(0);
     refresh();
+    flushNow();
     store.remove(DATA_KEY);
   }
   resetBtn.addEventListener('click', () => {
@@ -1251,9 +1418,7 @@ document.addEventListener('DOMContentLoaded', () => {
     restore({ ...d, activeClass: btn ? btn.dataset.class : null });
   })();
   (function initEntry() {
-    // Fresh sheet: preselect the current fiscal year (one less decision); saved year always wins.
-    if (!yearSel.value && hasYear(currentFiscal)) { yearSel.value = currentFiscal; save(); }
-    centerYearWindow();
+    if (!yearSel.value && hasYear(currentFiscal)) { ensureYearOption(currentFiscal); yearSel.value = currentFiscal; save(); }
     const firstEmpty = cardValues.findIndex(v => !(v > 0));
     setTarget(firstEmpty === -1 ? 0 : firstEmpty);
     refresh();
@@ -1388,7 +1553,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setProgress(pct, text) {
-    progressBar.style.width = `${pct}%`;
+    progressBar.style.setProperty('--p', pct / 100);
     progressTrack.setAttribute('aria-valuenow', String(pct));
     progressText.textContent = text;
   }
@@ -1483,4 +1648,455 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   renderFileList();
+
+  const pal = $('palette');
+  const palInput = $('pal-input');
+  const palList = $('pal-list');
+  const palBody = $('pal-body');
+  const palHl = $('pal-hl');
+  const palEmpty = $('pal-empty');
+  const palFlash = $('pal-flash');
+  const palTips = $('pal-tips');
+  const palKbd = $('pal-kbd');
+  const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent || '');
+  const modK = isMac ? '⌘ K' : 'Ctrl K';
+  document.querySelectorAll('.js-cmdk, #cmd-trigger-kbd').forEach(k => { k.textContent = modK; });
+  $('pal-keys').innerHTML = '<span><kbd>↑↓</kbd>تنقّل</span><span><kbd>↵</kbd>تطبيق</span><span><kbd>Tab</kbd>إكمال</span><span><kbd>Esc</kbd>إغلاق</span><span><kbd>⇧↵</kbd>السابق</span>';
+
+  const svg = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const PICON = {
+    class: svg('<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-4 3.8-6 7-6s6 2 7 6"/>'),
+    year: svg('<rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 10h16M8.5 3.5v3M15.5 3.5v3"/>'),
+    month: svg('<rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 10h16M9 14h.01M12 14h.01M15 14h.01"/>'),
+    region: svg('<path d="M12 20s6-5.4 6-10.2A6 6 0 0 0 6 9.8C6 14.6 12 20 12 20z"/><circle cx="12" cy="10" r="2"/>'),
+    pharmacy: svg('<rect x="3.5" y="9" width="17" height="7" rx="3.5" transform="rotate(-35 12 12.5)"/><path d="m10 8.8 4.2 6"/>'),
+    total: svg('<path d="M17 5H7l6 7-6 7h10"/>'),
+    action: svg('<path d="M13 3.5 6 13h5.5l-1 7.5L18 11h-5.5z"/>'),
+    hint: svg('<path d="M5 12h12M13 7l5 5-5 5"/>'),
+    error: svg('<circle cx="12" cy="12" r="8.5"/><path d="M12 8v4.5M12 16h.01"/>')
+  };
+  const KIND = { group: 'مجموعة', class: 'فئة', year: 'سنة', month: 'شهر', region: 'منطقة', pharmacy: 'صيدلية', total: 'إجمالي', action: 'أمر', hint: 'التالي' };
+  const P = { items: [], rows: [], sig: '', flat: false, active: -1, returnFocus: null, closing: false, lastEdit: null };
+
+  const regionLabel = v => regionSel.querySelector(`option[value="${v}"]`)?.text || '';
+  const classLabel = k => classBtnFor(k)?.dataset.label || '';
+  const pad2 = n => String(n).padStart(2, '0');
+
+
+  function prefill(text) { palInput.value = text; palRender(); palInput.focus(); try { palInput.setSelectionRange(text.length, text.length); } catch (e) {} }
+  function done(html, editedIndex = null) {
+    P.lastEdit = editedIndex;
+    palFlash.innerHTML = html;
+    if (!reducedMotion()) palFlash.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.22,.8,.24,1)' });
+    palInput.value = '';
+    palRender();
+  }
+  const ok = s => `<span class="pf-ok">${ICONS.check}</span>${s}`;
+
+  const STATIC = [];
+  const addStatic = it => { it.ft = foldArabic(it.plain || it.title); it.fk = foldArabic(it.kw || ''); STATIC.push(it); return it; };
+  const resolve = (it, browse) => (it.live ? { ...it, ...it.live(browse) } : it);
+  const GROUPS = cardNames.map((name, i) => addStatic({
+    id: `g${i}`, kind: 'group', badge: pad2(i + 1), title: name, kw: `مجموعه ${i + 1}`, complete: name + ' ',
+    run: () => prefill(name + ' '),
+    live: browse => {
+      const v = cardValues[i];
+      const here = browse && i === target;
+      return { val: v > 0 ? groupNum(v) : '—', dim: !(v > 0), on: here, sub: here ? 'الهدف الحالي' : '' };
+    }
+  }));
+  classBtns.forEach(b => addStatic({
+    id: `c${b.dataset.class}`, kind: 'class', title: b.dataset.label, sub: b.querySelector('.class-desc').textContent, kw: 'فئه',
+    live: () => ({ on: b.dataset.class === activeClass }),
+    run: () => { A.setClass(b.dataset.class); done(ok(`الفئة: ${escapeHTML(b.dataset.label)}`)); }
+  }));
+  Array.from(monthSel.options).filter(o => o.value).forEach(o => addStatic({
+    id: `m${o.value}`, kind: 'month', badge: o.value, title: o.text, kw: `شهر ${o.value}`,
+    live: () => ({ on: monthSel.value === o.value, sub: o.value === suggestedMonth ? 'الشهر السابق' : '' }),
+    run: () => { A.setMonth(o.value); done(ok(`الشهر: ${escapeHTML(o.text)}`)); }
+  }));
+  Array.from(regionSel.options).filter(o => o.value).forEach(o => addStatic({
+    id: `r${o.value}`, kind: 'region', title: `المنطقة ${o.text}`, kw: 'منطقه',
+    live: () => ({ on: regionSel.value === o.value }),
+    run: () => { A.setRegion(o.value); done(ok(`المنطقة ${escapeHTML(o.text)}`)); }
+  }));
+  Object.entries(pharmacyOptions).forEach(([cls, regions]) => Object.entries(regions).forEach(([reg, list]) => list.forEach((name, idx) => addStatic({
+    id: `p${cls}.${reg}.${idx}`, kind: 'pharmacy', title: name, kw: `صيدليه ${classLabel(cls)} ${regionLabel(reg)}`,
+    boostFn: () => (cls === activeClass && reg === regionSel.value ? -0.5 : cls === activeClass ? -0.25 : 0),
+    live: () => {
+      const here = cls === activeClass && reg === regionSel.value;
+      const sent = here && isSent(String(idx + 1));
+      return { on: here && pharmacySel.value === String(idx + 1), sub: `${classLabel(cls)} · المنطقة ${regionLabel(reg)}${sent ? ' · أُرسلت' : ''}` };
+    },
+    run: () => { A.setPharmacy(cls, reg, idx); done(ok(`الصيدلية: ${escapeHTML(name)}`)); }
+  }))));
+  const TOTAL_TITLES = optionalInputs.map(inp => inp.closest('.total-field').querySelector('.total-field-head').childNodes[2].textContent.trim());
+  optionalInputs.forEach((inp, which) => addStatic({
+    id: `t${which}`, kind: 'total', title: TOTAL_TITLES[which], kw: 'اجمالي تذاكر خارجي', sub: 'اكتب الرقم بعد الاسم', complete: TOTAL_TITLES[which] + ' ',
+    live: () => ({ val: inp.value ? (+inp.value).toLocaleString('en-US') : '—', dim: !inp.value }),
+    run: () => prefill(TOTAL_TITLES[which] + ' ')
+  }));
+
+  function setGroupItem(i, expr, score, isTarget) {
+    const v = evalExpr(expr, cardValues[i]);
+    if (!v) return null;
+    if (v.error) return { kind: 'error', id: `e${i}`, title: cardNames[i], sub: v.error, score, disabled: true };
+    const prev = cardValues[i];
+    const base = v.relative ? `${groupNum(prev)} ${expr.trim()[0] === '-' ? '−' : '+'} …` : prev > 0 ? `بدلًا من ${groupNum(prev)}` : 'فارغة الآن';
+    const sub = isTarget ? `المجموعة الحالية · ${base}` : base;
+    return { kind: 'group', id: `s${i}`, badge: pad2(i + 1), title: cardNames[i], sub, val: groupNum(v.value), strong: true, score,
+      run: () => { applyGroup(i, v.value); setTarget(nextEmptyAfter(i)); done(ok(`${escapeHTML(cardNames[i])} ← <b dir="ltr">${groupNum(v.value)}</b>`), i); } };
+  }
+  function yearItem(start, score, sub) {
+    const s = +start;
+    const far = Math.abs(s - curStart) > YEAR_SOFT_SPAN;
+    const on = yearSel.value === String(s + 1);
+    return { kind: 'year', id: `y${s}`, title: `<span dir="ltr">${s} – ${s + 1}</span>`, html: true, plain: `${s}`, kw: 'سنه ماليه عام', on, score,
+      sub: sub || (far ? 'تأكيد · بعيدة عن السنة الحالية' : String(s + 1) === currentFiscal ? 'السنة الحالية' : ''),
+      run: () => { A.setYearStart(s); renderYear(); done(ok(`السنة المالية <b dir="ltr">${s} – ${s + 1}</b>`)); } };
+  }
+  function totalSetItems(expr, q, score0) {
+    return optionalInputs.map((inp, which) => {
+      const title = TOTAL_TITLES[which];
+      const s = textScore(q, title, 'اجمالي تذاكر خارجي');
+      if (s === null) return null;
+      const d = normalizeDigits(expr).replace(/[^\d]/g, '');
+      if (!d) return null;
+      const n = Math.min(+d, MAX_OPTIONAL);
+      return { kind: 'total', id: `ts${which}`, title, sub: inp.value ? `بدلًا من ${inp.value}` : 'اختياري', val: n.toLocaleString('en-US'), strong: true, score: s + score0,
+        run: () => { A.setTotal(which === 0 ? 'tickets' : 'external', n); done(ok(`${escapeHTML(title)} ← <b dir="ltr">${n.toLocaleString('en-US')}</b>`)); } };
+    }).filter(Boolean);
+  }
+
+  function actionItems() {
+    const close = fn => () => { closePal(false); fn(); };
+    const ready = missingList().length === 0;
+    return [
+      { kind: 'action', title: 'إرسال البيانات', kw: 'ارسال submit send', sub: ready ? 'جاهز' : `ينقص ${missingList().length}`, run: close(() => submitBtn.click()) },
+      { kind: 'action', title: 'الانتقال إلى أول مجموعة فارغة', kw: 'فارغه التالي ادخال سريع', run: close(goToEntry) },
+      { kind: 'action', title: 'تراجع عن آخر إدخال', kw: 'تراجع undo', sub: history.length ? '' : 'لا يوجد', run: () => { const had = history.length; undo(); if (had) done(ok('تم التراجع')); } },
+      { kind: 'action', title: 'عرض المجموعات الفارغة فقط', kw: 'تصفيه فارغه', run: close(() => { setGroupFilter('empty'); $('step-groups').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' }); }) },
+      { kind: 'action', title: 'عرض الدفتر', kw: 'قائمه list view', on: cardsContainer.classList.contains('is-list'), run: () => { setView('list', true); done(ok('عرض الدفتر')); } },
+      { kind: 'action', title: 'عرض البطاقات', kw: 'شبكه grid view', on: cardsContainer.classList.contains('is-grid'), run: () => { setView('grid', true); done(ok('عرض البطاقات')); } },
+      { kind: 'action', title: 'المظهر الفاتح', kw: 'فاتح light theme', on: docEl.dataset.themePref === 'light', run: () => { applyTheme('light', true); done(ok('المظهر الفاتح')); } },
+      { kind: 'action', title: 'المظهر الداكن', kw: 'داكن dark theme ليلي', on: docEl.dataset.themePref === 'dark', run: () => { applyTheme('dark', true); done(ok('المظهر الداكن')); } },
+      { kind: 'action', title: 'المظهر التلقائي', kw: 'تلقائي system theme', on: docEl.dataset.themePref === 'system', run: () => { applyTheme('system', true); done(ok('المظهر التلقائي')); } },
+      { kind: 'action', title: 'رفع دفعة من الملفات', kw: 'رفع upload excel csv', run: close(() => { setUploadOpen(true); uploadToggle.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' }); }) },
+      { kind: 'action', title: 'إعادة تعيين النموذج', kw: 'مسح reset', danger: true, disabled: resetBtn.disabled, run: close(() => resetBtn.click()) }
+    ];
+  }
+  const actions = () => actionItems().map((a, k) => ({ ...a, id: 'a' + k }));
+  function hintItems() {
+    const map = { 'الفئة': 'فئة ', 'السنة': 'سنة ', 'الشهر': 'شهر ', 'المنطقة': 'منطقة ', 'الصيدلية': 'صيدلية ' };
+    return missingList().filter(m => map[m.label]).map(m => ({ kind: 'hint', id: `h${m.label}`, title: `اختر ${m.label}`, sub: 'اكتب للبحث', complete: map[m.label], run: () => prefill(map[m.label]) }));
+  }
+
+  const YEAR_LIKE = /^[\d\s\-–\/]+$/;
+  const isYearSep = s => /[-–\/]/.test(s) || /^\d{8}$/.test(s.replace(/\s/g, ''));
+
+  function nextItem() {
+    const name = cardNames[target];
+    const has = cardValues[target] > 0;
+    return { kind: 'group', id: 'next', badge: pad2(target + 1), title: `التالي: ${name}`, sub: has ? 'القيمة الحالية · اكتب لتغييرها' : 'اكتب القيمة ثم ↵',
+      val: has ? groupNum(cardValues[target]) : '—', dim: !has,
+      run: () => { closePal(false); jumpToGroup(target); } };
+  }
+  function emptyItems() {
+    const out = [];
+    const hints = hintItems();
+    out.push({ head: 'التالي' }, ...hints, nextItem());
+    out.push({ head: 'المجموعات الدوائية' }, ...GROUPS.map(g => resolve(g, true)));
+    out.push({ head: 'أوامر' }, ...actions());
+    return out;
+  }
+
+  function batchItems(parts) {
+    const list = new Map();
+    for (let k = 0; k < parts.length; k++) {
+      const part = parts[k];
+      const named = /\p{L}/u.test(part) || /^#?\d{1,2}\s*[=:]/.test(part) || /^#\d{1,2}\s/.test(part);
+      const p = named ? parseEntry(part) : { kind: 'bad', msg: 'اكتب اسم المجموعة قبل الرقم' };
+      if (p.kind === 'set') { list.delete(p.index); list.set(p.index, p.value); continue; }
+      const msg = p.kind === 'nomatch' ? `لا توجد مجموعة باسم «${p.query}»` : p.kind === 'goto' ? 'أضف القيمة بعد الاسم' : (p.msg || 'صيغة غير مفهومة');
+      return [{ kind: 'error', id: 'bx', title: `الجزء ${k + 1}: ${part}`, sub: msg, disabled: true }];
+    }
+    const entries = Array.from(list, ([i, value]) => ({ i, value }));
+    const n = entries.length;
+    const last = entries[n - 1].i;
+    return [{ kind: 'group', id: 'bx', badge: `${n}×`, title: 'تطبيق الدفعة', val: String(n), strong: true,
+      sub: entries.map(e => `${cardNames[e.i]} ← ${groupNum(e.value)}`).join(' · '),
+      run: () => {
+        A.setGroups(entries);
+        entries.forEach(e => flashCard(e.i));
+        setTarget(nextEmptyAfter(last));
+        done(ok(`طُبّقت الدفعة · <b dir="ltr">${n}</b>`), last);
+      } }];
+  }
+
+  function palItems(raw) {
+    const q = toLatin(raw).replace(/\s+/g, ' ').trim();
+    if (!q) return emptyItems();
+    const parts = splitBatch(q);
+    if (parts.length > 1) return batchItems(parts);
+    const s = parts.length ? parts[0] : q;
+    const res = [];
+    const push = it => { if (it) res.push(it); };
+
+    let m = s.match(/^#?(\d{1,2})\s*[=:]\s*(.+)$/) || s.match(/^#(\d{1,2})\s+(.+)$/);
+    if (m && +m[1] >= 1 && +m[1] <= cardNames.length) return [setGroupItem(+m[1] - 1, m[2], 0)].filter(Boolean);
+
+    if (YEAR_LIKE.test(s) && isYearSep(s)) {
+      const fp = parseFiscalInput(s, { phase: 'commit' });
+      if (fp.state === 'valid' || fp.state === 'far') return [yearItem(fp.start, -2)];
+      const ev = evalExpr(s, cardValues[target]);
+      if ((fp.reason === 'end-mismatch' || fp.reason === 'range') && (!ev || ev.error)) {
+        return [{ kind: 'error', id: 'ye', title: 'السنة المالية', sub: YEAR_REASON[fp.reason](fp), disabled: true }];
+      }
+    }
+
+    m = s.match(/^(.*?)\s*([+\-]?\d[\d.,+\-\s\/]*)$/);
+    const hasLetters = /\p{L}/u.test(s);
+    const text = m && /\p{L}/u.test(m[1]) ? m[1].trim() : (hasLetters && !m ? s : '');
+    const num = m ? m[2].trim() : '';
+
+    if (num && text) {
+      findGroups(text, cardNames, foldedNames).slice(0, 6).forEach((i, k) => push(setGroupItem(i, num, k * 0.1)));
+      if (!num.includes('/')) totalSetItems(num, text, 0.2).forEach(push);
+      const ys = textScore(text, 'سنه ماليه', 'عام');
+      if (ys !== null) {
+        const fp = parseFiscalInput(num, { phase: 'commit' });
+        if (fp.state === 'valid' || fp.state === 'far') push(yearItem(fp.start, ys - 1));
+      }
+      const ms = textScore(text, 'شهر');
+      if (ms !== null && /^\d{1,2}$/.test(num) && +num >= 1 && +num <= 12) {
+        const o = monthSel.options[+num];
+        push({ kind: 'month', id: 'mm', badge: num, title: o.text, score: ms, on: monthSel.value === num, run: () => { A.setMonth(num); done(ok(`الشهر: ${escapeHTML(o.text)}`)); } });
+      }
+    } else if (num && !hasLetters) {
+      const fp = /^\d{4}$/.test(num) ? parseFiscalInput(num, { phase: 'commit' }) : null;
+      const inWindow = !!fp && fp.state === 'valid';
+      const yearOk = !!fp && (fp.state === 'valid' || fp.state === 'far');
+      if (yearOk) push(yearItem(fp.start, inWindow ? -1 : 0.5, inWindow ? 'السنة المالية' : undefined));
+      push(setGroupItem(target, num, 0, true));
+      if (/^\d{1,2}$/.test(num) && +num >= 1 && +num <= cardNames.length) {
+        push({ ...resolve(GROUPS[+num - 1], false), id: 'go', score: 0.8, sub: 'انتقال إلى المجموعة', run: () => { setTarget(+num - 1); prefill(cardNames[+num - 1] + ' '); } });
+      }
+    } else {
+      const f = foldArabic(text);
+      const ranked = [];
+      const consider = (it, sc) => { if (sc !== null && sc !== undefined) ranked.push([it, sc + (it.boostFn ? it.boostFn() : it.boost || 0)]); };
+      STATIC.forEach(it => consider(it, scoreFolded(f, it.ft, it.fk)));
+      actions().forEach(a => consider({ ...a, boost: 0.3 }, scoreFolded(f, foldArabic(a.title), foldArabic(a.kw || ''))));
+      const yq = scoreFolded(f, 'سنه ماليه', 'عام');
+      if (yq !== null) [-1, 0, 1].forEach(d => consider({ ...yearItem(curStart + d, 0), boost: Math.abs(d) * 0.05 }, yq));
+      return ranked.sort((x, y) => x[1] - y[1]).slice(0, 40).map(([it]) => resolve(it, false));
+    }
+    return res.sort((x, y) => (x.score ?? 0) - (y.score ?? 0)).slice(0, 40);
+  }
+
+  function rowClass(it) {
+    return `pal-item pi-${it.kind}${it.on ? ' is-on' : ''}${it.disabled ? ' is-disabled' : ''}${it.danger ? ' is-danger' : ''}`;
+  }
+  function rowInner(it) {
+    const icon = it.badge ? `<span class="pi-badge">${escapeHTML(it.badge)}</span>` : (PICON[it.kind] || PICON.action);
+    const title = it.html ? it.title : escapeHTML(it.title);
+    return `<span class="pi-icon">${icon}</span>`
+      + `<span class="pi-main"><span class="pi-title">${title}</span>${it.sub ? `<span class="pi-sub">${escapeHTML(it.sub)}</span>` : ''}</span>`
+      + (it.val ? `<span class="pi-val${it.strong ? ' is-strong' : ''}${it.dim ? ' is-dim' : ''}" dir="ltr">${escapeHTML(it.val)}</span>` : '')
+      + (it.on ? `<span class="pi-check">${ICONS.check}</span>` : '')
+      + (P.flat ? `<span class="pi-kind">${KIND[it.kind] || ''}</span>` : '');
+  }
+  function itemHTML(it, i) {
+    if (it.head) return `<li class="pal-sec" role="presentation">${escapeHTML(it.head)}</li>`;
+    return `<li class="${rowClass(it)}" role="option" id="pal-opt-${i}" data-i="${i}" aria-selected="false"${it.disabled ? ' aria-disabled="true"' : ''}>${rowInner(it)}</li>`;
+  }
+
+  let palRaf = 0;
+  function schedulePalRender() {
+    if (palRaf) return;
+    palRaf = requestAnimationFrame(() => { palRaf = 0; palRender(); });
+  }
+  function flushPal() {
+    if (!palRaf) return;
+    cancelAnimationFrame(palRaf);
+    palRaf = 0;
+    palRender();
+  }
+  function palRender() {
+    if (palRaf) { cancelAnimationFrame(palRaf); palRaf = 0; }
+    const raw = palInput.value;
+    P.flat = !!raw.trim();
+    palTips.hidden = P.flat;
+    const items = palItems(raw);
+    const rows = items.map(it => (it.head ? it.head : rowClass(it) + '\u0001' + rowInner(it)));
+    const sig = (P.flat ? 'f' : 'b') + items.map(it => (it.head ? '#' + it.head : it.id || it.title)).join('|');
+    if (sig === P.sig && rows.length === P.rows.length) {
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i] === P.rows[i]) continue;
+        const el = palList.children[i];
+        const [cls, inner] = rows[i].split('\u0001');
+        if (el.className !== cls) el.className = cls;
+        el.innerHTML = inner;
+        el.setAttribute('aria-selected', 'false');
+        if (items[i].disabled) el.setAttribute('aria-disabled', 'true'); else el.removeAttribute('aria-disabled');
+      }
+    } else {
+      palList.innerHTML = items.map(itemHTML).join('');
+    }
+    P.sig = sig;
+    P.rows = rows;
+    P.items = items;
+    const has = items.some(it => !it.head);
+    palEmpty.hidden = has;
+    if (!has) palEmpty.innerHTML = /\d/.test(raw) ? 'صيغة غير مفهومة — جرّب <b>قلب 4500</b> أو <b dir="ltr">5=4500</b>' : `لا نتائج لـ «${escapeHTML(raw.trim())}»`;
+    const first = items.findIndex(it => !it.head && !it.disabled);
+    setActive(first === -1 ? items.findIndex(it => !it.head) : first, { instant: true, scroll: 'top' });
+  }
+
+  function setActive(i, { instant = false, scroll = 'nearest' } = {}) {
+    P.active = i;
+    palList.querySelectorAll('[aria-selected="true"]').forEach(el => el.setAttribute('aria-selected', 'false'));
+    const el = i >= 0 ? palList.querySelector(`[data-i="${i}"]`) : null;
+    if (!el) { palHl.style.opacity = '0'; palInput.removeAttribute('aria-activedescendant'); return; }
+    el.setAttribute('aria-selected', 'true');
+    palInput.setAttribute('aria-activedescendant', el.id);
+    palHl.classList.toggle('no-anim', instant);
+    palHl.style.opacity = '1';
+    palHl.style.transform = `translateY(${el.offsetTop}px)`;
+    palHl.style.height = `${el.offsetHeight}px`;
+    if (instant) { void palHl.offsetWidth; palHl.classList.remove('no-anim'); }
+    if (scroll === 'top') { palBody.scrollTop = 0; return; }
+    const top = el.offsetTop, bottom = top + el.offsetHeight, pad = 28;
+    if (top - pad < palBody.scrollTop) palBody.scrollTop = Math.max(0, top - pad - (el.previousElementSibling?.classList.contains('pal-sec') ? 30 : 0));
+    else if (bottom + 8 > palBody.scrollTop + palBody.clientHeight) palBody.scrollTop = bottom + 8 - palBody.clientHeight;
+  }
+  function moveActive(dir) {
+    const sel = P.items.map((it, i) => (!it.head ? i : -1)).filter(i => i !== -1);
+    if (!sel.length) return;
+    const at = sel.indexOf(P.active);
+    setActive(sel[(at + dir + sel.length) % sel.length]);
+  }
+  function runActive() {
+    const it = P.items[P.active];
+    if (!it || it.head) { rejectPal(); return; }
+    if (it.disabled) { rejectPal(); return; }
+    const el = palList.querySelector(`[data-i="${P.active}"]`);
+    if (el && !reducedMotion()) el.animate([{ transform: 'scale(1)' }, { transform: 'scale(.985)' }, { transform: 'scale(1)' }], { duration: 180, easing: 'ease-out' });
+    it.run();
+  }
+  function rejectPal() {
+    if (reducedMotion()) return;
+    pal.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-5px)' }, { transform: 'translateX(5px)' }, { transform: 'translateX(0)' }], { duration: 240, composite: 'add' });
+  }
+
+  function openPal(text = '') {
+    if (pal.open) { palInput.focus(); palInput.select(); return; }
+    P.returnFocus = document.activeElement;
+    P.lastEdit = null;
+    palFlash.textContent = '';
+    palInput.value = text;
+    pal.classList.remove('is-closing');
+    pal.showModal();
+    palRender(true);
+    palInput.focus();
+  }
+  function revealLastEdit() {
+    const i = P.lastEdit;
+    P.lastEdit = null;
+    if (i === null || i === undefined) return;
+    const card = groupCards[i];
+    if (card.hidden) return;
+    const r = card.getBoundingClientRect();
+    if (r.top < 0 || r.bottom > window.innerHeight) {
+      card.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'center' });
+      flashCard(i);
+    }
+  }
+  function closePal(restore = true) {
+    if (!pal.open || P.closing) return;
+    P.closing = true;
+    const finish = () => {
+      pal.close();
+      pal.classList.remove('is-closing');
+      P.closing = false;
+      const back = P.returnFocus;
+      if (restore && back && document.contains(back) && back !== document.body) back.focus({ preventScroll: true });
+      revealLastEdit();
+    };
+    if (reducedMotion()) finish();
+    else { pal.classList.add('is-closing'); setTimeout(finish, 150); }
+  }
+
+  palInput.addEventListener('input', () => { palFlash.textContent = ''; schedulePalRender(); });
+  palInput.addEventListener('keydown', e => {
+    flushPal();
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); moveActive(e.key === 'ArrowDown' ? 1 : -1); }
+    else if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      if (e.shiftKey && !palInput.value.trim()) { setTarget(target - 1); palRender(); return; }
+      runActive();
+    }
+    else if (e.key === 'Tab') {
+      const it = P.items[P.active];
+      e.preventDefault();
+      if (it && it.complete && palInput.value !== it.complete) prefill(it.complete);
+      else moveActive(e.shiftKey ? -1 : 1);
+    } else if (e.key === 'Escape') {
+      e.preventDefault(); e.stopPropagation();
+      if (palInput.value) { palInput.value = ''; palRender(); } else closePal();
+    } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !palInput.value) {
+      e.preventDefault(); const had = history.length; undo(); if (had) done(ok('تم التراجع'));
+    }
+  });
+  pal.addEventListener('cancel', e => { e.preventDefault(); if (palInput.value) { palInput.value = ''; palRender(); } else closePal(); });
+  let palPointer = null;
+  palList.addEventListener('pointermove', e => {
+    if (palPointer && palPointer.x === e.clientX && palPointer.y === e.clientY) return;
+    palPointer = { x: e.clientX, y: e.clientY };
+    const li = e.target.closest('.pal-item');
+    if (li && +li.dataset.i !== P.active) setActive(+li.dataset.i, { scroll: 'none' });
+  });
+  palList.addEventListener('click', e => {
+    const li = e.target.closest('.pal-item');
+    if (!li) return;
+    setActive(+li.dataset.i, { scroll: 'none' });
+    runActive();
+    if (pal.open && !(window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) palInput.focus({ preventScroll: true });
+  });
+  pal.addEventListener('pointerdown', e => {
+    if (e.target !== pal) return;
+    const r = pal.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) closePal();
+  });
+  $('pal-close').addEventListener('click', () => closePal());
+  palTips.addEventListener('click', e => {
+    const b = e.target.closest('[data-fill]');
+    if (b) prefill(b.dataset.fill);
+  });
+  palKbd.addEventListener('click', e => {
+    e.preventDefault();
+    const text = palInput.inputMode !== 'text';
+    palInput.inputMode = text ? 'text' : 'decimal';
+    palKbd.textContent = text ? '123' : 'أ';
+    palInput.blur();
+    palInput.focus();
+  });
+  $('dock-search').addEventListener('click', () => openPal());
+  const vv = window.visualViewport;
+  const syncViewport = () => {
+    const h = vv ? vv.height : window.innerHeight;
+    docEl.style.setProperty('--vvh', `${h}px`);
+    docEl.style.setProperty('--vvb', `${Math.max(0, window.innerHeight - h - (vv ? vv.offsetTop : 0))}px`);
+  };
+  if (vv) { vv.addEventListener('resize', syncViewport); vv.addEventListener('scroll', syncViewport); }
+  window.addEventListener('resize', syncViewport);
+  syncViewport();
+  $('cmd-trigger').addEventListener('click', () => openPal());
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'KeyK' || e.key.toLowerCase() === 'k')) {
+      if (document.querySelector('dialog[open]:not(#palette)')) return;
+      e.preventDefault();
+      pal.open ? closePal() : openPal();
+    }
+  });
 });
