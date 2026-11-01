@@ -178,28 +178,20 @@ img { display: block; max-width: 100%; }
   gap: var(--s-6);
   padding-block: clamp(1.5rem, 4vw, 2.75rem) var(--s-5);
 }
-.masthead-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: .7rem;
-  margin: 0 0 .9rem;
-  font-size: .78rem;
-  letter-spacing: .08em;
-  color: var(--muted);
-}
+.masthead-head { display: flex; align-items: center; gap: var(--s-4); }
 .rx-badge {
   display: inline-grid; place-items: center;
-  width: 2rem; height: 2rem;
+  flex: none;
+  width: 2.4rem; height: 2.4rem;
   font-family: var(--f-num);
   font-style: italic;
-  font-size: .82rem;
+  font-size: .95rem;
   color: var(--accent);
   border: 1px solid currentColor;
   border-radius: var(--loop);
   transform: rotate(-8deg);
   filter: url(#sketch-soft);
 }
-.masthead-pill { width: 2.4rem; height: 1px; background: var(--line-2); }
 .masthead-banner { position: relative; }
 .masthead-title {
   margin: 0;
